@@ -1,0 +1,201 @@
+<?xml version="1.0" ?>
+<robot name="ur3_workplace" 
+  xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find ur3_description)/urdf/ur3_robot_custom.urdf.xacro" />
+  <xacro:include filename="$(find ur3_description)/urdf/d435_camera_custom.urdf.xacro" />
+
+  <gazebo reference="camera_color_frame">
+    <sensor name="camera" type="depth">
+      <update_rate>20</update_rate>
+      <camera>
+        <horizontal_fov>1.047198</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>3</far>
+        </clip>
+      </camera>
+      <plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
+        <baseline>0</baseline>
+        <alwaysOn>true</alwaysOn>
+        <!-- Keep this zero, update_rate in the parent <sensor> tag will control the frame rate. -->
+        <updateRate>0.0</updateRate>
+        <cameraName>camera_ir</cameraName>
+        <imageTopicName>/camera/color/image_raw</imageTopicName>
+        <cameraInfoTopicName>/camera/color/camera_info</cameraInfoTopicName>
+        <depthImageTopicName>/camera/depth/image_raw</depthImageTopicName>
+        <depthImageCameraInfoTopicName>/camera/depth/camera_info</depthImageCameraInfoTopicName>
+        <pointCloudTopicName>/camera/depth/color/points</pointCloudTopicName>
+        <frameName>camera_color_optical_frame</frameName>
+        <pointCloudCutoff>0.001</pointCloudCutoff>
+        <pointCloudCutoffMax>1.8</pointCloudCutoffMax>
+        <distortionK1>0</distortionK1>
+        <distortionK2>0</distortionK2>
+        <distortionK3>0</distortionK3>
+        <distortionT1>0</distortionT1>
+        <distortionT2>0</distortionT2>
+        <CxPrime>0</CxPrime>
+        <Cx>0</Cx>
+        <Cy>0</Cy>
+        <focalLength>0</focalLength>
+        <hackBaseline>0</hackBaseline>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+
+  <link name="world" />
+
+  <link name="table">
+    <visual>
+      <geometry>
+        <mesh filename="package://ur3_description/meshes/stul.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 ${-pi/2} 0" xyz="0.47 -0.18 -0.51"/>
+      <material name="grey">
+        <color rgba="0.5 0.5 0.5 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.56 0.76 0.6"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.205 0.185 -0.295"/>
+    </collision>
+  </link>
+
+  <joint name="world_to_table" type="fixed">
+    <parent link="world"/>
+    <child link="table"/>
+    <origin xyz="0 0 0.61" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="table_to_robot" type="fixed">
+    <parent link="table"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+
+  <joint name="table_to_camera" type="fixed">
+    <parent link="table"/>
+    <child link="base_link_camera"/>
+    <origin xyz="0.165 0.94 0.55" rpy="0 ${pi/6} -${pi/2}"/>
+  </joint>
+
+  <link name="force_sensor">
+    <visual>
+      <geometry>
+        <mesh filename="package://ur3_description/meshes/force_sensor.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="grey">
+        <color rgba="0.5 0.5 0.5 1" />
+      </material>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.035" length="0.035"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="effector_body">
+    <visual>
+      <geometry>
+        <mesh filename="package://ur3_description/meshes/effector_body.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1" />
+      </material>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.031" length="0.076"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_jaw">
+    <visual>
+      <geometry>
+        <mesh filename="package://ur3_description/meshes/jaw.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1" />
+      </material>
+      <origin rpy="${pi} 0 ${pi/2}" xyz="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.03 0.03 0.045"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_jaw">
+    <visual>
+      <geometry>
+        <mesh filename="package://ur3_description/meshes/jaw.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1" />
+      </material>
+      <origin rpy="${pi} 0 ${pi/2}" xyz="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.03 0.03 0.045"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="FT_to_tip" type="fixed">
+    <parent link="ee_link"/>
+    <child link="force_sensor"/>
+    <origin xyz="0 0 0" rpy="0 ${pi/2} 0"/>
+  </joint>
+
+  <joint name="Effector_to_FT" type="fixed">
+    <parent link="force_sensor"/>
+    <child link="effector_body"/>
+    <origin xyz="0 0 0.035" rpy="0 0 0"/>
+  </joint>
+
+  <!--<joint name="leftjaw_to_effector" type="prismatic">-->
+  <joint name="leftjaw_to_effector" type="fixed">
+    <!--  <axis xyz="0 1 0"/>
+  <limit effort="1000.0" lower="0.01" upper="0" velocity="0.5"/>-->
+    <parent link="effector_body"/>
+    <child link="left_jaw"/>
+    <origin xyz="0 -0.01 0.076" rpy="0 0 0"/>
+  </joint>
+
+  <!--<joint name="rightjaw_to_effector" type="prismatic">-->
+  <joint name="rightjaw_to_effector" type="fixed">
+    <!--  <axis xyz="0 1 0"/>
+  <limit effort="1000.0" lower="0.01" upper="0" velocity="0.5"/> -->
+    <parent link="effector_body"/>
+    <child link="right_jaw"/>
+    <origin xyz="0 0.01 0.076" rpy="0 0 ${pi}"/>
+  </joint>
+
+
+
+  <link name="camera_points_link"/>
+  <joint name="camera_points_joint" type="fixed">
+    <origin rpy="0 1.57 0" xyz="0 0 0"/>
+    <parent link="base_link_camera"/>
+    <child link="camera_points_link"/>
+  </joint>
+
+
+</robot>
+
+
+
+
+	
