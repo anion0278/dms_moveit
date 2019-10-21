@@ -500,8 +500,9 @@
     </visual>
     <collision>
       <geometry>
-        <cylinder length="0.035" radius="0.035"/>
+        <mesh filename="package://ur3_description/meshes/force_sensor.stl" scale="0.001 0.001 0.001"/>
       </geometry>
+      <origin rpy="1.57079632679 0 0" xyz="0 0 0"/>
     </collision>
   </link>
   <link name="effector_body">
@@ -516,8 +517,9 @@
     </visual>
     <collision>
       <geometry>
-        <cylinder length="0.076" radius="0.031"/>
+        <mesh filename="package://ur3_description/meshes/effector_body.stl" scale="0.001 0.001 0.001"/>
       </geometry>
+      <origin rpy="1.57079632679 0 0" xyz="0 0 0"/>
     </collision>
   </link>
   <link name="left_jaw">
@@ -532,8 +534,10 @@
     </visual>
     <collision>
       <geometry>
-        <box size="0.03 0.03 0.045"/>
+        <mesh filename="package://ur3_description/meshes/jaw.stl" scale="0.001 0.001 0.001"/>
+        <!-- <box size="0.03 0.03 0.045"/> -->
       </geometry>
+      <origin rpy="3.14159265359 0 1.57079632679" xyz="0 0 0"/>
     </collision>
   </link>
   <link name="right_jaw">
@@ -548,8 +552,10 @@
     </visual>
     <collision>
       <geometry>
-        <box size="0.03 0.03 0.045"/>
+        <!-- <box size="0.03 0.03 0.045"/> -->
+        <mesh filename="package://ur3_description/meshes/jaw.stl" scale="0.001 0.001 0.001"/>
       </geometry>
+      <origin rpy="3.14159265359 0 1.57079632679" xyz="0 0 0"/>
     </collision>
   </link>
   <joint name="FT_to_tip" type="fixed">
@@ -568,7 +574,7 @@
   <limit effort="1000.0" lower="0.01" upper="0" velocity="0.5"/>-->
     <parent link="effector_body"/>
     <child link="left_jaw"/>
-    <origin rpy="0 0 0" xyz="0 -0.01 0.076"/>
+    <origin rpy="0 0 0" xyz="0 0 0.076"/>
   </joint>
   <!--<joint name="rightjaw_to_effector" type="prismatic">-->
   <joint name="rightjaw_to_effector" type="fixed">
@@ -576,12 +582,72 @@
   <limit effort="1000.0" lower="0.01" upper="0" velocity="0.5"/> -->
     <parent link="effector_body"/>
     <child link="right_jaw"/>
-    <origin rpy="0 0 3.14159265359" xyz="0 0.01 0.076"/>
+    <origin rpy="0 0 3.14159265359" xyz="0 0 0.076"/>
   </joint>
   <link name="camera_points_link"/>
   <joint name="camera_points_joint" type="fixed">
     <origin rpy="0 1.57 0" xyz="0 0 0"/>
     <parent link="base_link_camera"/>
     <child link="camera_points_link"/>
+  </joint>
+  <link name="top_wall">
+    <!-- <visual>
+      <geometry>
+        <box size="0.75 0.9 0.1"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual> -->
+    <collision>
+      <geometry>
+        <box size="0.75 0.9 0.1"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="top_wall_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.2 0.18 0.75"/>
+    <parent link="table"/>
+    <child link="top_wall"/>
+  </joint>
+  <link name="back_wall">
+    <!-- <visual>
+      <geometry>
+        <box size="0.75 0.1 ${limit_wall_height}"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual> -->
+    <collision>
+      <geometry>
+        <box size="0.75 0.1 1.2"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="back_wall_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.2 -0.32 0.1"/>
+    <parent link="table"/>
+    <child link="back_wall"/>
+  </joint>
+  <link name="left_wall">
+    <!-- <visual>
+      <geometry>
+        <box size="0.1 0.9 ${limit_wall_height}"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual> -->
+    <collision>
+      <geometry>
+        <box size="0.1 0.9 1.2"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_wall_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="-0.22 0.18 0.1"/>
+    <parent link="table"/>
+    <child link="left_wall"/>
   </joint>
 </robot>

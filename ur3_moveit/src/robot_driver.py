@@ -25,7 +25,7 @@ def move_home():
 
 
 def move_from_A_to_B():
-    start_motion_joint_pose = [-0.5161887833653935,
+    start_motion_joint_pose = [-0.45161887833653935,
                                -0.8200713084170896,
                                0.9261690554869411,
                                -1.6652095580852606,
