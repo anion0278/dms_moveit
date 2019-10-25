@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="spawn_obstacle" default="false"/>
+
   <arg name="paused" default="false"/>
   <arg name="gazebo_gui" default="true"/>
   <arg name="urdf_path" default="$(find ur3_description)/urdf/ur3.urdf"/>
@@ -30,5 +32,21 @@
     <arg name="publish_monitored_planning_scene" value="true" />
     <arg name="controllers_definition" value="controllers.yaml" />
   </include>
+
+
+  <!-- obstacle spawning -->
+  <group if="$(arg spawn_obstacle)">
+    <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
+      <arg name="model_name" value="obstacle" />
+      <arg name="x" value="0.3" />
+      <arg name="y" value="0.4" />
+      <arg name="z" value="0.7" />
+      <arg name="roll" value="0"/>
+      <arg name="pitch" value="0"/>
+      <arg name="yaw" value="0" />
+      <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/beer/model.sdf" />
+    </include>
+  </group>
+
 
 </launch>

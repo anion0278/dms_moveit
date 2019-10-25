@@ -1,0 +1,131 @@
+Start==============================/move_group/octomap_resolution = 0.02/move_group/max_safe_path_cost = 1/move_group/sense_for_plan/max_cost_sources = 100/move_group/sense_for_plan/max_look_attempts = 3/move_group/start_state_max_bounds_error = 0.1/move_group/trajectory_execution/allowed_start_tolerance = 0.01/move_group/ompl/simplify_solutions = True/move_group/plan_execution/max_replan_attempts = 5/move_group/planning_scene_monitor/publish_planning_scene_hz = 4.0/robot_description_kinematics/manipulator/kinematics_solver = ur_kinematics/UR3KinematicsPlugin/robot_description_kinematics/manipulator/kinematics_solver_attempts = 3/robot_description_kinematics/manipulator/kinematics_solver_search_resolution = 0.005/robot_description_kinematics/manipulator/kinematics_solver_timeout = 0.005/robot_description_planning/default_object_padding = 0.1/robot_description_planning/default_robot_padding = 0.0/move_group/sensors = [{'point_subsample': 20, 'max_range': 1.4, 'padding_offset': 0.06, 'filtered_cloud_topic': 'filtered_cloud', 'max_update_rate': 200.0, 'sensor_plugin': 'occupancy_map_monitor/PointCloudOctomapUpdater', 'padding_scale': 1.0, 'point_cloud_topic': '/camera/depth/color/points'}]Test name:Collision volumes: low poly - no obstacleEnd==============================Start==============================/move_group/octomap_resolution = 0.02/move_group/max_safe_path_cost = 1/move_group/sense_for_plan/max_cost_sources = 100/move_group/sense_for_plan/max_look_attempts = 3/move_group/start_state_max_bounds_error = 0.1/move_group/trajectory_execution/allowed_start_tolerance = 0.01/move_group/ompl/simplify_solutions = True/move_group/plan_execution/max_replan_attempts = 5/move_group/planning_scene_monitor/publish_planning_scene_hz = 4.0/robot_description_kinematics/manipulator/kinematics_solver = ur_kinematics/UR3KinematicsPlugin/robot_description_kinematics/manipulator/kinematics_solver_attempts = 3/robot_description_kinematics/manipulator/kinematics_solver_search_resolution = 0.005/robot_description_kinematics/manipulator/kinematics_solver_timeout = 0.005/robot_description_planning/default_object_padding = 0.1/robot_description_planning/default_robot_padding = 0.0/move_group/sensors = [{'point_subsample': 20, 'max_range': 1.4, 'padding_offset': 0.06, 'filtered_cloud_topic': 'filtered_cloud', 'max_update_rate': 200.0, 'sensor_plugin': 'occupancy_map_monitor/PointCloudOctomapUpdater', 'padding_scale': 1.0, 'point_cloud_topic': '/camera/depth/color/points'}]Test name:Collision volumes: low poly - no obstacleEnd==============================Start==============================/move_group/octomap_resolution = 0.02/move_group/max_safe_path_cost = 1/move_group/sense_for_plan/max_cost_sources = 100/move_group/sense_for_plan/max_look_attempts = 3/move_group/start_state_max_bounds_error = 0.1/move_group/trajectory_execution/allowed_start_tolerance = 0.01/move_group/ompl/simplify_solutions = True/move_group/plan_execution/max_replan_attempts = 5/move_group/planning_scene_monitor/publish_planning_scene_hz = 4.0/robot_description_kinematics/manipulator/kinematics_solver = ur_kinematics/UR3KinematicsPlugin/robot_description_kinematics/manipulator/kinematics_solver_attempts = 3/robot_description_kinematics/manipulator/kinematics_solver_search_resolution = 0.005/robot_description_kinematics/manipulator/kinematics_solver_timeout = 0.005/robot_description_planning/default_object_padding = 0.1/robot_description_planning/default_robot_padding = 0.0/move_group/sensors = [{'point_subsample': 20, 'max_range': 1.4, 'padding_offset': 0.06, 'filtered_cloud_topic': 'filtered_cloud', 'max_update_rate': 200.0, 'sensor_plugin': 'occupancy_map_monitor/PointCloudOctomapUpdater', 'padding_scale': 1.0, 'point_cloud_topic': '/camera/depth/color/points'}]Test name:Collision volumes: low poly - no obstacleEnd==============================Start==============================/move_group/octomap_resolution = 0.02/move_group/max_safe_path_cost = 1/move_group/sense_for_plan/max_cost_sources = 100/move_group/sense_for_plan/max_look_attempts = 3/move_group/start_state_max_bounds_error = 0.1/move_group/trajectory_execution/allowed_start_tolerance = 0.01/move_group/ompl/simplify_solutions = True/move_group/plan_execution/max_replan_attempts = 5/move_group/planning_scene_monitor/publish_planning_scene_hz = 4.0/robot_description_kinematics/manipulator/kinematics_solver = ur_kinematics/UR3KinematicsPlugin/robot_description_kinematics/manipulator/kinematics_solver_attempts = 3/robot_description_kinematics/manipulator/kinematics_solver_search_resolution = 0.005/robot_description_kinematics/manipulator/kinematics_solver_timeout = 0.005/robot_description_planning/default_object_padding = 0.1/robot_description_planning/default_robot_padding = 0.0/move_group/sensors = [{'point_subsample': 20, 'max_range': 1.4, 'padding_offset': 0.06, 'filtered_cloud_topic': 'filtered_cloud', 'max_update_rate': 200.0, 'sensor_plugin': 'occupancy_map_monitor/PointCloudOctomapUpdater', 'padding_scale': 1.0, 'point_cloud_topic': '/camera/depth/color/points'}]Test name:Collision volumes: low poly - no obstacleEnd==============================Start==============================
+/move_group/octomap_resolution = 0.02
+/move_group/max_safe_path_cost = 1
+/move_group/sense_for_plan/max_cost_sources = 100
+/move_group/sense_for_plan/max_look_attempts = 3
+/move_group/start_state_max_bounds_error = 0.1
+/move_group/trajectory_execution/allowed_start_tolerance = 0.01
+/move_group/ompl/simplify_solutions = True
+/move_group/plan_execution/max_replan_attempts = 5
+/move_group/planning_scene_monitor/publish_planning_scene_hz = 4.0
+/robot_description_kinematics/manipulator/kinematics_solver = ur_kinematics/UR3KinematicsPlugin
+/robot_description_kinematics/manipulator/kinematics_solver_attempts = 3
+/robot_description_kinematics/manipulator/kinematics_solver_search_resolution = 0.005
+/robot_description_kinematics/manipulator/kinematics_solver_timeout = 0.005
+/robot_description_planning/default_object_padding = 0.1
+/robot_description_planning/default_robot_padding = 0.0
+/move_group/sensors = [{'point_subsample': 20, 'max_range': 1.4, 'padding_offset': 0.06, 'filtered_cloud_topic': 'filtered_cloud', 'max_update_rate': 200.0, 'sensor_plugin': 'occupancy_map_monitor/PointCloudOctomapUpdater', 'padding_scale': 1.0, 'point_cloud_topic': '/camera/depth/color/points'}]
+Test name:Collision volumes: low poly - no obstacle
+End==============================
+Start==============================
+/move_group/octomap_resolution = 0.02
+/move_group/max_safe_path_cost = 1
+/move_group/sense_for_plan/max_cost_sources = 100
+/move_group/sense_for_plan/max_look_attempts = 3
+/move_group/start_state_max_bounds_error = 0.1
+/move_group/trajectory_execution/allowed_start_tolerance = 0.01
+/move_group/ompl/simplify_solutions = True
+/move_group/plan_execution/max_replan_attempts = 5
+/move_group/planning_scene_monitor/publish_planning_scene_hz = 4.0
+/robot_description_kinematics/manipulator/kinematics_solver = ur_kinematics/UR3KinematicsPlugin
+/robot_description_kinematics/manipulator/kinematics_solver_attempts = 3
+/robot_description_kinematics/manipulator/kinematics_solver_search_resolution = 0.005
+/robot_description_kinematics/manipulator/kinematics_solver_timeout = 0.005
+/robot_description_planning/default_object_padding = 0.1
+/robot_description_planning/default_robot_padding = 0.0
+/move_group/sensors = [{'point_subsample': 20, 'max_range': 1.4, 'padding_offset': 0.06, 'filtered_cloud_topic': 'filtered_cloud', 'max_update_rate': 200.0, 'sensor_plugin': 'occupancy_map_monitor/PointCloudOctomapUpdater', 'padding_scale': 1.0, 'point_cloud_topic': '/camera/depth/color/points'}]
+Test name:Collision volumes: low poly - no obstacle
+End==============================
+Start==============================
+/move_group/octomap_resolution = 0.02
+/move_group/max_safe_path_cost = 1
+/move_group/sense_for_plan/max_cost_sources = 100
+/move_group/sense_for_plan/max_look_attempts = 3
+/move_group/start_state_max_bounds_error = 0.1
+/move_group/trajectory_execution/allowed_start_tolerance = 0.01
+/move_group/ompl/simplify_solutions = True
+/move_group/plan_execution/max_replan_attempts = 5
+/move_group/planning_scene_monitor/publish_planning_scene_hz = 4.0
+/robot_description_kinematics/manipulator/kinematics_solver = ur_kinematics/UR3KinematicsPlugin
+/robot_description_kinematics/manipulator/kinematics_solver_attempts = 3
+/robot_description_kinematics/manipulator/kinematics_solver_search_resolution = 0.005
+/robot_description_kinematics/manipulator/kinematics_solver_timeout = 0.005
+/robot_description_planning/default_object_padding = 0.1
+/robot_description_planning/default_robot_padding = 0.0
+/move_group/sensors = [{'point_subsample': 20, 'max_range': 1.4, 'padding_offset': 0.06, 'filtered_cloud_topic': 'filtered_cloud', 'max_update_rate': 200.0, 'sensor_plugin': 'occupancy_map_monitor/PointCloudOctomapUpdater', 'padding_scale': 1.0, 'point_cloud_topic': '/camera/depth/color/points'}]
+Test name:Collision volumes: low poly - no obstacle
+End==============================
+Start==============================
+/move_group/octomap_resolution = 0.02
+/move_group/max_safe_path_cost = 1
+/move_group/sense_for_plan/max_cost_sources = 100
+/move_group/sense_for_plan/max_look_attempts = 3
+/move_group/start_state_max_bounds_error = 0.1
+/move_group/trajectory_execution/allowed_start_tolerance = 0.01
+/move_group/ompl/simplify_solutions = True
+/move_group/plan_execution/max_replan_attempts = 5
+/move_group/planning_scene_monitor/publish_planning_scene_hz = 4.0
+/robot_description_kinematics/manipulator/kinematics_solver = ur_kinematics/UR3KinematicsPlugin
+/robot_description_kinematics/manipulator/kinematics_solver_attempts = 3
+/robot_description_kinematics/manipulator/kinematics_solver_search_resolution = 0.005
+/robot_description_kinematics/manipulator/kinematics_solver_timeout = 0.005
+/robot_description_planning/default_object_padding = 0.1
+/robot_description_planning/default_robot_padding = 0.0
+/move_group/sensors = [{'point_subsample': 20, 'max_range': 1.4, 'padding_offset': 0.06, 'filtered_cloud_topic': 'filtered_cloud', 'max_update_rate': 200.0, 'sensor_plugin': 'occupancy_map_monitor/PointCloudOctomapUpdater', 'padding_scale': 1.0, 'point_cloud_topic': '/camera/depth/color/points'}]
+Test name:Collision volumes: low poly - no obstacle
+End==============================
+Start==============================
+/move_group/octomap_resolution = 0.02
+/move_group/max_safe_path_cost = 1
+/move_group/sense_for_plan/max_cost_sources = 100
+/move_group/sense_for_plan/max_look_attempts = 3
+/move_group/start_state_max_bounds_error = 0.1
+/move_group/trajectory_execution/allowed_start_tolerance = 0.01
+/move_group/ompl/simplify_solutions = True
+/move_group/plan_execution/max_replan_attempts = 5
+/move_group/planning_scene_monitor/publish_planning_scene_hz = 4.0
+/robot_description_kinematics/manipulator/kinematics_solver = ur_kinematics/UR3KinematicsPlugin
+/robot_description_kinematics/manipulator/kinematics_solver_attempts = 3
+/robot_description_kinematics/manipulator/kinematics_solver_search_resolution = 0.005
+/robot_description_kinematics/manipulator/kinematics_solver_timeout = 0.005
+/robot_description_planning/default_object_padding = 0.1
+/robot_description_planning/default_robot_padding = 0.0
+/move_group/sensors = [{'point_subsample': 20, 'max_range': 1.4, 'padding_offset': 0.06, 'filtered_cloud_topic': 'filtered_cloud', 'max_update_rate': 200.0, 'sensor_plugin': 'occupancy_map_monitor/PointCloudOctomapUpdater', 'padding_scale': 1.0, 'point_cloud_topic': '/camera/depth/color/points'}]
+Test name:Collision volumes: low poly - no obstacle
+End==============================
+Start==============================
+/move_group/octomap_resolution = 0.02
+/move_group/max_safe_path_cost = 1
+/move_group/sense_for_plan/max_cost_sources = 100
+/move_group/sense_for_plan/max_look_attempts = 3
+/move_group/start_state_max_bounds_error = 0.1
+/move_group/trajectory_execution/allowed_start_tolerance = 0.01
+/move_group/ompl/simplify_solutions = True
+/move_group/plan_execution/max_replan_attempts = 5
+/move_group/planning_scene_monitor/publish_planning_scene_hz = 4.0
+/robot_description_kinematics/manipulator/kinematics_solver = ur_kinematics/UR3KinematicsPlugin
+/robot_description_kinematics/manipulator/kinematics_solver_attempts = 3
+/robot_description_kinematics/manipulator/kinematics_solver_search_resolution = 0.005
+/robot_description_kinematics/manipulator/kinematics_solver_timeout = 0.005
+/robot_description_planning/default_object_padding = 0.1
+/robot_description_planning/default_robot_padding = 0.0
+/move_group/sensors = [{'point_subsample': 20, 'max_range': 1.4, 'padding_offset': 0.06, 'filtered_cloud_topic': 'filtered_cloud', 'max_update_rate': 200.0, 'sensor_plugin': 'occupancy_map_monitor/PointCloudOctomapUpdater', 'padding_scale': 1.0, 'point_cloud_topic': '/camera/depth/color/points'}]
+Test name:Collision volumes: low poly - no obstacle
+Start==============================
+/move_group/octomap_resolution = 0.02
+/move_group/max_safe_path_cost = 1
+/move_group/sense_for_plan/max_cost_sources = 100
+/move_group/sense_for_plan/max_look_attempts = 3
+/move_group/start_state_max_bounds_error = 0.1
+/move_group/trajectory_execution/allowed_start_tolerance = 0.01
+/move_group/ompl/simplify_solutions = True
+/move_group/plan_execution/max_replan_attempts = 5
+/move_group/planning_scene_monitor/publish_planning_scene_hz = 4.0
+/robot_description_kinematics/manipulator/kinematics_solver = ur_kinematics/UR3KinematicsPlugin
+/robot_description_kinematics/manipulator/kinematics_solver_attempts = 3
+/robot_description_kinematics/manipulator/kinematics_solver_search_resolution = 0.005
+/robot_description_kinematics/manipulator/kinematics_solver_timeout = 0.005
+/robot_description_planning/default_object_padding = 0.1
+/robot_description_planning/default_robot_padding = 0.0
+/move_group/sensors = [{'point_subsample': 20, 'max_range': 1.4, 'padding_offset': 0.06, 'filtered_cloud_topic': 'filtered_cloud', 'max_update_rate': 200.0, 'sensor_plugin': 'occupancy_map_monitor/PointCloudOctomapUpdater', 'padding_scale': 1.0, 'point_cloud_topic': '/camera/depth/color/points'}]
+Test name:Collision volumes: low poly - no obstacle
