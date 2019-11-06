@@ -12,7 +12,7 @@
   <param name="trajectory_execution/allowed_start_tolerance" value="0.01"/>
 
   <arg name="controllers_definition" default="" />
-  <arg name="moveit_controller_manager" default="ur3_workplace"/>
+  <arg name="moveit_controller_manager" default=""/>
   <include file="$(find ur3_moveit)/launch/$(arg moveit_controller_manager)_moveit_controller_manager.launch.xml">
     <arg name="controllers_definition" value="$(arg controllers_definition)" />
   </include>

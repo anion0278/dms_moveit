@@ -7,3 +7,12 @@ sensors:
     padding_scale: 1.0
     max_update_rate: 200.0
     filtered_cloud_topic: filtered_cloud
+
+  - sensor_plugin: occupancy_map_monitor/PointCloudOctomapUpdater
+    point_cloud_topic: /camera2/depth/color/points
+    max_range: 1.4
+    point_subsample: 20
+    padding_offset: 0.06
+    padding_scale: 1.0
+    max_update_rate: 200.0
+    filtered_cloud_topic: filtered_cloud_2

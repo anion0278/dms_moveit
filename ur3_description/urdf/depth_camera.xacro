@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<robot name="realsense2_cameras" 
+    xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:macro name="depth_camera" params="name">
+        <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
+
+        <link name="base_link_${name}" />
+        <sensor_d435 parent="base_link_${name}" name="${name}">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </sensor_d435>
+
+        <gazebo reference="${name}_color_frame">
+            <sensor name="${name}" type="depth">
+                <update_rate>20</update_rate>
+                <camera>
+                    <horizontal_fov>1.047198</horizontal_fov>
+                    <image>
+                        <width>640</width>
+                        <height>480</height>
+                        <format>R8G8B8</format>
+                    </image>
+                    <clip>
+                        <near>0.05</near>
+                        <far>3</far>
+                    </clip>
+                </camera>
+                <plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
+                    <baseline>0</baseline>
+                    <alwaysOn>true</alwaysOn>
+                    <!-- Keep this zero, update_rate in the parent <sensor> tag will control the frame rate. -->
+                    <updateRate>0.0</updateRate>
+                    <cameraName>${name}_ir</cameraName>
+                    <imageTopicName>/${name}/color/image_raw</imageTopicName>
+                    <cameraInfoTopicName>/${name}/color/camera_info</cameraInfoTopicName> 
+                    <depthImageTopicName>/${name}/depth/image_raw</depthImageTopicName>
+                    <depthImageCameraInfoTopicName>/${name}/depth/camera_info</depthImageCameraInfoTopicName>
+                    <pointCloudTopicName>/${name}/depth/color/points</pointCloudTopicName>
+                    <frameName>${name}_color_optical_frame</frameName>
+                    <pointCloudCutoff>0.001</pointCloudCutoff>
+                    <pointCloudCutoffMax>1.8</pointCloudCutoffMax>
+                    <distortionK1>0</distortionK1>
+                    <distortionK2>0</distortionK2>
+                    <distortionK3>0</distortionK3>
+                    <distortionT1>0</distortionT1>
+                    <distortionT2>0</distortionT2>
+                    <CxPrime>0</CxPrime>
+                    <Cx>0</Cx>
+                    <Cy>0</Cy>
+                    <focalLength>0</focalLength>
+                    <hackBaseline>0</hackBaseline>
+                </plugin>
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+</robot>

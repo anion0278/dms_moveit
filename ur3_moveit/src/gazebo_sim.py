@@ -14,9 +14,10 @@ from std_srvs.srv import Empty
 from StringIO import StringIO
 
 class GazeboSim():
-    def __init__(self, is_obstacle_present):
+    def __init__(self, is_obstacle_present, is_workspace_limited):
         self.gazebo_process = None
         self.is_obstacle_present = is_obstacle_present
+        self.is_workspace_limited = is_workspace_limited
 
     def start_gazebo(self):
         self.close_gazebo()
@@ -27,8 +28,11 @@ class GazeboSim():
         node_name = 'start_sim.launch'
 
         # very concrete, needs refactoring
-        command = "roslaunch {0} {1} spawn_obstacle:={2}".format(
+        command = "roslaunch {0} {1} spawn_obstacle:={2} ".format(
             package, node_name, str(self.is_obstacle_present).lower())
+
+        if (self.is_workspace_limited):
+            command += "xacro_file_name:=ur3_workspace_limitation.xacro"
 
         process = subprocess.Popen(command, shell=True)
 

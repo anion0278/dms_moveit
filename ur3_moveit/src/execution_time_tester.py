@@ -21,7 +21,6 @@ obstacle_name = "obstacle"
 is_low_poly = True
 is_rviz_online = False
 
-
 class ParameterTester:
     def __init__(self, watched_parameters, repetitions, is_obstacle_present):
         self.watched_parameters = watched_parameters
@@ -39,17 +38,19 @@ class ParameterTester:
         return time_spent
 
     def run_planners_tests(self):
-        self.gazebo_sim = gazebo_sim.GazeboSim(self.is_obstacle_present)
+        self.gazebo_sim = gazebo_sim.GazeboSim(
+            is_obstacle_present=self.is_obstacle_present, 
+            is_workspace_limited=True)
         self.gazebo_sim.start_gazebo()
         robot = robot_driver.RobotDriver()
 
         planners = [
-                    "SBL", "EST", "LBKPIECE", "BKPIECE", "KPIECE", "RRT", "RRTConnect", "RRTstar", "TRRT", "PRM", "PRMstar", "FMT", 
-                    #"BFMT", could not test
-                    "PDST", "STRIDE", "BiTRRT", 
-                    #"LBTRRT", # could not test
-                     "BiEST", "ProjEST", "LazyPRM", "LazyPRMstar", "SPARS", "SPARStwo"
-                     ]
+            "SBL", "EST", "LBKPIECE", "BKPIECE", "KPIECE", "RRT", "RRTConnect", "RRTstar", "TRRT", "PRM", "PRMstar", "FMT",
+            # "BFMT", could not test
+            "PDST", "STRIDE", "BiTRRT",
+                    # "LBTRRT", # could not test
+            "BiEST", "ProjEST", "LazyPRM", "LazyPRMstar", "SPARS", "SPARStwo"
+        ]
 
         for planner_name in planners:
             self.__run_tests(
@@ -58,7 +59,9 @@ class ParameterTester:
         self.gazebo_sim.close_gazebo()
 
     def run_single_parameters_tests(self, param_name, param_value):
-        self.gazebo_sim = gazebo_sim.GazeboSim(self.is_obstacle_present)
+        self.gazebo_sim = gazebo_sim.GazeboSim(
+            is_obstacle_present=self.is_obstacle_present, 
+            is_workspace_limited=False)
         self.gazebo_sim.start_gazebo()
         robot = robot_driver.RobotDriver()
 
@@ -66,8 +69,8 @@ class ParameterTester:
 
         self.gazebo_sim.close_gazebo()
 
-    def __run_tests(self, robot, tested_param_name, tested_param_value, planner_config_name="RRTConnect"):
-        tested_param_value = str(tested_param_value)    
+    def __run_tests(self, robot_driver, tested_param_name, tested_param_value, planner_config_name="RRTConnect"):
+        tested_param_value = str(tested_param_value)
 
         self.logger = log.MeasurementLogger(
             tested_param_name, tested_param_value, measurements_dir)
@@ -78,10 +81,9 @@ class ParameterTester:
         self.logger.log_message(test_name)
         self.logger.log_param("Planned repetitions", self.repetitions)
 
-        link_names = robot.robot.get_link_names()
-        has_walls = "top_wall" in link_names or "left_wall" in link_names or "back_wall" in link_names
+        has_walls = self.CheckLimitingWalls(robot_driver.robot)
 
-        robot.group.set_planner_id(planner_config_name)
+        robot_driver.group.set_planner_id(planner_config_name)
 
         for cycle_num in range(1, self.repetitions + 1):
             self.logger.log_message("====== CYCLE %s ======" % cycle_num)
@@ -89,17 +91,19 @@ class ParameterTester:
                 "====== CYCLE %s ======" % cycle_num)
             self.gazebo_sim.reset_sim()
 
+            robot_driver.group.set_goal_position_tolerance(0.002)
+            # robot_driver.group.set_goal_orientation_tolerance()
+
             self.logger.log_section("Params")
             is_obstacle_present = obstacle_name in self.gazebo_sim.get_sim_objects_names_list()
             self.logger.log_param("Planner", planner_config_name)
             self.logger.log_param("Invisible walls", has_walls)
             self.logger.log_param("Goal joint tolerance",
-                                  robot.group.get_goal_joint_tolerance())
+                                  robot_driver.group.get_goal_joint_tolerance())
             self.logger.log_param(
-                "Goal orientation tolerance", robot.group.get_goal_orientation_tolerance())
+                "Goal orientation tolerance", robot_driver.group.get_goal_orientation_tolerance())
             self.logger.log_param("Goal position tolerance",
-                                  robot.group.get_goal_position_tolerance())
-            #self.logger.log_param("Goal tolerance", robot.group.get_goal_tolerance()) - all three 
+                                  robot_driver.group.get_goal_position_tolerance())
             self.logger.log_param("Collision model is low poly", is_low_poly)
             self.logger.log_param("RViz", is_rviz_online)
             self.logger.log_param("Obstacle", is_obstacle_present)
@@ -111,11 +115,11 @@ class ParameterTester:
                     obstacle_name)
 
             self.logger.log_section("Time Measurement")
-            cycle_success = self.perform_single_movement_set(robot)
+            cycle_success = self.perform_single_movement_set(robot_driver)
 
             actual_pose = self.gazebo_sim.get_model_pos(obstacle_name)
-            if (is_obstacle_present 
-            and (actual_pose.pose != obstacle_inital_pose.pose or actual_pose.twist != obstacle_inital_pose.twist)):
+            if (is_obstacle_present
+                    and (actual_pose.pose != obstacle_inital_pose.pose or actual_pose.twist != obstacle_inital_pose.twist)):
                 self.logger.log_error("Robot has moved the obstacle!")
                 cycle_success = False
 
@@ -130,6 +134,10 @@ class ParameterTester:
 
         self.postponed_logger.close()
         self.logger.close()
+
+    def CheckLimitingWalls(self, robot):
+        link_names = robot.get_link_names()
+        return "top_wall" in link_names or "left_wall" in link_names or "back_wall" in link_names
 
     def save_current_ros_params(self):
         for param_name in self.watched_parameters:
@@ -167,11 +175,16 @@ class ParameterTester:
                 self.postponed_logger.log_message(
                     "Planning time to %s: %s" % (pose.name, plan_time))
                 execution_time = self.measure_time(robot.execute_planned_sync)
+
+                # self.logger.log_message(
+                #     "Position: " + str(robot.robot.get_current_pose()))
+
+                # TODO remove typo!!!
                 self.logger.log_message(
                     "Exection time to %s: %s" % (pose.name, execution_time))
                 self.postponed_logger.log_message(
                     "Exection time to %s: %s" % (pose.name, execution_time))
-            except:
+            except Exception as ex:
                 self.logger.log_error("Movement to %s failed" % pose.name)
                 success = False
                 break
@@ -196,7 +209,7 @@ if __name__ == "__main__":
     tested_parameters = ["/move_group/manipulator/longest_valid_segment_fraction",
 
                          "/move_group/max_safe_path_cost",  # same?
-                         "/move_group/octomap_resolution", 
+                         "/move_group/octomap_resolution",
                          "/move_group/ompl/simplify_solutions",
                          "/move_group/plan_execution/max_replan_attempts",
 
@@ -213,12 +226,12 @@ if __name__ == "__main__":
                          "/robot_description_kinematics/manipulator/kinematics_solver_timeout",
 
                          "/robot_description_planning/default_robot_padding",
-                         "/robot_description_planning/default_object_padding", ]  # save each sensor param
+                         "/robot_description_planning/default_object_padding", ]
 
     tester = ParameterTester(tested_parameters, 30, is_obstacle_present=True)
 
-    #tester.run_planners_tests()
+    # tester.run_planners_tests()
 
-    tester.run_single_parameters_tests("Obstacle", "None")
+    tester.run_single_parameters_tests("Path simplification", "Disabled")
     # group.allow_replanning
     # group.allow_looking

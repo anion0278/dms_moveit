@@ -1,27 +1,27 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="spawn_obstacle" default="false"/>
+  <param name="move_group/ompl/simplify_solutions" value="true" />
 
-  <arg name="paused" default="false"/>
-  <arg name="gazebo_gui" default="true"/>
-  <arg name="urdf_path" default="$(find ur3_description)/urdf/ur3.urdf"/>
+  <arg name="spawn_obstacle" default="false"/>
+  <arg name="sim_paused" default="false"/>
+
+  <arg name="xacro_file_name" default="ur3.xacro"/>
+  <arg name="xacro_path" default="$(find ur3_description)/urdf/$(arg xacro_file_name)"/>
 
   <!-- startup simulated world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" default="worlds/empty.world"/>
-    <arg name="paused" value="$(arg paused)"/>
-    <arg name="gui" value="$(arg gazebo_gui)"/>
+    <arg name="paused" value="$(arg sim_paused)"/>
+    <arg name="gui" value="true"/>
   </include>
 
-  <param name="robot_description" textfile="$(arg urdf_path)" />
-  <!-- push robot_description to factory and spawn robot in gazebo at the origin, change x,y,z arguments to spawn in a different position -->
+  <param name="robot_description" command="xacro --inorder '$(arg xacro_path)'" />
   <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -x 0 -y 0 -z 0" respawn="false" output="screen" />
 
   <include file="$(find ur3_moveit)/launch/ros_controllers.launch"/>
-
   <include file="$(find ur_gazebo)/launch/controller_utils.launch"/>
 
-  <!-- start this controller -->
+  <!-- start simulated arm controller -->
   <rosparam file="$(find ur_gazebo)/controller/arm_controller_ur3.yaml" command="load"/>
   <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
 
@@ -29,10 +29,8 @@
   <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load joint_group_position_controller" />
 
   <include file="$(find ur3_moveit)/launch/move_group.launch">
-    <arg name="publish_monitored_planning_scene" value="true" />
     <arg name="controllers_definition" value="controllers.yaml" />
   </include>
-
 
   <!-- obstacle spawning -->
   <group if="$(arg spawn_obstacle)">
@@ -41,12 +39,8 @@
       <arg name="x" value="0.3" />
       <arg name="y" value="0.4" />
       <arg name="z" value="0.63" />
-      <arg name="roll" value="0"/>
-      <arg name="pitch" value="0"/>
-      <arg name="yaw" value="0" />
       <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/beer/model.sdf" />
     </include>
   </group>
-
 
 </launch>

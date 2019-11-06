@@ -3,12 +3,10 @@
 
   <arg name="robot_ip" default="192.168.1.101"/>
 
-  <arg name="limited" default="false"/>
-  <arg name="min_payload" default="0.0"/>
-  <arg name="max_payload" default="3.0"/>
-  <arg name="prefix" default="" />
-
-  <param name="robot_description" textfile="$(find ur3_description)/urdf/ur3.urdf" />
+  <!-- duplication -->
+  <arg name="urdf_file_name" default="ur3.urdf"/>
+  <arg name="urdf_path" default="$(find ur3_description)/urdf/$(arg urdf_file_name)"/>
+  <param name="robot_description" textfile="$(arg urdf_path)" />
 
   <include file="$(find realsense2_camera)/launch/rs_camera.launch">
     <arg name="filters" value="pointcloud" />
@@ -19,6 +17,9 @@
     <arg name="controllers_definition" value="real_controllers.yaml" />
   </include>
 
+  <arg name="min_payload" default="0.0"/>
+  <arg name="max_payload" default="3.0"/>
+  <arg name="prefix" default="" />
   <include file="$(find ur_modern_driver)/launch/ur_common.launch">
     <arg name="robot_ip" value="$(arg robot_ip)"/>
     <arg name="min_payload" value="$(arg min_payload)"/>

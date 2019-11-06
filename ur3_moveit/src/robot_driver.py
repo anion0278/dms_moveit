@@ -40,10 +40,6 @@ pose_B = RobotJointPose([1.112419230110138,
                          1.3836915426267309],
                         "Point B")
 
-class ExecutionStatus:
-    def __init__(self):
-        pass
-
 class RobotDriver:
     def __init__(self):
         moveit_commander.roscpp_initialize(sys.argv)
