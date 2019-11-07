@@ -6,7 +6,11 @@
   <xacro:include filename="$(find ur3_description)/urdf/depth_camera.xacro" />
 
   <depth_camera name="camera" />
-  <depth_camera name="camera2" />
+  <joint name="table_to_camera" type="fixed">
+    <parent link="table"/>
+    <child link="base_link_camera"/>
+    <origin xyz="0.165 0.94 0.55" rpy="0 ${pi/6} -${pi/2}"/>
+  </joint>
 
   <link name="world" />
 
@@ -39,19 +43,6 @@
     <child link="base_link"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
-
-
-  <joint name="table_to_camera" type="fixed">
-    <parent link="table"/>
-    <child link="base_link_camera"/>
-    <origin xyz="0.165 0.94 0.55" rpy="0 ${pi/6} -${pi/2}"/>
-  </joint>
-  <joint name="table_to_camera2" type="fixed">
-    <parent link="table"/>
-    <child link="base_link_camera2"/>
-    <origin xyz="0.94 0.165 0.55" rpy="0 ${pi/6} -${pi}"/>
-  </joint>
-
 
   <link name="force_sensor">
     <visual>
@@ -120,7 +111,7 @@
         <!-- <box size="0.03 0.03 0.045"/> -->
         <mesh filename="package://ur3_description/meshes/jaw.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-       <origin rpy="${pi} 0 ${pi/2}" xyz="0 0 0"/>
+      <origin rpy="${pi} 0 ${pi/2}" xyz="0 0 0"/>
     </collision>
   </link>
 
@@ -153,8 +144,6 @@
     <child link="right_jaw"/>
     <origin xyz="0 0 0.076" rpy="0 0 ${pi}"/>
   </joint>
-
-
 
 </robot>
 

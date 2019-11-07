@@ -13,7 +13,7 @@
         <box size="0.75 0.9 0.1"/>
       </geometry>
       <material name="black">
-        <color rgba="0 0 0 1" />
+        <color rgba="0.2 0.2 0.2 0.2" />
       </material>
     </visual> -->
     <collision>
@@ -34,7 +34,7 @@
         <box size="0.75 0.1 ${limit_wall_height}"/>
       </geometry>
       <material name="black">
-        <color rgba="0 0 0 1" />
+        <color rgba="0.2 0.2 0.2 0.2" />
       </material>
     </visual> -->
     <collision>
@@ -56,7 +56,7 @@
         <box size="0.1 0.9 ${limit_wall_height}"/>
       </geometry>
       <material name="black">
-        <color rgba="0 0 0 1" />
+        <color rgba="0.2 0.2 0.2 0.2" />
       </material>
     </visual> -->
     <collision>

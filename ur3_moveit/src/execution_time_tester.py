@@ -61,7 +61,7 @@ class ParameterTester:
     def run_single_parameters_tests(self, param_name, param_value):
         self.gazebo_sim = gazebo_sim.GazeboSim(
             is_obstacle_present=self.is_obstacle_present, 
-            is_workspace_limited=False)
+            is_workspace_limited=True)
         self.gazebo_sim.start_gazebo()
         robot = robot_driver.RobotDriver()
 
