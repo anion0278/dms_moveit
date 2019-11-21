@@ -1,7 +1,13 @@
 <?xml version="1.0"?>
 <launch>
+  <!-- Octomap and sensors settings -->
+  <param name="move_group/octomap_resolution" type="double" value="0.02" />
+  <rosparam ns="move_group" command="load" file="$(find ur3_moveit)/config/sensors_3d.yaml" />
+
+  <!-- Planners -->
   <param name="move_group/ompl/simplify_solutions" value="true" />
 
+  <!-- Simulation -->
   <arg name="spawn_obstacle" default="false"/>
   <arg name="sim_paused" default="false"/>
 
@@ -24,8 +30,6 @@
   <!-- start simulated arm controller -->
   <rosparam file="$(find ur_gazebo)/controller/arm_controller_ur3.yaml" command="load"/>
   <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
-
-  <!-- load other controllers -->
   <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load joint_group_position_controller" />
 
   <include file="$(find ur3_moveit)/launch/move_group.launch">

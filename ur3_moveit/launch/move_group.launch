@@ -1,8 +1,4 @@
 <launch>
-  <!-- Octomap and sensors settings -->
-  <param name="move_group/octomap_resolution" type="double" value="0.02" />
-  <rosparam ns="move_group" command="load" file="$(find ur3_moveit)/config/sensors_3d.yaml" />
-
   <!-- move_group settings -->
   <arg name="pipeline" default="ompl" />
   <arg name="max_safe_path_cost" default="1"/>
