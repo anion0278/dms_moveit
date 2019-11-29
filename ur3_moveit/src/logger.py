@@ -1,15 +1,5 @@
 import time
-import robot_driver
-import rospy
 import os
-import subprocess
-import roslaunch
-import rospkg
-import yaml
-import gazebo_sim
-from gazebo_msgs.srv import GetWorldProperties, GetModelState
-from std_srvs.srv import Empty
-from StringIO import StringIO
 
 class MeasurementLogger(object):
     def __init__(self, tested_param_name, tested_param_value, measurements_full_dir_path):

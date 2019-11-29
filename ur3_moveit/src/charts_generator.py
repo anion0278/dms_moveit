@@ -10,16 +10,21 @@ from functools import reduce
 import collections
 import data_reader
 from statistics import mean
+from matplotlib.pyplot import cm
+import matplotlib.lines as mlines
 
 plt.rcdefaults()
 
 current_script_path = os.path.dirname(__file__)
 measurements_dir = os.path.join(current_script_path, "measurements")
 
+margin = 0.005
 x_labels_rotation = 70
 bar_width = 0.8
 chart_label_font = 8
 figure_size = (22, 4)
+available_colors = ["#4e79a7", "#f28e2b", "#76b7b2",
+                    "#e15759",   "#59a14f",  "#edc948", "#b07aa1", ]
 
 
 class ResultPlotter:
@@ -105,33 +110,22 @@ class ResultPlotter:
             self.show_box_plot(execution_statistics,
                                title="Execution time " + movements[index],
                                y_label="Time [s]",
-                               y_limit=y_limit
-                               )
-
-    # def plot_durations_bar_plot(self, movements, reader):
-    #     for index in range(len(movements)):
-    #         plan_durations = reader.get_point_plan_average(index)
-    #         self.show_bar_plot(plan_durations,
-    #                            title="Planning time " + movements[index],
-    #                            y_label="Time [s]")
-
-    #         execution_durations = reader.get_point_execution_average(index)
-    #         self.show_bar_plot(execution_durations,
-    #                            title="Execution time " + movements[index],
-    #                            y_label="Time [s]")
+                               y_limit=y_limit)
 
     def show_relative_performances(self, movements, reader):
-       
-
-        relative_performances = self.calculate_relative_performance(movements, reader)
-
+        relative_performances = self.calculate_relative_performance(
+            movements, reader)
+        self.filter_statistics_by_rule(
+            relative_performances, lambda key, value: "obstacle" in key.lower())
         self.show_grouped_bar_plot(relative_performances,
                                    title="Relative values",
                                    y_label="Relative average value [%]")
+        self.show_relative_change_bar_plot(relative_performances)
 
     def calculate_relative_performance(self, movements, reader):
         def calculate_relative(value, min, max):
-            if min > max: raise ArithmeticError()
+            if min > max:
+                raise ArithmeticError()
             return (1 - ((value - min) / (max - min))) * 100
 
         relative_performances = collections.OrderedDict()
@@ -160,7 +154,24 @@ class ResultPlotter:
         for key, value in success_probability.items():
             if key in relative_performances:
                 relative_performances[key].append(value)
+
         return relative_performances
+
+    def filter_statistics_by_rule(self, statistics, exclude_rule):
+        for key, value in statistics.items():
+            if exclude_rule(key, value):
+                del statistics[key]
+
+    def show_relative_change_bar_plot(self, relative_performance):
+        relative_changes = collections.OrderedDict()
+        keys = relative_performance.keys()
+        values = relative_performance.values()
+        for index in range(0, len(relative_performance), 2):
+            new_key = keys[index] + " vs " + keys[index+1]
+            relative_changes[new_key] = abs(mean(values[index]) - mean(values[index + 1]))
+        self.show_bar_plot(relative_changes,
+                           title="Relative performance change",
+                           y_label="Relative change [%]")
 
     def show_grouped_bar_plot(self, relative_performance, title, y_label):
         x_labels = relative_performance.keys()
@@ -168,83 +179,58 @@ class ResultPlotter:
         fig, axis = plt.subplots(figsize=figure_size)
 
         members_labels = ["Plan Home->A", "Execute Home->A",
-                            "Plan A->B", "Execute A->B",
-                            "Plan B->A", "Execute B->A",
-                            "Success"]
+                          "Plan A->B", "Execute A->B",
+                          "Plan B->A", "Execute B->A",
+                          "Success"]
         actions_durations = np.array(relative_performance.values())
         group_members_num = len(actions_durations[0])
         groups_num = len(actions_durations)
         group_width = bar_width
-        # plt.autoscale(enable=True, axis='x', tight=True)
+        bars = []
         for group_member_index in range(group_members_num):
             column = actions_durations[:, group_member_index]
             single_bar_width = group_width / group_members_num
             x_pos = x_base - group_width / 2 + single_bar_width * \
                 (group_members_num - group_member_index)
+            bar = axis.bar(x_pos, column, single_bar_width,
+                           label=members_labels[group_member_index],
+                           color=available_colors[group_member_index])
+            bars.append(bar)
 
-            channel_value = float(group_member_index) / group_members_num
-            bar = axis.bar(x_pos, column, single_bar_width, label=members_labels[group_member_index], color=(
-                channel_value, channel_value, 0, 0.6))
-
-        margin = 0.005
+        # average lines
         plt.margins(margin, 0)
-        x_pos = x_base + group_width / group_members_num
-        # averages
         for group_index in range(groups_num):
             group_mean = mean(actions_durations[group_index])
-            #(1 - bar_width) / 2
-            line_start = float(group_index) / groups_num
-            line_end = float(group_index + 1 - margin) / groups_num
+            line_start = float(group_index) / groups_num + \
+                margin * (groups_num - group_index) / groups_num
+            line_end = float(group_index + 1) / groups_num - \
+                margin * (group_index) / groups_num
             axis.axhline(y=group_mean,
-                         xmin=line_start + margin,
+                         xmin=line_start,
                          xmax=line_end,
                          linewidth=2)
-            # line_start = x_pos[group_index] / groups_num 
-            # line_end = x_pos[group_index] / groups_num + 0.05
 
-        axis.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize = chart_label_font) #bbox_to_anchor=(0.99, 0.5),  ncol=7
+        average_legend = mlines.Line2D(
+            [], [], color='blue', label='General performance', linewidth=2)
+        bars.append(average_legend)
+        axis.legend(loc='center left', bbox_to_anchor=(1, 0.5),
+                    fontsize=chart_label_font, handles=bars)
         axis.set_ylabel(y_label)
         axis.set_title(title)
+        x_pos = x_base + group_width / group_members_num
         axis.set_xticks(x_pos)
         axis.set_xticklabels(x_labels, fontsize=chart_label_font,
                              rotation=x_labels_rotation)
 
-        # fig.savefig('samplefigure', bbox_extra_artists=[legend], bbox_inches='tight')
-
         fig.tight_layout()
         plt.subplots_adjust(right=0.92)
-        
+
         self.save_figure(title)
         self.show_figure(fig)
 
-# class BoxPlotFactory:
-#     def __init__(self, meas_reader):
-#         self.meas_reader = meas_reader
 
-#     def show_plot(self):
-#         plan_statistics = self.meas_reader.get_point_plan_statistics(index)
-#         self.show_box_plot(plan_statistics,
-#                             title="Planning time " + movements[index],
-#                                y_label="Time [s]")
-
-#     def show_box_plot(self, statistics_dict, title, y_label):
-#         all_data = statistics_dict.values()
-#         labels = statistics_dict.keys()
-
-
-#         fig, axis = plt.subplots(nrows=1, ncols=1, figsize=(40, 4))
-#         bplot1 = axis.boxplot(all_data, vert=True,
-#                               patch_artist=True,  labels=labels)
-#         plt.xticks(fontsize=7, rotation=self.x_labels_rotation)
-#         plt.subplots_adjust(bottom=0.40)
-#         axis.set_title(title)
-#         # for patch, color in zip(bplot1['boxes'], colors):
-#         #     patch.set_facecolor(color)
-#         axis.yaxis.grid(True)
-#         axis.set_xlabel('Measured parameter variant')
-#         axis.set_ylabel(y_label)
-#         plt.savefig(os.path.join(current_script_path, title + ".png"))
-#         plt.show()
 reader = data_reader.MeasurementsReader(measurements_dir)
+reader.parse_all_measurements()
+
 plotter = ResultPlotter(reader)
 plotter.plot_all()

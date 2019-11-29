@@ -18,7 +18,7 @@ from geometry_msgs.msg import Pose
 
 home_position = "Home"
 group_name = "manipulator"
-
+clear_octomap_service = "/clear_octomap"
 
 class NamedJointPose():
     def __init__(self, joint_angles, name):
@@ -70,7 +70,9 @@ class RobotDriver:
         self.scene = moveit_commander.PlanningSceneInterface()
         self.move_group = moveit_commander.MoveGroupCommander(group_name)
 
-        clear_octomap_service = "/clear_octomap"
+        # self.move_group.allow_replanning(True)
+
+        
         rospy.wait_for_service(clear_octomap_service)
         self.__clear_octomap_service = rospy.ServiceProxy(
             clear_octomap_service, Empty)
@@ -82,6 +84,7 @@ class RobotDriver:
 
     def clear_octomap(self):
         print("Octomap clearing...")
+        rospy.wait_for_service(clear_octomap_service)
         # the service type is Empty, that is why there are no arguments
         self.__clear_octomap_service()
 
@@ -135,4 +138,4 @@ class RobotDriver:
 
 if __name__ == "__main__":
     robot_driver = RobotDriver()
-    robot_driver.execute_cyclic_movement(5)
+    robot_driver.execute_cyclic_movement(10)

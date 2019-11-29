@@ -1,0 +1,4 @@
+<launch>
+  <node name="performance_meas" pkg="ur3_moveit" type="moveit_tester.py">
+  </node>
+</launch>

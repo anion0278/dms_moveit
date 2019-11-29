@@ -83,9 +83,8 @@ class MeasurementsReader:
     def __init__(self, measurements_dir):
         self.all_parameters_measured = []
         self.measurements_dir = measurements_dir
-        self.__parse_measurements()
 
-    def __parse_measurements(self):
+    def parse_all_measurements(self):
         for meas_dir in os.listdir(self.measurements_dir):
             param_measurement = ParameterMeasurement(meas_dir)
             current_meas_dir = os.path.join(self.measurements_dir, meas_dir)
@@ -140,16 +139,16 @@ class MeasurementsReader:
         return file_contents
 
     def get_point_plan_statistics(self, point_num):
-        return self.__get_point_stat_dict(lambda x: x.get_point_plan_measurements(point_num), lambda x: len(x) > 0)
+        return self.__get_point_stat_dict(lambda variant: variant.get_point_plan_measurements(point_num), lambda samples: len(samples) > 0)
 
     def get_point_execution_statistics(self, point_num):
-        return self.__get_point_stat_dict(lambda x: x.get_point_execution_measurements(point_num), lambda x: len(x) > 0)
+        return self.__get_point_stat_dict(lambda variant: variant.get_point_execution_measurements(point_num), lambda samples: len(samples) > 0)
 
     def get_point_plan_average(self, point_num):
-        return self.__get_point_stat_dict(lambda x: x.get_average_plan_time_for_point(point_num), lambda x: x != 0)
+        return self.__get_point_stat_dict(lambda variant: variant.get_average_plan_time_for_point(point_num), lambda average: average != 0)
 
     def get_point_execution_average(self, point_num):
-        return self.__get_point_stat_dict(lambda x: x.get_average_execution_time_for_point(point_num), lambda x: x != 0)
+        return self.__get_point_stat_dict(lambda variant: variant.get_average_execution_time_for_point(point_num), lambda average: average != 0)
 
     def get_success_statistics(self):
         return self.__get_point_stat_dict(lambda x: x.success_rate * 100)
