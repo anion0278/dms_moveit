@@ -26,7 +26,6 @@ figure_size = (22, 4)
 available_colors = ["#4e79a7", "#f28e2b", "#76b7b2",
                     "#e15759",   "#59a14f",  "#edc948", "#b07aa1", ]
 
-
 class ResultPlotter:
     def __init__(self, meas_reader):
         self.reader = meas_reader
@@ -90,9 +89,8 @@ class ResultPlotter:
         plt.close(figure)
 
     def plot_all(self):
-        movements = ["Home -> A", "A -> B", "B -> A"]
-        self.show_relative_performances(movements, self.reader)
-        self.show_durations_box_plot(movements, self.reader)
+        self.show_relative_performances(moveit_tester.movements, self.reader)
+        self.show_durations_box_plot(moveit_tester.movements, self.reader)
         success_statistics = self.reader.get_success_statistics()
         self.show_bar_plot(success_statistics,
                            title="Success probability",
@@ -123,10 +121,7 @@ class ResultPlotter:
         self.show_relative_change_bar_plot(relative_performances)
 
     def calculate_relative_performance(self, movements, reader):
-        def calculate_relative(value, min, max):
-            if min > max:
-                raise ArithmeticError()
-            return (1 - ((value - min) / (max - min))) * 100
+
 
         relative_performances = collections.OrderedDict()
         for index in range(len(movements)):
@@ -134,7 +129,7 @@ class ResultPlotter:
             max_duration = max(plan_durations.values())
             min_duration = min(plan_durations.values())
             for key, value in plan_durations.items():
-                rel_value = calculate_relative(
+                rel_value = moveit_tester.calculate_relative(
                     value, min_duration, max_duration)
                 if not (key in relative_performances):
                     relative_performances[key] = []
@@ -144,7 +139,7 @@ class ResultPlotter:
             max_exec_duration = max(execution_durations.values())
             min_exec_duration = min(execution_durations.values())
             for key, value in execution_durations.items():
-                rel_value = calculate_relative(
+                rel_value = moveit_tester.calculate_relative(
                     value, min_exec_duration, max_exec_duration)
                 if not (key in relative_performances):
                     relative_performances[key] = []
@@ -178,10 +173,12 @@ class ResultPlotter:
         x_base = np.arange(len(x_labels))
         fig, axis = plt.subplots(figsize=figure_size)
 
-        members_labels = ["Plan Home->A", "Execute Home->A",
-                          "Plan A->B", "Execute A->B",
-                          "Plan B->A", "Execute B->A",
-                          "Success"]
+        members_labels = []
+        for label in moveit_tester.movements:
+            members_labels.append("Plan " + label)
+            members_labels.append("Execute " + label)
+        members_labels.append("Success")
+
         actions_durations = np.array(relative_performance.values())
         group_members_num = len(actions_durations[0])
         groups_num = len(actions_durations)

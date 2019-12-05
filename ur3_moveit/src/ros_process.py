@@ -15,25 +15,31 @@ from StringIO import StringIO
 import roslaunch
 import rosgraph
 import rosservice
+import moveit_commander
 
 
 def run_process_async(command, shell=True):
     return subprocess.Popen(command, shell=shell)
 
+
 def run_process_sync(command):
     os.system(command)
+
 
 def kill_process_by_name(process_name):
     for proc in psutil.process_iter():
         if proc.name() == process_name:
             proc.kill()
 
+
 def start_roscore():
     process = run_process_async("roscore")
     rospy.wait_for_service("/rosout/get_loggers")
 
+
 def is_roscore_running():
     return rosgraph.is_master_online()
+
 
 def close_roscore():
     kill_process_by_name("roscore")
@@ -45,8 +51,25 @@ def close_roscore():
     print("roscore killed !")
 
 
+def wait_for_services_or_timeout(services, timeout, timeout_callback=None):
+    time_spent = 0
+    while timeout >= time_spent and all(not is_rosservice_running(x) for x in services):
+        time.sleep(1)
+        time_spent += 1
+    if (time_spent >= gazebo_timeout):
+        print("Time is up!")
+        timeout_callback()
+        raise RuntimeError("Timeout!")
+
+
+def is_rosservice_running(service_name):
+    services = rosservice.get_service_list()
+    return service_name in services
+
+
 world_props_service = "/gazebo/get_world_properties"
-gazebo_timeout = 5
+gazebo_timeout = 15
+
 
 class GazeboSim:
     def __init__(self, is_obstacle_present, is_workspace_limited):
@@ -55,7 +78,7 @@ class GazeboSim:
         self.is_workspace_limited = is_workspace_limited
 
     def start(self, additional_params=""):
-        self.close_gazebo()
+        self.__close_gazebo()
         self.gazebo_process = self.__start_gazebo_process(additional_params)
 
     def __start_gazebo_process(self, additional_params):
@@ -74,34 +97,26 @@ class GazeboSim:
         return process
 
     def wait_for_gazebo_or_timeout(self):
-        # rospy.wait_for_service("/arm_controller/query_state")
-        # rospy.wait_for_service("/move_group/plan_execution/set_parameters")
-        # rospy.wait_for_service(world_props_service)
-        time_spent = 0
-        while(gazebo_timeout >= time_spent and
-              (not self.is_rosservice_running("/arm_controller/query_state")
-               and not self.is_rosservice_running("/move_group/plan_execution/set_parameters")
-               and not self.is_rosservice_running(rospy.wait_for_service(world_props_service)))):
-            time.sleep(1)
-            time_spent+=1
-
-        if (time_spent >= gazebo_timeout):
-            self.close_gazebo()
-            close_roscore()
-            self.close_gazebo()
-            print("Gazebo Error")
-            raise RuntimeError("Could not start Gazebo!")
+        wait_for_services_or_timeout(
+            services=[
+                "/arm_controller/query_state",
+                "/move_group/plan_execution/set_parameters",
+                world_props_service],
+                timeout=gazebo_timeout,
+                timeout_callback= self.end)
 
         self.__world_properties_service = rospy.ServiceProxy(
             world_props_service, GetWorldProperties)
         self.__model_state_service = rospy.ServiceProxy(
             "/gazebo/get_model_state", GetModelState)
         self.__reset_sim_service = rospy.ServiceProxy(
+            "/gazebo/reset_simulation", Empty)
+        self.__reset_world_service = rospy.ServiceProxy(
             "/gazebo/reset_world", Empty)
-
-    def is_rosservice_running(self, service_name):
-        services = rosservice.get_service_list()
-        return service_name in services
+        self.__pause_physics_service = rospy.ServiceProxy(
+            "/gazebo/pause_physics", Empty)
+        self.__unpause_physics_service = rospy.ServiceProxy(
+            "/gazebo/unpause_physics", Empty)
 
     def get_sim_objects_names_list(self):
         response = self.__world_properties_service()
@@ -112,11 +127,21 @@ class GazeboSim:
 
     def reset_sim(self):
         print("Reseting simulation...")
-        self.__reset_sim_service()
-        time.sleep(0.5)
+        self.__pause_physics_service()
+        time.sleep(0.1)
+        # self.__reset_sim_service()
+        self.__reset_world_service()
+        time.sleep(0.1)
+        self.__unpause_physics_service()
+        time.sleep(0.2)
 
-    def close_gazebo(self):
+    def __close_gazebo(self):
         kill_process_by_name("gzserver")
         kill_process_by_name("gzclient")
         if (self.gazebo_process != None):
             os.killpg(os.getpgid(self.gazebo_process.pid), signal.SIGTERM)
+
+    def end(self):
+        self.__close_gazebo()
+        close_roscore()
+

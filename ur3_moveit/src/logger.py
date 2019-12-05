@@ -28,6 +28,9 @@ class MeasurementLogger(object):
         self.log_message(movement_name + " - execution: " +
                          str(measured_time[1]))
 
+    def flush(self):
+        self.__log_file.flush()
+
     def close(self):
         self.__log_file.close()
 

@@ -4,17 +4,18 @@ import sys
 import copy
 import rospy
 import moveit_commander
-import moveit_msgs.msg
-import geometry_msgs.msg
 from math import pi
+import time
+import ros_process
+
 from std_msgs.msg import String
 from std_srvs.srv import Empty
-from moveit_commander.conversions import pose_to_list
-import time
+import moveit_msgs.msg
+import geometry_msgs.msg
 from geometry_msgs.msg import Point, Quaternion
-
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
+import timeout
 
 home_position = "Home"
 group_name = "manipulator"
@@ -68,25 +69,35 @@ class RobotDriver:
 
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface()
-        self.move_group = moveit_commander.MoveGroupCommander(group_name)
-
-        # self.move_group.allow_replanning(True)
-
+        
+        try:
+            self.move_group = moveit_commander.MoveGroupCommander(group_name)
+        except Exception as ex:
+            ros_process.kill_process_by_name("move_group")
+            rospy.wait_for_service(clear_octomap_service)
+            print("MoveGroup SUPER ERROR")
+            time.sleep(5)
+            self.move_group = moveit_commander.MoveGroupCommander(group_name)
         
         rospy.wait_for_service(clear_octomap_service)
         self.__clear_octomap_service = rospy.ServiceProxy(
             clear_octomap_service, Empty)
         self.clear_octomap()
 
-        print("Robot current state")
-        print self.robot.get_current_state()
-        print self.move_group.get_current_pose()
+        # print("Robot current state")
+        # print self.robot.get_current_state()
+        # print self.move_group.get_current_pose()
+
+    def cleanup(self):
+        self.move_group.clear_path_constraints()
+        self.move_group.clear_pose_targets()
 
     def clear_octomap(self):
+        print("Waiting for octomap service")
+        rospy.wait_for_service(clear_octomap_service, timeout=5)
         print("Octomap clearing...")
-        rospy.wait_for_service(clear_octomap_service)
         # the service type is Empty, that is why there are no arguments
-        self.__clear_octomap_service()
+        timeout.action_with_timeout(self.__clear_octomap_service, 5)
 
     # returns measured time - for planning and for execution
     def move_to_pose(self, target):
@@ -109,7 +120,7 @@ class RobotDriver:
         plan = self.move_group.plan()
         success = plan[0]
         if (not success):
-            print("Could not plan the movement! Plan: " + str(plan))
+            print("Could not plan the movement!") # Plan: " + str(plan)
         return success
 
     def execute_planned_sync(self):
