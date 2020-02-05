@@ -57,7 +57,7 @@ planned_poses = [
     #robot_driver.point_pose_A, robot_driver.point_pose_B, robot_driver.point_pose_A,
 ]
 
-movements = ["Home->A", "A->B", "B->A"]
+movements = ["Home -> A", "A -> B", "B -> A"]
 
 
 plan_param_name = "/meas/plan"
@@ -70,13 +70,14 @@ def calculate_relative(value, min, max):
     return (1 - ((value - min) / (max - min))) * 100
 
 class ParametersTester:
-    def __init__(self, watched_parameters, repetitions, is_obstacle_present):
+    def __init__(self, watched_parameters, repetitions, is_obstacle_present, sim_env):
         self.watched_parameters = watched_parameters
         self.repetitions = repetitions
         rospy.on_shutdown(self.__shutdown_handler)
-        self.gazebo_sim = None
+        self.environment = None
         self.is_obstacle_present = is_obstacle_present
         self.rob = None
+        self.is_simulated_env = sim_env
 
     def measure_time(self, function, message="time spent"):
         start = time.time()
@@ -89,27 +90,24 @@ class ParametersTester:
     def start(self):
         ros_process.close_roscore()
         ros_process.start_roscore()
-        self.gazebo_sim = ros_process.GazeboSim(
+        self.environment = ros_process.Environment(
             is_obstacle_present=self.is_obstacle_present,
-            is_workspace_limited=True)
-        self.gazebo_sim.start()
+            is_workspace_limited=True,
+            is_simulated=self.is_simulated_env)
+        self.environment.start()
 
-    def apply_new_move_group_params(self):
-        if (self.rob is not None):
-            self.rob.cleanup()
-        # ros_process.kill_process_by_name("move_group")
-        os.system("rosnode kill /move_group")
-        time.sleep(1)
-        os.system("rosnode cleanup")
-        print("killed move group!")
+    def restart_move_group(self):
+        robot_driver.restart_moveit_node()
+
+    def wait_for_moveit_node(self):
         rospy.wait_for_service(robot_driver.clear_octomap_service)
 
     def end(self):
-        self.gazebo_sim.__close_gazebo()
+        self.environment.end()
         ros_process.close_roscore()
 
     def run_single_parameter_tests(self, tested_param_name, tested_param_value, planner_config_name="RRTConnect"):
-        self.rob = robot = robot_driver.RobotDriver()
+        robot = robot_driver.RobotDriver()
 
         tested_param_value = str(tested_param_value)
 
@@ -127,26 +125,27 @@ class ParametersTester:
         has_walls = self.check_space_limitation(robot.robot)
 
         robot.move_group.set_planner_id(planner_config_name)
+        # robot.move_group.set_goal_joint_tolerance(1e-05)
 
         for cycle_num in range(1, self.repetitions + 1):
+            
             self.logger.log_message("====== CYCLE %s ======" % cycle_num)
             self.postponed_logger.log_message(
                 "====== CYCLE %s ======" % cycle_num)
-            self.gazebo_sim.reset_sim()
+            self.environment.reset()
 
-
-            is_obstacle_present = obstacle_name in self.gazebo_sim.get_sim_objects_names_list()
-            self.log_sim_params(planner_config_name, has_walls,
+            is_obstacle_present = obstacle_name in self.environment.get_sim_objects_names_list()
+            self.log_env_params(planner_config_name, has_walls,
                                 is_obstacle_present, robot)
 
             if (is_obstacle_present):
-                obstacle_inital_pose = self.gazebo_sim.get_model_pos(
+                obstacle_inital_pose = self.environment.get_model_pos(
                     obstacle_name)
 
             robot.clear_octomap()
             cycle_success = self.perform_movement_set(robot)
 
-            obstacle_new_pose = self.gazebo_sim.get_model_pos(obstacle_name)
+            obstacle_new_pose = self.environment.get_model_pos(obstacle_name)
             if (is_obstacle_present
                     and (obstacle_new_pose.pose != obstacle_inital_pose.pose or obstacle_new_pose.twist != obstacle_inital_pose.twist)):
                 self.logger.log_error("Robot has moved the obstacle!")
@@ -164,8 +163,9 @@ class ParametersTester:
 
         self.postponed_logger.close()
         self.logger.close()
+        print("Param test finished")
 
-    def log_sim_params(self, planner_config_name, has_walls, is_obstacle_present, robot):
+    def log_env_params(self, planner_config_name, has_walls, is_obstacle_present, robot):
         self.logger.log_section("Params")
 
         self.logger.log_param("Planner", planner_config_name)
@@ -212,7 +212,7 @@ class ParametersTester:
         for pose, label in zip(planned_poses, movements):
             robot.set_target_pose(pose)
             try:
-                plan_time = self.measure_time(robot.perform_planning)
+                plan_time = self.measure_time(robot.perform_planning) 
                 self.logger.log_message(
                     "Planning time to %s: %s" % (pose.name, plan_time))
                 self.postponed_logger.log_message(
@@ -235,7 +235,6 @@ class ParametersTester:
         return success
 
     def __shutdown_handler(self):
-        self.gazebo_sim.__close_gazebo()
         pass
 
     def get_sensors_config(self, point_subsample=None):
@@ -244,3 +243,31 @@ class ParametersTester:
             if point_subsample != None:
                 config[0]["point_subsample"] = point_subsample
             return config
+
+
+if __name__ == "__main__":
+
+    raise EnvironmentError
+
+    tester = ParametersTester(tested_parameters, 30, is_obstacle_present=True, sim_env=True)
+    tester.start()
+    
+    #default
+    # octomap_res = 0.02
+    # point_subs = 1
+    # segment = 0.005
+    # planner = "RRTConnect"
+
+    #Optimized
+    octomap_res = 0.0678
+    point_subs = 125
+    segment = 0.0056
+    planner = "BiTRRT"
+    robot_driver.set_dynamic_params([octomap_res, point_subs, segment])
+    
+    tester.run_single_parameter_tests("Simulation B2", "Optimized LP " + planner, planner)
+
+    # for planner in tested_planners:
+        # tester.run_single_parameter_tests("Planner", planner, planner_config_name=planner)
+    #"Oct res "+octomap_res+"; subsample "+point_subs+"; longest valid segment "+segment+"; Low poly; "+planner
+    tester.end()

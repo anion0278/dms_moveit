@@ -571,3 +571,314 @@ ur3_moveit/src/measurements  Filtered/Workspace limitation/Limited by walls_meas
 ur3_moveit/src/measurements  Filtered/Workspace limitation/Limited by walls_short_successful_attempts_measurement.txt
 ur3_moveit/src/measurements  Filtered/Workspace limitation/No limits_measurement.txt
 ur3_moveit/src/measurements  Filtered/Workspace limitation/No limits_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Collision volumes/High poly_measurement.txt
+ur3_moveit/src/After first comparison/Collision volumes/High poly_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Collision volumes/low poly_measurement.txt
+ur3_moveit/src/After first comparison/Collision volumes/low poly_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Comparison/Initial_measurement.txt
+ur3_moveit/src/After first comparison/Comparison/Initial_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Comparison/Optimized_measurement.txt
+ur3_moveit/src/After first comparison/Comparison/Optimized_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Goal Joint Tolerance/0.01_measurement.txt
+ur3_moveit/src/After first comparison/Goal Joint Tolerance/0.01_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Goal Joint Tolerance/1e-05_measurement.txt
+ur3_moveit/src/After first comparison/Goal Joint Tolerance/1e-05_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics search resolution/0.0005_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics search resolution/0.05_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics search resolution/0.0005_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics search resolution/0.05_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics solver/KDLKinematicsPlugin_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics solver/KDLKinematicsPlugin_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics solver/UR3KinematicsPlugin_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics solver/UR3KinematicsPlugin_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics solver attempts/1_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics solver attempts/1_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics solver attempts/10_measurement.txt
+ur3_moveit/src/After first comparison/Kinematics solver attempts/10_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Longest valid segment fraction/0.0001_measurement.txt
+ur3_moveit/src/After first comparison/Longest valid segment fraction/0.001_measurement.txt
+ur3_moveit/src/After first comparison/Longest valid segment fraction/0.1_measurement.txt
+ur3_moveit/src/After first comparison/Longest valid segment fraction/0.0001_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Longest valid segment fraction/0.001_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Longest valid segment fraction/0.1_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Longest valid segment fraction/0.005_measurement.txt
+ur3_moveit/src/After first comparison/Longest valid segment fraction/0.05_measurement.txt
+ur3_moveit/src/After first comparison/Longest valid segment fraction/0.005_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Longest valid segment fraction/0.05_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Obstacle/None_measurement.txt
+ur3_moveit/src/After first comparison/Obstacle/None_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Obstacle/Obstacle present_measurement.txt
+ur3_moveit/src/After first comparison/Obstacle/Obstacle present_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Octomap resolution/0.005_measurement.txt
+ur3_moveit/src/After first comparison/Octomap resolution/0.005_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Octomap resolution/0.025_measurement.txt
+ur3_moveit/src/After first comparison/Octomap resolution/0.025_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Path simplification/Disabled_measurement.txt
+ur3_moveit/src/After first comparison/Path simplification/Disabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Path simplification/Enabled_measurement.txt
+ur3_moveit/src/After first comparison/Path simplification/Enabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Planner/BFMT_measurement.txt
+ur3_moveit/src/After first comparison/Planner/BFMT_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Planner/BiEST_measurement.txt
+ur3_moveit/src/After first comparison/Planner/BiEST_short_successful_attempts_measurement.txt
+ur3_moveit/src/After first comparison/Planner/BiTRRT_measurement.txt
+ur3_moveit/src/PSO/Values_measurement 245.txt
+ur3_moveit/src/PSO/Values_measurement 500.txt
+ur3_moveit/src/PSO/Values_measurement_1.txt
+ur3_moveit/src/PSO/Values_measurement_2.txt
+ur3_moveit/src/PSO/Values_measurement.txt
+ur3_moveit/src/measurements/2 Points subsample/1_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/2 Points subsample/150_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/3 Workspace limitation/Disabled_measurement.txt
+ur3_moveit/src/measurements/3 Workspace limitation/Disabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/3 Workspace limitation/Enabled_measurement.txt
+ur3_moveit/src/measurements/3 Workspace limitation/Enabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Collision mesh/High poly_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Collision mesh/High poly.txt
+ur3_moveit/src/measurements/Collision mesh/Low poly_measurement.txt
+ur3_moveit/src/measurements/Collision mesh/Low poly_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Goal joint tolerance/0.01_measurement.txt
+ur3_moveit/src/measurements/Goal joint tolerance/0.01_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Goal joint tolerance/1e-05_measurement.txt
+ur3_moveit/src/measurements/Goal joint tolerance/1e-05_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Kinematics solver/KDLKinematics_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Kinematics solver/UR3Kinematics_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Longest valid segment fraction/0.0005_measurement.txt
+ur3_moveit/src/measurements/Longest valid segment fraction/0.0005_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Max update rate/6_measurement.txt
+ur3_moveit/src/measurements/Max update rate/6_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Max update rate/Unlimited_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Octomap resolution/0.02_measurement.txt
+ur3_moveit/src/measurements/Octomap resolution/0.02_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner10/PRM_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner10/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner11/PRMstar_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner11/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner12/ProjEST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner12/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner13/0-SPARS_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner13/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner14/0-STRIDE_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner14/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner2/BiEST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner2/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner3/BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner3/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner4/EST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner4/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner5/FMT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner5/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner6/KPIECE_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner6/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner7/LazyPRM_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner7/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner8/LazyPRMstar_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner8/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner9/PDST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements/Planner9/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Collision mesh/0-Low poly_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Collision mesh/High poly_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Goal joint tolerance/0.01_measurement.txt
+ur3_moveit/src/measurements %X/Goal joint tolerance/0.01_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Goal joint tolerance/1e-05_measurement.txt
+ur3_moveit/src/measurements %X/Goal joint tolerance/1e-05_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Kinematics search resolution/0.005_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Kinematics search resolution/0.05_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Kinematics solver/KDLKinematics_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Kinematics solver/UR3Kinematics_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Longest valid segment fraction/-0.0005_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Longest valid segment fraction/0.005_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Max update rate/6_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Max update rate/Unlimited_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Octomap resolution/-0.005_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Octomap resolution/0.02_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Path simplification/Disabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Path simplification/Enabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/BiEST_measurement.txt
+ur3_moveit/src/measurements %X/Planner/BiEST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/BiTRRT_measurement.txt
+ur3_moveit/src/measurements %X/Planner/BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/BKPIECE_measurement.txt
+ur3_moveit/src/measurements %X/Planner/BKPIECE_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/EST_measurement.txt
+ur3_moveit/src/measurements %X/Planner/EST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/FMT_measurement.txt
+ur3_moveit/src/measurements %X/Planner/FMT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/KPIECE_measurement.txt
+ur3_moveit/src/measurements %X/Planner/KPIECE_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/LazyPRM_measurement.txt
+ur3_moveit/src/measurements %X/Planner/LazyPRM_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/LazyPRMstar_measurement.txt
+ur3_moveit/src/measurements %X/Planner/LazyPRMstar_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/LBKPIECE_measurement.txt
+ur3_moveit/src/measurements %X/Planner/LBKPIECE_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/PDST_measurement.txt
+ur3_moveit/src/measurements %X/Planner/PDST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/PRM_measurement.txt
+ur3_moveit/src/measurements %X/Planner/PRM_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/PRMstar_measurement.txt
+ur3_moveit/src/measurements %X/Planner/PRMstar_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/ProjEST_measurement.txt
+ur3_moveit/src/measurements %X/Planner/ProjEST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/RRT_measurement.txt
+ur3_moveit/src/measurements %X/Planner/RRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/RRTConnect_measurement.txt
+ur3_moveit/src/measurements %X/Planner/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/RRTstar_measurement.txt
+ur3_moveit/src/measurements %X/Planner/RRTstar_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/SBL_measurement.txt
+ur3_moveit/src/measurements %X/Planner/SBL_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/SPARS_measurement.txt
+ur3_moveit/src/measurements %X/Planner/SPARS_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/SPARStwo_measurement.txt
+ur3_moveit/src/measurements %X/Planner/SPARStwo_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/STRIDE_measurement.txt
+ur3_moveit/src/measurements %X/Planner/STRIDE_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Planner/TRRT_measurement.txt
+ur3_moveit/src/measurements %X/Planner/TRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Points subsample/-150_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Points subsample/1_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Workspace limitation/Disabled_measurement.txt
+ur3_moveit/src/measurements %X/Workspace limitation/Disabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements %X/Workspace limitation/Enabled_measurement.txt
+ur3_moveit/src/measurements %X/Workspace limitation/Enabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Collision mesh/High poly_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Collision mesh/High poly.txt
+ur3_moveit/src/measurements (copy)/Collision mesh/Low poly_measurement.txt
+ur3_moveit/src/measurements (copy)/Collision mesh/Low poly_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Goal joint tolerance/0.01_measurement.txt
+ur3_moveit/src/measurements (copy)/Goal joint tolerance/0.01_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Goal joint tolerance/1e-05_measurement.txt
+ur3_moveit/src/measurements (copy)/Goal joint tolerance/1e-05_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Initial settings/_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Kinematics search resolution/-0.005_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Kinematics search resolution/0.005_measurement.txt
+ur3_moveit/src/measurements (copy)/Kinematics solver/KDLKinematics_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Kinematics solver/UR3Kinematics_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Longest valid segment fraction/0.0005_measurement.txt
+ur3_moveit/src/measurements (copy)/Longest valid segment fraction/0.005_measurement.txt
+ur3_moveit/src/measurements (copy)/Longest valid segment fraction/0.0005_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Longest valid segment fraction/0.005_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Max update rate/6_measurement.txt
+ur3_moveit/src/measurements (copy)/Max update rate/6_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Max update rate/Unlimited_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Obstacle/Disabled_measurement.txt
+ur3_moveit/src/measurements (copy)/Obstacle/Disabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Obstacle/Enabled_measurement.txt
+ur3_moveit/src/measurements (copy)/Obstacle/Enabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Octomap resolution/0.02_measurement.txt
+ur3_moveit/src/measurements (copy)/Octomap resolution/0.02_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Points subsample/150_measurement.txt
+ur3_moveit/src/measurements (copy)/Points subsample/150_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B1 NEW/Inital HP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B1 NEW/Initial HP RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B1 NEW/Optimized HP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B1 NEW/Optimized LP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B1 OLD/Initial HP RRTConnect_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B1 OLD/Initial HP RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B1 OLD/Optimized HP BiTRRT_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B1 OLD/Optimized HP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B1 OLD/Optimized LP BiTRRT_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B1 OLD/Optimized LP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B2 NEW/Inital HP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B2 NEW/Inital HP RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B2 NEW/Optimized HP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B2 NEW/Optimized LP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B2 OLD/Initial HP RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B2 OLD/Optimized HP BiTTRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B2 OLD/Optimized HP RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B2 OLD/Optimized LP BiTRRT_measurement.txt
+ur3_moveit/src/measurements (copy)/Real B2 OLD/Optimized LP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B1 NEW/0-Optimized HP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B1 NEW/0-Optimized LP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B1 NEW/Initial HP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B1 NEW/Initial HP RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B1 OLD/Initial HP RRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B1 OLD/Optimized HP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B1 OLD/Optimized HP RRTConnect_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B1 OLD/Optimized HP RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B1 OLD/Optimized LP BiTRRT_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B1 OLD/Optimized LP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 NEW/Initial HP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 NEW/Initial HP RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 NEW/Optimized HP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 NEW/Optimized LP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 OLD/Initial HP RRTConnect_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 OLD/Initial HP RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 OLD/Optimized HP BiTRRT_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 OLD/Optimized HP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 OLD/Optimized HP RRTConnect_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 OLD/Optimized HP RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 OLD/Optimized HP_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 OLD/Optimized LP BiTRRT_measurement.txt
+ur3_moveit/src/measurements (copy)/Simulation B2 OLD/Optimized LP BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Workspace limitation/Disabled_measurement.txt
+ur3_moveit/src/measurements (copy)/Workspace limitation/Disabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements (copy)/Workspace limitation/Enabled_measurement.txt
+ur3_moveit/src/measurements (copy)/Workspace limitation/Enabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/1 Initial settings/_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/2 Points subsample/150_measurement.txt
+ur3_moveit/src/measurements main/2 Points subsample/150_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/3 Workspace limitation/Disabled_measurement.txt
+ur3_moveit/src/measurements main/3 Workspace limitation/Disabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Collision mesh/Low poly_measurement.txt
+ur3_moveit/src/measurements main/Collision mesh/Low poly_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Goal joint tolerance/0.01_measurement.txt
+ur3_moveit/src/measurements main/Goal joint tolerance/0.01_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Kinematics solver/UR3Kinematics_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Kinematics solver/UR3KinematicsPlugin_measurement.txt
+ur3_moveit/src/measurements main/Longest valid segment fraction/0.0005_measurement.txt
+ur3_moveit/src/measurements main/Longest valid segment fraction/0.0005_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Max update rate/6_measurement.txt
+ur3_moveit/src/measurements main/Max update rate/6_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Octomap resolution/0.005_measurement.txt
+ur3_moveit/src/measurements main/Octomap resolution/0.005_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Path simplification/Disabled_measurement.txt
+ur3_moveit/src/measurements main/Path simplification/Disabled_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/BiEST_measurement.txt
+ur3_moveit/src/measurements main/Planner/BiEST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/BiTRRT_measurement.txt
+ur3_moveit/src/measurements main/Planner/BiTRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/BKPIECE_measurement.txt
+ur3_moveit/src/measurements main/Planner/BKPIECE_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/EST_measurement.txt
+ur3_moveit/src/measurements main/Planner/EST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/FMT_measurement.txt
+ur3_moveit/src/measurements main/Planner/FMT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/KPIECE_measurement.txt
+ur3_moveit/src/measurements main/Planner/KPIECE_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/LazyPRM_measurement.txt
+ur3_moveit/src/measurements main/Planner/LazyPRM_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/LazyPRMstar_measurement.txt
+ur3_moveit/src/measurements main/Planner/LazyPRMstar_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/LBKPIECE_measurement.txt
+ur3_moveit/src/measurements main/Planner/LBKPIECE_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/PDST_measurement.txt
+ur3_moveit/src/measurements main/Planner/PDST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/PRM_measurement.txt
+ur3_moveit/src/measurements main/Planner/PRM_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/PRMstar_measurement.txt
+ur3_moveit/src/measurements main/Planner/PRMstar_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/ProjEST_measurement.txt
+ur3_moveit/src/measurements main/Planner/ProjEST_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/RRT_measurement.txt
+ur3_moveit/src/measurements main/Planner/RRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/RRTConnect_measurement.txt
+ur3_moveit/src/measurements main/Planner/RRTConnect_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/RRTstar_measurement.txt
+ur3_moveit/src/measurements main/Planner/RRTstar_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/SBL_measurement.txt
+ur3_moveit/src/measurements main/Planner/SBL_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/SPARS_measurement.txt
+ur3_moveit/src/measurements main/Planner/SPARS_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/SPARStwo_measurement.txt
+ur3_moveit/src/measurements main/Planner/SPARStwo_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/STRIDE_measurement.txt
+ur3_moveit/src/measurements main/Planner/STRIDE_short_successful_attempts_measurement.txt
+ur3_moveit/src/measurements main/Planner/TRRT_measurement.txt
+ur3_moveit/src/measurements main/Planner/TRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/Relative performance change.png
+ur3_moveit/src/Relative performances - Obstacle 1 (Real robot).png
+ur3_moveit/src/Relative values.png
+ur3_moveit/src/Relative performance change.png
+ur3_moveit/src/Relative values.png

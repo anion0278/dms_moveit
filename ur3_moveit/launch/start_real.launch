@@ -4,11 +4,11 @@
 
   <!-- Octomap and sensors settings -->
   <param name="move_group/octomap_resolution" type="double" value="0.02" />
-  <rosparam ns="move_group" command="load" file="$(find ur3_moveit)/config/sensors_3d.yaml" />
+  <rosparam ns="/move_group" command="load" file="$(find ur3_moveit)/config/sensors_3d.yaml" />
+  <param name="/point_subsample" type="int" value="1" />
+  <param name="/move_group/manipulator/longest_valid_segment_fraction" type="double" value="0.005" />
 
   <!-- Planners -->
-  <arg name="segment_fraction" default="0.005"/>
-  <param name="move_group/manipulator/longest_valid_segment_fraction" type="double" value="$(arg segment_fraction)" />
   <!-- <param name="move_group/ompl/simplify_solutions" value="true" /> -->
 
   <!-- duplication !!! See start_sim  -->

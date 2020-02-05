@@ -2,36 +2,38 @@
 <launch>
   <!-- Octomap and sensors settings -->
   <arg name="octomap_resolution" default="0.02"/>
-  <param name="move_group/octomap_resolution" type="double" value="$(arg octomap_resolution)" />
-  <!-- check if NONE !!!! -->
-  <!-- <rosparam ns="move_group" command="load" file="$(find ur3_moveit)/config/sensors_3d.yaml" /> -->
-
-  <!-- Planners -->
+  <param name="/move_group/octomap_resolution" type="double" value="$(arg octomap_resolution)" />
+  <param name="/point_subsample" type="int" value="1" />
+  <rosparam ns="/move_group" command="load" file="$(find ur3_moveit)/config/sensors_3d.yaml" />
   <arg name="segment_fraction" default="0.005"/>
-  <param name="move_group/manipulator/longest_valid_segment_fraction" type="double" value="$(arg segment_fraction)" />
+  <param name="/move_group/manipulator/longest_valid_segment_fraction" type="double" value="$(arg segment_fraction)" />
+
   <param name="move_group/ompl/simplify_solutions" value="true" />
 
   <!-- Simulation -->
   <arg name="spawn_obstacle" default="false"/>
-  <arg name="sim_paused" default="false"/>
+  <arg name="spawn_obstacle_2" default="false"/>
+  <arg name="spawn_obstacle_3" default="false"/>
+  <arg name="spawn_obstacle_4" default="false"/>
+  <arg name="sim_paused" default="true"/>
 
   <arg name="xacro_file_name" default="ur3.xacro"/>
   <arg name="xacro_path" default="$(find ur3_description)/urdf/$(arg xacro_file_name)"/>
 
   <!-- startup simulated world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" default="worlds/empty.world"/>
+    <arg name="world_name" default="worlds/empty_adjusted.world"/>
     <arg name="paused" value="$(arg sim_paused)"/>
     <arg name="gui" value="true"/>
+    <arg name="verbose" value="true" />
   </include>
 
   <param name="robot_description" command="xacro --inorder '$(arg xacro_path)'" />
-  <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -x 0 -y 0 -z 0" respawn="false" output="screen" />
+  <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -x 0 -y 0 -z 0  -J shoulder_lift_joint -1.57 -unpause" respawn="false" output="screen" />
 
   <include file="$(find ur3_moveit)/launch/ros_controllers.launch"/>
   <include file="$(find ur_gazebo)/launch/controller_utils.launch"/>
 
-  <!-- start simulated arm controller -->
   <rosparam file="$(find ur_gazebo)/controller/arm_controller_ur3.yaml" command="load"/>
   <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
   <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load joint_group_position_controller" />
@@ -48,6 +50,17 @@
       <arg name="y" value="0.4" />
       <arg name="z" value="0.63" />
       <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/beer/model.sdf" />
+    </include>
+  </group>
+
+  <group if="$(arg spawn_obstacle_2)">
+    <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
+      <arg name="model_name" value="obstacle" />
+      <arg name="x" value="0.47" />
+      <arg name="y" value="0.16" />
+      <arg name="z" value="0.65" />
+      <arg name="yaw" value="-0.35" />
+      <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/box/model.sdf" />
     </include>
   </group>
 

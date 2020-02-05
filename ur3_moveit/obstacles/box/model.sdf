@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
-  <model name="beer">
+  <model name="boxNew">
     <!-- <static>true</static> -->
     <link name="link">
       <gravity>0</gravity>
@@ -18,21 +18,19 @@
       </inertial>
       <collision name="collision">
         <geometry>
-          <cylinder>
-            <radius>0.055000</radius>
-            <length>0.230000</length>
-          </cylinder>
+          <box>
+            <size>0.14 0.07 0.2</size>
+          </box>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
-          <cylinder>
-            <radius>0.055000</radius>
-            <length>0.230000</length>
-          </cylinder>
+          <box>
+            <size>0.14 0.07 0.2</size>
+          </box>
         </geometry>
         <material>
-          <diffuse>0.0 1.0 0.0 1.0</diffuse>
+          <diffuse>0.0 0.0 1.0 1.0</diffuse>
         </material>
       </visual>
     </link>

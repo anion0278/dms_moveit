@@ -1,0 +1,40 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/stefan/ws_moveit/devel/include/**",
+                "/home/stefan/catkin_ws/devel/include/**",
+                "/opt/ros/kinetic/include/**",
+                "/home/stefan/ws_moveit/src/moveit/moveit_planners/chomp/chomp_motion_planner/include/**",
+                "/home/stefan/catkin_ws/src/cpp_debug/include/**",
+                "/home/stefan/ws_moveit/src/geometric_shapes/include/**",
+                "/home/stefan/ws_moveit/src/moveit/moveit_experimental/moveit_jog_arm/include/**",
+                "/home/stefan/ws_moveit/src/moveit/moveit_planners/chomp/chomp_interface/include/**",
+                "/home/stefan/ws_moveit/src/moveit/moveit_ros/benchmarks/include/**",
+                "/home/stefan/ws_moveit/src/moveit/moveit_plugins/moveit_ros_control_interface/include/**",
+                "/home/stefan/ws_moveit/src/moveit/moveit_ros/move_group/include/**",
+                "/home/stefan/ws_moveit/src/moveit/moveit_ros/occupancy_map_monitor/include/**",
+                "/home/stefan/ws_moveit/src/moveit/moveit_ros/robot_interaction/include/**",
+                "/home/stefan/ws_moveit/src/moveit/moveit_setup_assistant/include/**",
+                "/home/stefan/ws_moveit/src/moveit/moveit_plugins/moveit_simple_controller_manager/include/**",
+                "/home/stefan/ws_moveit/src/moveit_visual_tools/include/**",
+                "/home/stefan/catkin_ws/src/realsense-ros/realsense2_camera/include/**",
+                "/home/stefan/ws_moveit/src/rviz_visual_tools/include/**",
+                "/home/stefan/ws_moveit/src/moveit/moveit_planners/sbpl/core/sbpl_interface/include/**",
+                "/home/stefan/catkin_ws/src/universal_robot/ur_kinematics/include/**",
+                "/home/stefan/catkin_ws/src/ur_modern_driver/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

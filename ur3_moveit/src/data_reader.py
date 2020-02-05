@@ -11,7 +11,7 @@ import collections
 
 
 successful_attempts_name = "_short_successful_attempts_measurement.txt"
-
+value_separator = ": "
 
 class PointMeasurementResult:
     def __init__(self, point_name, plan_time, execution_time):
@@ -151,15 +151,15 @@ class MeasurementsReader:
         return self.__get_point_stat_dict(lambda variant: variant.get_average_execution_time_for_point(point_num), lambda average: average != 0)
 
     def get_success_statistics(self):
-        return self.__get_point_stat_dict(lambda x: x.success_rate * 100)
+        return self.__get_point_stat_dict(lambda x: x.success_rate * 100, lambda average: average != 0)
 
     def __get_point_stat_dict(self, value_getter, validation = None):
         measuremetns_by_param_names = collections.OrderedDict()
         for param in self.all_parameters_measured:
             for param_variant in param.variant_measurements:
-                name_base = param.param_name + "\n " + param_variant.param_value
+                name_base = param.param_name + value_separator + param_variant.param_value
                 variant_meas = value_getter(param_variant)
-                if (not self.is_planning_fast(param_variant)): continue
+                # if (not self.is_planning_fast(param_variant)): continue
                 if ( validation == None or (validation != None and validation(variant_meas))):
                     measuremetns_by_param_names[name_base] = variant_meas
         return measuremetns_by_param_names
