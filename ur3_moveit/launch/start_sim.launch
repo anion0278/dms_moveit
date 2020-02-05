@@ -64,4 +64,24 @@
     </include>
   </group>
 
+  <group if="$(arg spawn_obstacle_3)">
+    <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
+      <arg name="model_name" value="obstacle" />
+      <arg name="x" value="0.35" />
+      <arg name="y" value="0.35" />
+      <arg name="z" value="0.63" />
+      <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/beer/model.sdf" />
+    </include>
+  </group>
+
+  <group if="$(arg spawn_obstacle_4)">
+    <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
+      <arg name="model_name" value="obstacle" />
+      <arg name="x" value="0.4" />
+      <arg name="y" value="0.23" />
+      <arg name="z" value="0.65" />
+      <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/beer/model.sdf" />
+    </include>
+  </group>
+
 </launch>
