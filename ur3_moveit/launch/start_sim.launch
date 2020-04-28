@@ -1,28 +1,25 @@
 <?xml version="1.0"?>
 <launch>
   <!-- Octomap and sensors settings -->
-  <arg name="octomap_resolution" default="0.02"/>
-  <param name="/move_group/octomap_resolution" type="double" value="$(arg octomap_resolution)" />
-  <param name="/point_subsample" type="int" value="1" />
+  <param name="/move_group/octomap_resolution" type="double" value="0.035" />
   <rosparam ns="/move_group" command="load" file="$(find ur3_moveit)/config/sensors_3d.yaml" />
-  <arg name="segment_fraction" default="0.005"/>
-  <param name="/move_group/manipulator/longest_valid_segment_fraction" type="double" value="$(arg segment_fraction)" />
-
-  <param name="move_group/ompl/simplify_solutions" value="true" />
+  <param name="/move_group/manipulator/longest_valid_segment_fraction" type="double" value="0.006" />
+  <param name="/move_group/ompl/simplify_solutions" value="true" />
 
   <!-- Simulation -->
-  <arg name="spawn_obstacle" default="false"/>
+  <arg name="spawn_obstacle" default="true"/>
   <arg name="spawn_obstacle_2" default="false"/>
   <arg name="spawn_obstacle_3" default="false"/>
   <arg name="spawn_obstacle_4" default="false"/>
   <arg name="sim_paused" default="true"/>
 
-  <arg name="xacro_file_name" default="ur3.xacro"/>
+  <arg name="xacro_file_name" default="ur3_multicam.xacro"/>
   <arg name="xacro_path" default="$(find ur3_description)/urdf/$(arg xacro_file_name)"/>
 
   <!-- startup simulated world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" default="worlds/empty_adjusted.world"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="world_name" default="worlds/empty.world"/>
     <arg name="paused" value="$(arg sim_paused)"/>
     <arg name="gui" value="true"/>
     <arg name="verbose" value="true" />

@@ -1,7 +1,7 @@
-<robot name="ur3_workplace" 
+<robot name="ur3_workplacess" 
   xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find ur3_description)/urdf/ur3.xacro" />
+  <xacro:include filename="$(find ur3_description)/urdf/ur3_workspace_limitation.xacro" />
 
   <depth_camera name="camera2" />
   <joint name="table_to_camera2" type="fixed">

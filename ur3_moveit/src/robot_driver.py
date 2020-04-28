@@ -26,12 +26,13 @@ group_name = "manipulator"
 clear_octomap_service = "/clear_octomap"
 state_validity_service = "/check_state_validity"
 
+speed = 0.5
+
 
 class NamedJointPose():
     def __init__(self, joint_angles, name):
         self.pose = joint_angles
         self.name = name
-
 
 class NamedPointPose():
     def __init__(self, pose, name):
@@ -98,12 +99,21 @@ def set_dynamic_params(params):
 class RobotDriver:
     def __init__(self):
         # self._base_pub = rospy.Publisher('/cartpole_v0/foot_joint_velocity_controller/command', Float64, queue_size=1)
+        print(moveit_commander.__file__)
+
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node('robot_python_driver', anonymous=True)
 
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface()
         self.move_group = moveit_commander.MoveGroupCommander(group_name)
+
+        self.move_group.allow_replanning(False)
+        self.move_group.set_num_planning_attempts(20)
+
+        # this is needed in melodic(for some reason), otherwise the robot moves superslowly
+        self.move_group.set_max_velocity_scaling_factor(speed)
+        self.move_group.set_max_acceleration_scaling_factor(speed)
 
         rospy.wait_for_service(clear_octomap_service)
         self.__clear_octomap_service = rospy.ServiceProxy(clear_octomap_service, Empty)
@@ -128,9 +138,12 @@ class RobotDriver:
 
     def move_to_pose(self, target):
         self.set_target_pose(target)
-        success = self.perform_planning()
-        success = self.execute_planned_sync() and success
+        if not self.perform_planning(): return False
+        success = self.execute_planned_sync()
         return success
+
+    def get_pose(self):
+        return self.move_group.get_current_joint_values()
 
     def set_target_pose(self, target):
         if (isinstance(target, str)):
@@ -144,7 +157,7 @@ class RobotDriver:
 
     def perform_planning(self):
         plan = self.move_group.plan()
-        success = plan[0]
+        success = plan[0] # moveit python API has changed
         if (not success):
             print("Could not plan the movement!")  # Plan: " + str(plan)
         return success
@@ -172,81 +185,7 @@ class RobotDriver:
             self.__move_from_A_to_B()
         self.move_home()
 
-
-# def move_joints(self, joints_array):
-#     joint_value = Float64()
-#     joint_value.data = joints_array[0]
-#     rospy.logdebug("Single Base JointsPos>>"+str(joint_value))
-#     self._base_pub.publish(joint_value)
-
-# def reset_controllers(self):
-#     """
-#     We turn on and off the given controllers
-#     :param controllers_reset: ["name_controler_1", "name_controller2",...,"name_controller_n"]
-#     :return:
-#     """
-#     reset_result = False
-
-#     result_off_ok = self.switch_controllers(controllers_on = [],
-#                             controllers_off = self.controllers_list)
-
-#     rospy.logdebug("Deactivated Controlers")
-
-#     if result_off_ok:
-#         rospy.logdebug("Activating Controlers")
-#         result_on_ok = self.switch_controllers(controllers_on=self.controllers_list,
-#                                                 controllers_off=[])
-#         if result_on_ok:
-#             rospy.logdebug("Controllers Reseted==>"+str(self.controllers_list))
-#             reset_result = True
-#         else:
-#             rospy.logdebug("result_on_ok==>" + str(result_on_ok))
-#     else:
-#         rospy.logdebug("result_off_ok==>" + str(result_off_ok))
-
-#     return reset_result
-
 if __name__ == "__main__":
 
-
-    # rospy.wait_for_service('/controller_manager/switch_controller')
-
-    # switch_controller = rospy.ServiceProxy(
-    #                    '/controller_manager/switch_controller', SwitchController)
-
-
-    # switch_service = rospy.ServiceProxy('/controller_manager/switch_controller', SwitchController)
-
-    # switch_request_object = SwitchControllerRequest()
-    # switch_request_object.start_controllers = ['arm_controller', 'joint_state_controller']
-    # switch_request_object.stop_controllers =  []#['arm_controller', 'joint_state_controller', 'joint_group_position_controller']
-    # switch_request_object.strictness = 1
-
-    # switch_result = switch_service(switch_request_object)
-########################
-    # msg = SwitchController()
-    # msg.start_controllers = ['arm_controller']
-    # msg.stop_controllers = []
-    # msg.strictness = 1
-    # msg = SwitchController(start_controllers = [], stop_controllers=['arm_controller', 'joint_state_controller'], strictness = 1)
-    # ret = switch_controller([], ['joint_state_controller'], 1)
-############################
-    # ros_process.start_roscore()
-    # octomap_res = 0.02
-    # point_subs = 1
-    # segment = 0.005
-    
-    # planner = "BiTRRT"
-    # set_dynamic_params([octomap_res, point_subs, segment])
-    # gazebo_sim = ros_process.Environment(
-    #     is_obstacle_present=True,
-    #     is_workspace_limited=True,
-    #     is_simulated=True
-    #     )
-    # gazebo_sim.start()
     robot_driver = RobotDriver()
-
-    # robot_driver.move_group.forget_joint_values("manipulator")
-    robot_driver.execute_cyclic_movement(10)
-
-    # ros_process.close_roscore()
+    robot_driver.execute_cyclic_movement(50)
