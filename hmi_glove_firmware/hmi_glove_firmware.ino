@@ -1,35 +1,24 @@
-/*********************************************************************
- This is an example for our nRF52 based Bluefruit LE modules
-
- Pick one up today in the adafruit shop!
-
- Adafruit invests time and resources providing this open source code,
- please support Adafruit and open-source hardware by purchasing
- products from Adafruit!
-
- MIT license, check LICENSE for more information
- All text above, and the splash screen below must be included in
- any redistribution
-*********************************************************************/
 #include <bluefruit.h>
 #include <Adafruit_LittleFS.h>
 #include <InternalFileSystem.h>
+#include <Firmata.h>
 
-// BLE Service
 BLEDfu  bledfu;  // OTA DFU service
 BLEDis  bledis;  // device information
 BLEUart bleuart; // uart over ble
 BLEBas  blebas;  // battery
 
-String inputString = ""; 
+String inputString = "";
+String recieved = "recieved";
+int currentSpeed = 0;
 
 void setup()
 {
-  Serial.begin(115200);
-//  while ( !Serial ) delay(10);   // for nrf52840 with native usb
+  SetupMotors();
+  SetAllMotorsSpeed(0);
   
-  Serial.println("Bluefruit52 BLEUART Example");
-  Serial.println("---------------------------\n");
+  Serial.begin(115200);
+  Serial.println("-------------- START -------------\n");
 
   // Setup the BLE LED to be enabled on CONNECT
   // Note: This is actually the default behaviour, but provided
@@ -41,9 +30,9 @@ void setup()
   // Note: All config***() function must be called before begin()
   Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
 
-  Bluefruit.begin(1, 0); // only 1 Central connection!!!! 0 Periferal
+  Bluefruit.begin();
   Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
-  Bluefruit.setName("Bluefruit52");
+  Bluefruit.setName("HMI Glove Left");
   //Bluefruit.setName(getMcuUniqueID()); // useful testing with multiple central connections
   Bluefruit.Central.setConnectCallback(connect_callback);
   Bluefruit.Central.setDisconnectCallback(disconnect_callback);
@@ -63,11 +52,21 @@ void setup()
   blebas.begin();
   blebas.write(100);
 
-  // Set up and start advertising
   startAdv();
 
-  Serial.println("Please use Adafruit's Bluefruit LE app to connect in UART mode");
-  Serial.println("Once connected, enter character(s) that you wish to send");
+  Serial.println("Connect using Python app");
+}
+
+void SetupMotors()
+{
+  pinMode(PIN_A0, OUTPUT);
+  pinMode(PIN_A1, OUTPUT);
+  pinMode(PIN_A2, OUTPUT);
+  pinMode(PIN_A3, OUTPUT);
+  Firmata.setPinMode(PIN_A0, PIN_MODE_PWM);
+  Firmata.setPinMode(PIN_A1, PIN_MODE_PWM);
+  Firmata.setPinMode(PIN_A2, PIN_MODE_PWM);
+  Firmata.setPinMode(PIN_A3, PIN_MODE_PWM);
 }
 
 void startAdv(void)
@@ -94,24 +93,12 @@ void startAdv(void)
    */
   Bluefruit.Advertising.restartOnDisconnect(true);
   Bluefruit.Advertising.setInterval(32, 244);    // in unit of 0.625 ms
-  Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
+  Bluefruit.Advertising.setFastTimeout(9999);      // number of seconds in fast mode
   Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds  
 }
 
 void loop()
 {
-  // Forward data from HW Serial to BLEUART
-//  while (Serial.available())
-//  {
-//    // Delay to wait for enough input, since we have a limited transmission buffer
-//    delay(2);
-//
-//    uint8_t buf[64];
-//    int count = Serial.readBytes(buf, sizeof(buf));
-//    bleuart.write( buf, count );
-//  }
-
-  // Forward from BLEUART to HW Serial
   inputString = "";
   int len = 0;
   while ( bleuart.available() )
@@ -121,21 +108,45 @@ void loop()
     inputString += inChar;
     if (inChar == '\n')
     {
-      uint8_t buf[64];
-      inputString.getBytes(buf, len);
-      bleuart.write( buf, len );
-      Serial.println(inputString);
+      if ( inputString.charAt(0) == 'C' )
+      {
+        currentSpeed = ParseSpeed(inputString, 1);
+        Serial.print("Speed changed: ");
+        Serial.println(currentSpeed);
+        SetAllMotorsSpeed(currentSpeed);
+        //uint8_t buf[64];
+        //recieved.getBytes(buf, 8);
+        //bleuart.write( buf, 8 );
+      }
+      inputString = "";
     }
-    
   }
 }
 
-// callback invoked when central connects
+void SetAllMotorsSpeed(int speed)
+{
+  analogWrite(PIN_A0, 255 - speed);
+  analogWrite(PIN_A1, 255 - speed);
+  analogWrite(PIN_A2, 255 - speed);
+  analogWrite(PIN_A3, 255 - speed);
+}
+
+int ParseSpeed(String message, byte pos_byte)
+{
+  char speed_chars[3];
+  for (int i = 0; i < 3; i++)
+  {
+    speed_chars[i] = message.charAt(pos_byte + i);
+  }
+  return atoi(speed_chars);
+}
+
 void connect_callback(uint16_t conn_handle)
 {
   // Get the reference to current connection
   BLEConnection* connection = Bluefruit.Connection(conn_handle);
 
+  SetAllMotorsSpeed(0);
   char central_name[32] = { 0 };
   connection->getPeerName(central_name, sizeof(central_name));
 
@@ -143,16 +154,14 @@ void connect_callback(uint16_t conn_handle)
   Serial.println(central_name);
 }
 
-/**
- * Callback invoked when a connection is dropped
- * @param conn_handle connection where this event happens
- * @param reason is a BLE_HCI_STATUS_CODE which can be found in ble_hci.h
- */
+// @param reason is a BLE_HCI_STATUS_CODE which can be found in ble_hci.h
 void disconnect_callback(uint16_t conn_handle, uint8_t reason)
 {
   (void) conn_handle;
   (void) reason;
+  SetAllMotorsSpeed(0);
 
   Serial.println();
-  Serial.print("Disconnected, reason = 0x"); Serial.println(reason, HEX);
+  Serial.print("Disconnected, reason = 0x"); 
+  Serial.println(reason, HEX);
 }
