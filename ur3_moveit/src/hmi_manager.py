@@ -5,6 +5,25 @@ from Adafruit_BluefruitLE.services import UART
 from datetime import datetime
 import rospy
 import numpy as np
+import sys
+import signal
+import atexit
+import os
+
+os.setpgrp()
+
+adapter = None
+global device
+device = None
+
+def on_exit():
+    print("Disconnecting... *It is possible to set lower timeout*")
+    from Adafruit_BluefruitLE.services import UART
+    #try:
+    UART.disconnect_devices()
+    #except:
+    #    pass # nevermind
+
 
 # Get the BLE provider for the current platform.
 ble = Adafruit_BluefruitLE.get_provider()
@@ -55,7 +74,7 @@ def main():
     print("Connecting to device...")
     device.connect()  # Will time out after 60 seconds, specify timeout_sec parameter
                     # to change the timeout.
-
+    atexit.register(on_exit)
     # Once connected do everything else in a try/finally to make sure the device
     # is disconnected when done.
     try:
@@ -98,7 +117,6 @@ def main():
     finally:
         # Make sure device is disconnected on exit.
         device.disconnect()
-
 
 # Initialize the BLE system.  MUST be called before other BLE calls!
 ble.initialize()
