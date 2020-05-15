@@ -26,7 +26,6 @@ group_name = "manipulator"
 clear_octomap_service = "/clear_octomap"
 state_validity_service = "/check_state_validity"
 
-speed = 0.5
 
 
 class NamedJointPose():
@@ -97,7 +96,7 @@ def set_dynamic_params(params):
 
 
 class RobotDriver:
-    def __init__(self):
+    def __init__(self, total_speed = 1.0, total_acc = 1.0):
         # self._base_pub = rospy.Publisher('/cartpole_v0/foot_joint_velocity_controller/command', Float64, queue_size=1)
         print(moveit_commander.__file__)
 
@@ -110,10 +109,11 @@ class RobotDriver:
 
         self.move_group.allow_replanning(False)
         self.move_group.set_num_planning_attempts(20)
+        #self.move_group.set_planner_id("RRTConnect")
 
         # this is needed in melodic(for some reason), otherwise the robot moves superslowly
-        self.move_group.set_max_velocity_scaling_factor(speed)
-        self.move_group.set_max_acceleration_scaling_factor(speed)
+        self.move_group.set_max_velocity_scaling_factor(total_speed)
+        self.move_group.set_max_acceleration_scaling_factor(total_acc)
 
         rospy.wait_for_service(clear_octomap_service)
         self.__clear_octomap_service = rospy.ServiceProxy(clear_octomap_service, Empty)

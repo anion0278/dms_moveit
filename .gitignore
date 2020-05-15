@@ -882,3 +882,6 @@ ur3_moveit/src/Relative performances - Obstacle 1 (Real robot).png
 ur3_moveit/src/Relative values.png
 ur3_moveit/src/Relative performance change.png
 ur3_moveit/src/Relative values.png
+ur3_moveit/src/robot_driver.pyc
+ur3_moveit/src/ros_process.pyc
+ur3_moveit/src/timeout.pyc

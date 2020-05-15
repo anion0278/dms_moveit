@@ -43,10 +43,11 @@
   <group if="$(arg spawn_obstacle)">
     <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
       <arg name="model_name" value="obstacle" />
-      <arg name="x" value="0.3" />
-      <arg name="y" value="0.4" />
-      <arg name="z" value="0.63" />
-      <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/beer/model.sdf" />
+      <arg name="x" value="0.4" />
+      <arg name="y" value="0.40" />
+      <arg name="z" value="0.9" />
+      <arg name="yaw" value="0.785398" />
+      <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/hand/model.sdf" />
     </include>
   </group>
 
