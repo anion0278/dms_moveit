@@ -8,7 +8,6 @@
   </node>
 
   <include file="$(find ur3_moveit)/launch/move_group.launch">
-
     <arg name="controllers_definition" value="real_controllers.yaml" />
   </include>
 

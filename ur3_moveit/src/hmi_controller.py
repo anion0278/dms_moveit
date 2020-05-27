@@ -26,12 +26,6 @@ class HmiController():
     def get_speed(self):
         return rospy.get_param(self.param_name)
 
-    def start(self):
-        self.ble = Adafruit_BluefruitLE.get_provider()
-        self.ble.initialize()
-        
-        self.ble.run_mainloop_with(self.__mainloop)
-
     def send_speed_command(self, speed):
         speed_text = str(int(speed)).zfill(3)
         self.send_text("C{}\r\n".format(speed_text))
@@ -41,7 +35,14 @@ class HmiController():
         print(self.__get_time() + " Sent:" + text)
         self.uart.write(text)
 
+    def start(self):
+        self.ble = Adafruit_BluefruitLE.get_provider()
+        self.ble.initialize()
+        self.ble.run_mainloop_with(self.__mainloop)
+
     def __mainloop(self):
+        rospy.set_param(self.param_name, 0)
+        rospy.set_param("/move_group/collision/min_clearance", self.clearance_min)
         atexit.register(self.__on_exit)
 
         self.ble.clear_cached_data()
@@ -72,6 +73,11 @@ class HmiController():
 
         self.uart = UART(device, receive_callback=self.__on_data_recieved)
 
+        self.send_speed_command(0)
+
+        # TODO VIBRATION should be proportional to the distance to the future trajectory AND !
+        # AND proportional to the distance to the robot - if the user is in the path of trajectory, 
+        # then he still has time to react, no need to vibrate intesivelly
         # TODO refactoring
         while True:
             hmi_command = self.get_speed()

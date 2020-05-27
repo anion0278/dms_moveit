@@ -47,7 +47,7 @@
       <arg name="y" value="0.40" />
       <arg name="z" value="0.9" />
       <arg name="yaw" value="0.785398" />
-      <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/hand/model.sdf" />
+      <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/hand_right/model.sdf" />
     </include>
   </group>
 

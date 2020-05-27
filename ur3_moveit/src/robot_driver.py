@@ -107,9 +107,9 @@ class RobotDriver:
         self.scene = moveit_commander.PlanningSceneInterface()
         self.move_group = moveit_commander.MoveGroupCommander(group_name)
 
-        self.move_group.allow_replanning(False)
+        self.move_group.allow_replanning(True)
         self.move_group.set_num_planning_attempts(20)
-        #self.move_group.set_planner_id("RRTConnect")
+        self.move_group.set_planner_id("BiTRRT")
 
         # this is needed in melodic(for some reason), otherwise the robot moves superslowly
         self.move_group.set_max_velocity_scaling_factor(total_speed)

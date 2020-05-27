@@ -10,4 +10,11 @@
     <origin xyz="0.94 0.165 0.55" rpy="0 ${pi/6} -${pi}"/>
   </joint>
 
+  <depth_camera name="camera_top" />
+  <joint name="table_to_camera_top" type="fixed">
+    <parent link="table"/>
+    <child link="base_link_camera_top"/>
+    <origin xyz="0.2 0.185 1.2" rpy="0 ${pi/2} -${pi}"/>
+  </joint>
+
 </robot>
