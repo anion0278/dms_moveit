@@ -16,6 +16,8 @@ upper = (hsv_color_base+sensitivity,255,255)
 lower = (hsv_color_base-sensitivity,50,50)
 
 dwn_smpl = 8
+if debug:
+    dwn_smpl = 1
 
 pc_fields = [PointField('x', 0, PointField.FLOAT32, 1),
             PointField('y', 4, PointField.FLOAT32, 1),

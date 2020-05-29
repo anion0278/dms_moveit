@@ -71,7 +71,7 @@ class HmiController():
         print("Discovering services...")
         UART.discover(device, timeout_sec=self.timeouts)
 
-        self.uart = UART(device, receive_callback=self.__on_data_recieved)
+        self.uart = UART(device)
 
         self.send_speed_command(0)
 
@@ -99,8 +99,8 @@ class HmiController():
         else:
             print("Received no data!")
 
-    def __on_data_recieved(self, data):
-        print(self.__get_time() + " Recieved:" + data)
+    #def __on_data_recieved(self, data):
+    #    print(self.__get_time() + " Recieved:" + data)
 
     def __on_exit(self):
         print("Disconnecting... *It is possible to set lower timeout*")
