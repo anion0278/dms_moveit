@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Exec=/home/stefan/catkin_ws/src/dms_moveit/rviz.sh
+Name=Start DMS RViz
+Comment=Start DMS RViz
+Icon=gnome-control-center

@@ -1,0 +1,12 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Icon[en_US]=gnome-panel-launcher
+Name[en_US]=Build MoveIt!
+Comment[en_US]=Build MoveIt!
+Exec=/home/stefan/catkin_ws/src/dms_moveit/moveit_build.sh
+Name=Build MoveIt!
+Comment=Build MoveIt!
+Icon=org.gnome.Software

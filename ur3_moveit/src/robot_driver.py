@@ -13,7 +13,7 @@ from std_msgs.msg import String
 from std_srvs.srv import Empty
 import moveit_msgs.msg
 import geometry_msgs.msg
-from geometry_msgs.msg import Point, Quaternion
+from geometry_msgs.msg import Point, Quaternion, PoseStamped
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
 import timeout
@@ -25,7 +25,6 @@ home_position = "Home"
 group_name = "manipulator"
 clear_octomap_service = "/clear_octomap"
 state_validity_service = "/check_state_validity"
-
 
 
 class NamedJointPose():
@@ -119,6 +118,26 @@ class RobotDriver:
         self.__clear_octomap_service = rospy.ServiceProxy(clear_octomap_service, Empty)
         self.clear_octomap()
 
+        self.create_hmi_obj((0.2, 0.5, 1.0), "hmi_right")
+        self.create_hmi_obj((0.1, 0.2, 0.1), "hmi_left")
+
+    def create_hmi_obj(self, center, name, size = 0.1):
+#         coll_obj = CollisionObject()
+#   coll_obj.header.stamp = rospy.Time(0)
+#   coll_obj.header.frame_id = "/base"
+#   coll_obj.id = "sensor_platform"
+#   coll_obj.operation = CollisionObject.ADD
+#   coll_obj.primitives.append(box)
+#   coll_obj.primitive_poses.append(pose_box)
+#   coll_obj.
+         p = PoseStamped()
+         p.header.frame_id = "camera_top_color_optical_frame"
+         p.pose.position.x = center[0]
+         p.pose.position.y = center[1]
+         p.pose.position.z = center[2]
+         p.pose.orientation = Quaternion(0.1, 0.1, 0.1, 0.1) # any
+         self.scene.add_sphere(name, p, size * 2)
+
     def cleanup(self):
         self.move_group.clear_path_constraints()
         self.move_group.clear_pose_targets()
@@ -186,6 +205,6 @@ class RobotDriver:
         self.move_home()
 
 if __name__ == "__main__":
-
-    robot_driver = RobotDriver()
-    robot_driver.execute_cyclic_movement(50)
+    pass
+    # robot_driver = RobotDriver()
+    # robot_driver.execute_cyclic_movement(50)
