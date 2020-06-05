@@ -99,6 +99,9 @@ class RobotDriver:
         # self._base_pub = rospy.Publisher('/cartpole_v0/foot_joint_velocity_controller/command', Float64, queue_size=1)
         print(moveit_commander.__file__)
 
+        rospy.wait_for_service(clear_octomap_service)
+        time.sleep(1)
+
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node('robot_python_driver', anonymous=True)
 
@@ -106,37 +109,28 @@ class RobotDriver:
         self.scene = moveit_commander.PlanningSceneInterface()
         self.move_group = moveit_commander.MoveGroupCommander(group_name)
 
-        self.move_group.allow_replanning(True)
-        self.move_group.set_num_planning_attempts(20)
+        self.move_group.allow_replanning(False)
+        self.move_group.set_num_planning_attempts(0)
         self.move_group.set_planner_id("BiTRRT")
 
         # this is needed in melodic(for some reason), otherwise the robot moves superslowly
         self.move_group.set_max_velocity_scaling_factor(total_speed)
         self.move_group.set_max_acceleration_scaling_factor(total_acc)
 
-        rospy.wait_for_service(clear_octomap_service)
         self.__clear_octomap_service = rospy.ServiceProxy(clear_octomap_service, Empty)
         self.clear_octomap()
 
-        self.create_hmi_obj((0.2, 0.5, 1.0), "hmi_right")
-        self.create_hmi_obj((0.1, 0.2, 0.1), "hmi_left")
-
-    def create_hmi_obj(self, center, name, size = 0.1):
-#         coll_obj = CollisionObject()
-#   coll_obj.header.stamp = rospy.Time(0)
-#   coll_obj.header.frame_id = "/base"
-#   coll_obj.id = "sensor_platform"
-#   coll_obj.operation = CollisionObject.ADD
-#   coll_obj.primitives.append(box)
-#   coll_obj.primitive_poses.append(pose_box)
-#   coll_obj.
+    def update_hmi_obj(self, center, frame_id, name, size = 0.1):
          p = PoseStamped()
-         p.header.frame_id = "camera_top_color_optical_frame"
+         p.header.frame_id = frame_id
          p.pose.position.x = center[0]
          p.pose.position.y = center[1]
          p.pose.position.z = center[2]
          p.pose.orientation = Quaternion(0.1, 0.1, 0.1, 0.1) # any
          self.scene.add_sphere(name, p, size * 2)
+
+    def remove_hmi_obj(self, name):
+        self.scene.remove_world_object(name)
 
     def cleanup(self):
         self.move_group.clear_path_constraints()

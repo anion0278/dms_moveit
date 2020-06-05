@@ -10,6 +10,10 @@ import signal
 import atexit
 import os
 
+debug = False # TODO ROS param
+
+clearance_param = "/move_group/collision/min_clearance"
+clearance_left_param = clearance_param + "_left" 
 
 class HmiController():
     def __init__(self, rosparam_name = "hmi_value"):
@@ -32,8 +36,9 @@ class HmiController():
         rospy.sleep(rospy.Duration(secs=0, nsecs=500))
 
     def send_text(self, text):
-        print(self.__get_time() + " Sent:" + text)
         self.uart.write(text)
+        if debug:
+            print(self.__get_time() + " Sent:" + text)
 
     def start(self):
         self.ble = Adafruit_BluefruitLE.get_provider()
@@ -42,7 +47,8 @@ class HmiController():
 
     def __mainloop(self):
         rospy.set_param(self.param_name, 0)
-        rospy.set_param("/move_group/collision/min_clearance", self.clearance_min)
+        rospy.set_param(clearance_param, self.clearance_min)
+        rospy.set_param(clearance_left_param, self.clearance_min)
         atexit.register(self.__on_exit)
 
         self.ble.clear_cached_data()
@@ -84,7 +90,10 @@ class HmiController():
             if hmi_command != 0:
                 self.send_speed_command(hmi_command)
             else:
-                clearance_level = rospy.get_param("/move_group/collision/min_clearance")
+                clearance_left_level = rospy.get_param(clearance_left_param)
+                clearance_level = rospy.get_param(clearance_param)
+                if clearance_level < clearance_left_level: # choose the smallest value
+                    clearance_left_level = clearance_level
 
                 if clearance_level < self.clearance_min:
                     vibration_level = (self.max_vib - self.min_vib) * (self.clearance_min - clearance_level) / self.clearance_min + self.min_vib
