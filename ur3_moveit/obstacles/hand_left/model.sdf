@@ -20,7 +20,7 @@
         <geometry>
             <!-- <mesh filename="package://ur3_moveit/obstacles/hand_right/hand_right_low.stl"> -->
             <mesh>
-              <uri>/home/stefan/catkin_ws/src/dms_moveit/ur3_moveit/obstacles/hand_right/hand_right_low.stl</uri>
+              <uri>/home/stefan/catkin_ws/src/dms_moveit/ur3_moveit/obstacles/hand_left/hand_left_low.stl</uri>
               <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
@@ -37,7 +37,7 @@
         <geometry>
           <!-- <mesh filename="package://ur3_moveit/obstacles/hand_right/hand_right_glove.stl"> -->
           <mesh>
-            <uri>/home/stefan/catkin_ws/src/dms_moveit/ur3_moveit/obstacles/hand_right/hand_right_glove.stl</uri>
+            <uri>/home/stefan/catkin_ws/src/dms_moveit/ur3_moveit/obstacles/hand_left/hand_left_glove.stl</uri>
             <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
@@ -49,7 +49,7 @@
         <geometry>
           <!-- <mesh filename="package://ur3_moveit/obstacles/hand_right/forearm_right.stl"> -->
           <mesh>
-            <uri>/home/stefan/catkin_ws/src/dms_moveit/ur3_moveit/obstacles/hand_right/forearm_right.stl</uri>
+            <uri>/home/stefan/catkin_ws/src/dms_moveit/ur3_moveit/obstacles/hand_left/forearm_left.stl</uri>
             <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>

@@ -25,8 +25,6 @@ home_position = "Home"
 group_name = "manipulator"
 clear_octomap_service = "/clear_octomap"
 state_validity_service = "/check_state_validity"
-
-
 class NamedJointPose():
     def __init__(self, joint_angles, name):
         self.pose = joint_angles

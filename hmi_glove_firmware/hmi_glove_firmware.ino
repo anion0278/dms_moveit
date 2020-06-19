@@ -8,9 +8,12 @@ BLEDis  bledis;  // device information
 BLEUart bleuart; // uart over ble
 BLEBas  blebas;  // battery
 
+
+const char* deviceName = "hmi-glove-right";
+//const char* deviceName = "hmi-glove-left";
+
 int ledPin = 17;
 float ledSensitivity = 3.5f;
-const char* deviceName = "HMI Glove Left";
 bool isBleLedActive = true;
 int vibrationMinSpeed = 50;
 
@@ -150,6 +153,7 @@ void disconnect_callback(uint16_t conn_handle, uint8_t reason)
   Serial.println();
   Serial.print("Disconnected, reason = 0x"); 
   Serial.println(reason, HEX);
+  //Bluefruit.disconnect(conn_handle);
 }
 
 void ProcessBleUartData()

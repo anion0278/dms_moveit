@@ -7,11 +7,13 @@
   <param name="/move_group/ompl/simplify_solutions" value="true" />
 
   <!-- Simulation -->
-  <arg name="spawn_obstacle" default="true"/>
-  <arg name="spawn_obstacle_2" default="true"/>
+  <arg name="spawn_left_hand" default="true"/>
+  <arg name="spawn_right_hand" default="true"/>
   <arg name="spawn_obstacle_3" default="false"/>
   <arg name="spawn_obstacle_4" default="false"/>
   <arg name="sim_paused" default="true"/>
+
+  <arg name="enable_both_hmi" default="true"/>
 
   <arg name="xacro_file_name" default="ur3_multicam.xacro"/>
   <arg name="xacro_path" default="$(find ur3_description)/urdf/$(arg xacro_file_name)"/>
@@ -35,34 +37,36 @@
   <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
   <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load joint_group_position_controller" />
   
-  <node name="hmi_controller" pkg="ur3_moveit" type="hmi_controller.py" respawn="false" output="screen" />
-  <node name="hand_recognizer" pkg="ur3_moveit" type="hand_recognizer.py" respawn="false" output="screen" />
-  <node name="total_commander" pkg="ur3_moveit" type="custom_commander.py" respawn="false" output="screen" />
+   <group if="$(arg enable_both_hmi)">
+    <node name="hmi_starter" pkg="ur3_moveit" type="hmi_starter.py" respawn="false" output="screen"/>
+  </group>
+  <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen" />
+  <node name="total_commander" pkg="ur3_moveit" type="system_commander.py" respawn="false" output="screen" args="$(arg enable_both_hmi)" />
 
   <include file="$(find ur3_moveit)/launch/move_group.launch">
     <arg name="controllers_definition" value="controllers.yaml" />
   </include>
 
   <!-- obstacle spawning -->
-  <group if="$(arg spawn_obstacle)">
+  <group if="$(arg spawn_left_hand)">
     <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
       <arg name="model_name" value="left_hand" />
-      <arg name="x" value="0.4" />
-      <arg name="y" value="0.40" />
-      <arg name="z" value="0.9" />
-      <arg name="yaw" value="0.785398" />
-      <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/hand_right/model.sdf" />
-    </include>
-  </group>
-
-  <group if="$(arg spawn_obstacle_2)">
-    <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
-      <arg name="model_name" value="right_hand" />
-      <arg name="x" value="0.2" />
-      <arg name="y" value="0.40" />
+      <arg name="x" value="0.7" />
+      <arg name="y" value="0.5" />
       <arg name="z" value="0.9" />
       <arg name="yaw" value="0.785398" />
       <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/hand_left/model.sdf" />
+    </include>
+  </group>
+
+  <group if="$(arg spawn_right_hand)">
+    <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
+      <arg name="model_name" value="right_hand" />
+      <arg name="x" value="0.4" />
+      <arg name="y" value="0.70" />
+      <arg name="z" value="0.9" />
+      <arg name="yaw" value="0.785398" />
+      <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/hand_right/model.sdf" />
     </include>
   </group>
 
