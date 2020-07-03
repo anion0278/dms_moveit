@@ -11,6 +11,7 @@ import atexit
 from std_srvs.srv import Empty
 import os
 import time
+import config
 
 debug = False  
 
@@ -35,8 +36,8 @@ class HmiController():
         rospy.set_param(rosparam_name, 0)
         self.timeouts = 2
         self.clearance_min = 0.15
-        self.min_vib = 50
-        self.max_vib = 100
+        self.min_vib = config.dist_intensity_min
+        self.max_vib = config.dist_intensity_max
 
     def calc_intensity(self):
         # TODO VIBRATION should be proportional to the distance to the future trajectory AND !
@@ -67,6 +68,7 @@ class HmiController():
         rospy.sleep(rospy.Duration(secs=0, nsecs=500))
 
     def send_text(self, text):
+        # may throw !! check why
         self.uart.write(text)
         if debug:
             print(self.__get_time() + " Sent:" + text)
@@ -108,16 +110,18 @@ class HmiController():
         self.uart = UART(device)
 
         self.__notify_ready()
-        print("Device %s is ready." % self.device_name)
 
         while True:
             vibr_level = self.calc_intensity()
             self.send_speed_command(vibr_level)
+            # temp Debug data
+            rospy.set_param("debug_"+self.node_name, vibr_level)
 
     def __notify_ready(self):
         # service notifying that HMI is ready
         self.ready_service = rospy.Service(self.node_name + "_service", Empty,None)
         self.send_speed_command(0)
+        print("Device %s is ready." % self.device_name)
 
     def read_with_timeout(self, timeout_sec=1):
         received = self.uart.read(timeout_sec=timeout_sec)

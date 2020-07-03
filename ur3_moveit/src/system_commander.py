@@ -3,7 +3,7 @@
 import robot_driver as drive
 import rospy
 import sys
-
+import config
 
 hmi_param = "hmi_value"
 
@@ -69,10 +69,10 @@ class Commander():
         return success
 
     def send_unable_to_plan(self):
-        rospy.set_param(hmi_param, 170)
+        rospy.set_param(hmi_param, config.invalid_goal_intensity)
 
     def send_movement_interrupted(self):
-        rospy.set_param(hmi_param, 130)
+        rospy.set_param(hmi_param, config.replan_intensity)
         rospy.sleep(duration=0.5)
 
     def demo(self):

@@ -901,3 +901,5 @@ ur3_moveit/src/robot_driver.pyc
 ur3_moveit/src/moveit_tester.pyc
 ur3_moveit/src/logger.pyc
 ur3_moveit/src/data_reader.pyc
+ur3_moveit/src/timeline.csv
+timeline.csv

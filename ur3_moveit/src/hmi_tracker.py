@@ -26,10 +26,15 @@ def get_color_range(color_base):
 right_color_range = get_color_range(60)  #green
 left_color_range = get_color_range(15)  #red
 
+right_border_color = (0, 255, 0)
+left_border_color = (0, 0, 255)
+
 blob_min_size = 50
 
 left_hmi = "hmi_left"
 right_hmi = "hmi_right"
+
+camera_name = "camera_top"
 
 dwn_smpl = 8
 if debug:
@@ -62,9 +67,9 @@ def on_data(depth_msg, img_msg):
     left_hand = find_hand(hsv, depth_msg, left_color_range)
 
     if right_hand is not None:
-        display_hand_on_img(img, right_hand, (255, 0, 0))
+        display_hand_on_img(img, right_hand, right_border_color)
     if left_hand is not None:
-        display_hand_on_img(img, left_hand, (0, 0, 255))
+        display_hand_on_img(img, left_hand, left_border_color)
 
     if left_hand is not None or right_hand is not None:
         depth_img = ros_numpy.numpify(depth_msg)
@@ -171,10 +176,10 @@ if __name__ == "__main__":
 
     bridge = CvBridge()
     # rospy.init_node('top_cam_handler')
-    depth_sub = message_filters.Subscriber("/camera_top/depth/color/points",
+    depth_sub = message_filters.Subscriber("/"+camera_name+"/depth/color/points",
                                            PointCloud2,
                                            queue_size=1)
-    camera_sub = message_filters.Subscriber("/camera_top/color/image_raw",
+    camera_sub = message_filters.Subscriber("/"+camera_name+"/color/image_raw",
                                             Image,
                                             queue_size=1)
     sync = message_filters.ApproximateTimeSynchronizer([depth_sub, camera_sub],
