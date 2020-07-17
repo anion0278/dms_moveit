@@ -17,7 +17,10 @@ debug = False
 
 obj_clearance_param = "/move_group/collision/min_clearance"
 
-# TODO Refactoring!!
+class TimedCommand():
+    def __init__(self, intensity, time):
+        self.time = time
+        self.intensity = intensity
 
 class HmiController():
     def __init__(self,
@@ -32,46 +35,26 @@ class HmiController():
         self.device_name = device_name
         self.this_hand_clearance_param = obj_clearance_param + clearance_hand_suffix
         self.second_hand_clearance_param = self.__get_second_hand_name(self.this_hand_clearance_param)
-        self.hmi_command_param = rosparam_name
+        self.hmi_status_param = rosparam_name
         rospy.set_param(rosparam_name, 0)
-        self.timeouts = 2
+        self.timeouts = 1
         self.clearance_min = 0.15
         self.min_vib = config.dist_intensity_min
         self.max_vib = config.dist_intensity_max
 
-    def calc_intensity(self):
-        # TODO VIBRATION should be proportional to the distance to the future trajectory AND !
-        # AND proportional to the distance to the robot - if the user is in the path of trajectory,
-        # then he still has time to react, no need to vibrate intesivelly
-        hmi_command =  rospy.get_param(self.hmi_command_param)
-        if hmi_command != 0:
-            return hmi_command
-        else:
-            this_hand_clearance_level = rospy.get_param(self.this_hand_clearance_param)
-            second_hand_clearance_level = rospy.get_param(self.second_hand_clearance_param)
-            objs_clearance_level = rospy.get_param(obj_clearance_param)
-
-            # choose the smallest value if the smallest value is not the same as for second hand
-            if objs_clearance_level < this_hand_clearance_level and second_hand_clearance_level != objs_clearance_level:  
-                this_hand_clearance_level = objs_clearance_level
-
-            if this_hand_clearance_level < self.clearance_min:
-                vibration_level = (self.max_vib - self.min_vib) * (self.clearance_min -
-                    this_hand_clearance_level) / self.clearance_min + self.min_vib
-                return vibration_level
-            else:
-                return 0
-
     def send_speed_command(self, speed):
+        rospy.set_param("debug_"+self.node_name, speed)
         speed_text = str(int(speed)).zfill(3)
         self.send_text("C{}\r\n".format(speed_text))
         rospy.sleep(rospy.Duration(secs=0, nsecs=500))
 
     def send_text(self, text):
-        # may throw !! check why
-        self.uart.write(text)
-        if debug:
-            print(self.__get_time() + " Sent:" + text)
+        try:
+            self.uart.write(text)
+            if debug:
+                print(self.__get_time() + " Sent:" + text)
+        except Exception as ex:
+            print("SENDING {" + text + "} EXCEPTION: " + ex)
 
     def start(self):
         self.ble = Adafruit_BluefruitLE.get_provider()
@@ -79,7 +62,7 @@ class HmiController():
         self.ble.run_mainloop_with(self.__mainloop)
 
     def __mainloop(self):
-        rospy.set_param(self.hmi_command_param, 0)
+        rospy.set_param(self.hmi_status_param, 0)
         rospy.set_param(obj_clearance_param, self.clearance_min)
         rospy.set_param(self.this_hand_clearance_param, self.clearance_min)
         rospy.set_param(self.second_hand_clearance_param, self.clearance_min)
@@ -111,11 +94,52 @@ class HmiController():
 
         self.__notify_ready()
 
+        time_step = 0.05
+
         while True:
-            vibr_level = self.calc_intensity()
-            self.send_speed_command(vibr_level)
-            # temp Debug data
-            rospy.set_param("debug_"+self.node_name, vibr_level)
+            command = self.calc_intensity()
+            if isinstance(command, TimedCommand):
+                while command.time > 0:
+                    self.send_speed_command(command.intensity)
+                    rospy.sleep(time_step)
+                    command.time = command.time - time_step
+                    new_command = self.calc_intensity()
+                    if (isinstance(new_command, TimedCommand) and new_command.intensity > command.intensity)  or new_command > command.intensity:
+                        if isinstance(new_command, TimedCommand):
+                            self.send_speed_command(new_command.intensity)
+                        else:
+                            self.send_speed_command(new_command)
+                        break
+
+            else:
+                self.send_speed_command(command)
+
+    def calc_intensity(self):
+        # TODO VIBRATION should be proportional to the distance to the future trajectory AND !
+        # AND proportional to the distance to the robot - if the user is in the path of trajectory,
+        # then he still has time to react, no need to vibrate intesivelly. Requires changes in MoveIt!
+        hmi_status_command =  rospy.get_param(self.hmi_status_param)
+        if hmi_status_command != 0:
+            if hmi_status_command == config.status_invalid:
+                return config.invalid_goal_intensity
+
+            if hmi_status_command == config.status_replan:
+                return TimedCommand(config.replan_intensity, 0.3)    
+        else:
+            this_hand_clearance_level = rospy.get_param(self.this_hand_clearance_param)
+            second_hand_clearance_level = rospy.get_param(self.second_hand_clearance_param)
+            objs_clearance_level = rospy.get_param(obj_clearance_param)
+
+            # choose the smallest value if the smallest value is not the same as for second hand
+            if objs_clearance_level < this_hand_clearance_level and second_hand_clearance_level != objs_clearance_level:  
+                this_hand_clearance_level = objs_clearance_level
+
+            if this_hand_clearance_level < self.clearance_min:
+                vibration_level = (self.max_vib - self.min_vib) * (self.clearance_min -
+                    this_hand_clearance_level) / self.clearance_min + self.min_vib
+                return vibration_level
+            else:
+                return 0
 
     def __notify_ready(self):
         # service notifying that HMI is ready

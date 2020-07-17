@@ -11,7 +11,7 @@ import message_filters
 import robot_driver
 import numpy as np
 from scipy.spatial import distance
-import custom_commander as com
+import task_commander as com
 import sys
 
 debug = True

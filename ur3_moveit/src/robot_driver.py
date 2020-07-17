@@ -55,7 +55,7 @@ joint_pose_A = NamedJointPose([-0.45161887833653935,
                                -1.6652095580852606,
                                -1.5501685915793058,
                                1.0543118993180052],
-                              "Joint pose A")
+                              "Pose A")
 
 joint_pose_B = NamedJointPose([1.012419230110138,
                                -0.8036786161659402,
@@ -63,7 +63,7 @@ joint_pose_B = NamedJointPose([1.012419230110138,
                                -1.6316082500996831,
                                -1.5601357714877526,
                                1.3836915426267309],
-                              "Joint pose B")
+                              "Pose B")
 
 
 def restart_moveit_node():
