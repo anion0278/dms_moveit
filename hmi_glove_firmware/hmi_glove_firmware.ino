@@ -3,19 +3,29 @@
 #include <InternalFileSystem.h>
 #include <Firmata.h>
 
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
+
 BLEDfu  bledfu;  // OTA DFU service
 BLEDis  bledis;  // device information
 BLEUart bleuart; // uart over ble
 BLEBas  blebas;  // battery
 
+//                                  I2C id, address
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
-const char* deviceName = "hmi-glove-right";
-//const char* deviceName = "hmi-glove-left";
+//const char* deviceName = "hmi-glove-right";
+const char* deviceName = "hmi-glove-left";
 
 int ledPin = 17;
 float ledSensitivity = 3.5f;
 bool isBleLedActive = true;
 int vibrationMinSpeed = 50;
+
+uint8_t buf[64];
+short digits = 3;
 
 void setup()
 {
@@ -28,7 +38,40 @@ void setup()
 
   StartAdvertisingBle();
 
+  ConnectIMU();
+
   Serial.println("Connect using Python app");
+}
+
+void ConnectIMU()
+{
+  /* Initialise the sensor */
+  if(!bno.begin())
+  {
+    /* There was a problem detecting the BNO055 ... check your connections */
+    Serial.print("No BNO055 detected!");
+    while(1);
+  }
+  delay(1000);
+  /* Use external crystal for better accuracy */
+  bno.setExtCrystalUse(true);  
+  DisplaySensorDetails();
+}
+
+void DisplaySensorDetails(void)
+{
+  sensor_t sensor;
+  bno.getSensor(&sensor);
+  Serial.println("------------------------------------");
+  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
+  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
+  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
+  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" xxx");
+  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" xxx");
+  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
+  Serial.println("------------------------------------");
+  Serial.println("");
+  //delay(500);
 }
 
 void SetupBle()
@@ -173,14 +216,49 @@ void ProcessBleUartData()
         SetAllMotorsSpeed(currentSpeed);
         Serial.print("Speed changed: ");
         Serial.println(currentSpeed);
-        //bleuart.write( buf, 8 );
+      
       }
       inputString = "";
     }
   }
 }
 
+void SendImuData()
+{
+  sensors_event_t event;
+  bno.getEvent(&event);
+
+  Serial.print(F("Orientation: "));
+  Serial.print(360 - (float)event.orientation.x);
+  Serial.print(F(", "));
+  Serial.print((float)event.orientation.y);
+  Serial.print(F(", "));
+  Serial.print((float)event.orientation.z);
+  Serial.println(F("")); 
+
+  imu::Quaternion quat = bno.getQuat();
+
+  uint8_t sys, gyro, accel, mag = 0;
+  bno.getCalibration(&sys, &gyro, &accel, &mag);
+
+  String msg = "Q["+String(quat.w(),digits)+"; "+String(quat.x(),digits)+";"+String(quat.y(),digits)+";"+String(quat.z(),digits)+"]";
+  msg = msg + "-C["+sys+"; "+gyro+";"+accel+";"+mag+"]";
+
+  SendString(msg);
+}
+
+void SendString(String str)
+{
+  str = str + '\n';
+  str.getBytes(buf, str.length());
+  bleuart.write(buf, str.length());
+}
+
+
+
 void loop()
 {
+ 
   ProcessBleUartData();
+  SendImuData();
 }
