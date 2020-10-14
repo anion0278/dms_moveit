@@ -8,13 +8,11 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
+
 BLEDfu  bledfu;  // OTA DFU service
 BLEDis  bledis;  // device information
 BLEUart bleuart; // uart over ble
 BLEBas  blebas;  // battery
-
-//                                  I2C id, address
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 //const char* deviceName = "hmi-glove-right";
 const char* deviceName = "hmi-glove-left";
@@ -27,52 +25,7 @@ int vibrationMinSpeed = 50;
 uint8_t buf[64];
 short digits = 3;
 
-void setup()
-{
-  Serial.begin(115200);
-  Serial.println("-------------- START -------------\n");
-  
-  SetupMotors();
-  SetupPwmPin(ledPin);
-  SetupBle();
-
-  StartAdvertisingBle();
-
-  ConnectIMU();
-
-  Serial.println("Connect using Python app");
-}
-
-void ConnectIMU()
-{
-  /* Initialise the sensor */
-  if(!bno.begin())
-  {
-    /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.print("No BNO055 detected!");
-    while(1);
-  }
-  delay(1000);
-  /* Use external crystal for better accuracy */
-  bno.setExtCrystalUse(true);  
-  DisplaySensorDetails();
-}
-
-void DisplaySensorDetails(void)
-{
-  sensor_t sensor;
-  bno.getSensor(&sensor);
-  Serial.println("------------------------------------");
-  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
-  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
-  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
-  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" xxx");
-  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" xxx");
-  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
-  Serial.println("------------------------------------");
-  Serial.println("");
-  //delay(500);
-}
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 void SetupBle()
 {
@@ -102,6 +55,8 @@ void SetupBle()
   // Start BLE Battery Service
   blebas.begin();
   blebas.write(100);
+
+  Serial.println("BLE OK");
 }
 
 void SetupMotors()
@@ -145,6 +100,7 @@ void StartAdvertisingBle(void)
   Bluefruit.Advertising.setInterval(32, 244);    // in unit of 0.625 ms
   Bluefruit.Advertising.setFastTimeout(9999);      // number of seconds in fast mode
   Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds  
+  Serial.println("Waiting to connect...");
 }
 
 void SetAllMotorsSpeed(int speed)
@@ -212,15 +168,40 @@ void ProcessBleUartData()
     {
       if ( inputString.charAt(0) == 'C' )
       {
-        int currentSpeed = ParseSpeed(inputString, 1);
-        SetAllMotorsSpeed(currentSpeed);
-        Serial.print("Speed changed: ");
-        Serial.println(currentSpeed);
-      
+        if (inputString == "CALIB")
+        {
+          SaveCalibration();
+        }
+        else 
+        {
+          int currentSpeed = ParseSpeed(inputString, 1);
+          SetAllMotorsSpeed(currentSpeed);
+          Serial.print("Speed changed: ");
+          Serial.println(currentSpeed);
+        }
       }
       inputString = "";
     }
   }
+}
+
+//////////////////////////////////////////////////////////////////////// IMU
+
+
+void SetupImu()
+{
+  if(!bno.begin())
+  {
+    Serial.println("No IMU detected!");
+    while(1);
+  }
+  delay(1000);
+
+  bno.setExtCrystalUse(true);  
+  
+  //RestoreImuCalibration();
+
+  Serial.println("IMU OK");
 }
 
 void SendImuData()
@@ -228,6 +209,21 @@ void SendImuData()
   sensors_event_t event;
   bno.getEvent(&event);
 
+  //ShowOrientation(event);
+
+  imu::Quaternion quat = bno.getQuat();
+
+  uint8_t sys, gyro, accel, mag = 0;
+  bno.getCalibration(&sys, &gyro, &accel, &mag);
+
+  String msg = "Q["+String(quat.w(),digits)+"; "+String(quat.x(),digits)+"; "+String(quat.y(),digits)+"; "+String(quat.z(),digits)+"]";
+  msg = msg + "-C["+sys+"; "+gyro+"; "+accel+"; "+mag+"]";
+
+  SendString(msg);
+}
+
+void ShowEuler(sensors_event_t event)
+{
   Serial.print(F("Orientation: "));
   Serial.print(360 - (float)event.orientation.x);
   Serial.print(F(", "));
@@ -235,16 +231,6 @@ void SendImuData()
   Serial.print(F(", "));
   Serial.print((float)event.orientation.z);
   Serial.println(F("")); 
-
-  imu::Quaternion quat = bno.getQuat();
-
-  uint8_t sys, gyro, accel, mag = 0;
-  bno.getCalibration(&sys, &gyro, &accel, &mag);
-
-  String msg = "Q["+String(quat.w(),digits)+"; "+String(quat.x(),digits)+";"+String(quat.y(),digits)+";"+String(quat.z(),digits)+"]";
-  msg = msg + "-C["+sys+"; "+gyro+";"+accel+";"+mag+"]";
-
-  SendString(msg);
 }
 
 void SendString(String str)
@@ -254,7 +240,98 @@ void SendString(String str)
   bleuart.write(buf, str.length());
 }
 
+void RestoreImuCalibration()
+{
+    int eeAddress = 0;
+    long bnoID;
+    bool foundCalib = false;
 
+    //EEPROM.get(eeAddress, bnoID);
+
+    adafruit_bno055_offsets_t calibrationData;
+    sensor_t sensor;
+    
+    bno.getSensor(&sensor);
+    if (bnoID != sensor.sensor_id)
+    {
+        Serial.println("\nNo Calibration Data for this sensor exists in EEPROM");
+        delay(500);
+    }
+    else
+    {
+        Serial.println("\nFound Calibration for this sensor in EEPROM.");
+        eeAddress += sizeof(long);
+        //EEPROM.get(eeAddress, calibrationData);
+
+        DisplayImuOffsets(calibrationData);
+
+        Serial.println("\n\nRestoring Calibration data to the BNO055...");
+        bno.setSensorOffsets(calibrationData);
+
+        Serial.println("\n\nCalibration data loaded into BNO055");
+        foundCalib = true;
+    }
+ }
+
+void SaveCalibration()
+{
+    adafruit_bno055_offsets_t newCalib;
+    bno.getSensorOffsets(newCalib);
+    DisplayImuOffsets(newCalib);
+
+    Serial.println("\n\nStoring calibration data to EEPROM...");
+
+    int eeAddress = 0;
+    //bno.getSensor(&sensor);
+    //bnoID = sensor.sensor_id;
+
+    //EEPROM.put(eeAddress, bnoID);
+
+    eeAddress += sizeof(long);
+    //EEPROM.put(eeAddress, newCalib);
+    Serial.println("Data stored to EEPROM.");
+}
+
+void DisplayImuOffsets(const adafruit_bno055_offsets_t &calibData)
+{
+    Serial.print("Accelerometer: ");
+    Serial.print(calibData.accel_offset_x); Serial.print(" ");
+    Serial.print(calibData.accel_offset_y); Serial.print(" ");
+    Serial.print(calibData.accel_offset_z); Serial.print(" ");
+
+    Serial.print("\nGyro: ");
+    Serial.print(calibData.gyro_offset_x); Serial.print(" ");
+    Serial.print(calibData.gyro_offset_y); Serial.print(" ");
+    Serial.print(calibData.gyro_offset_z); Serial.print(" ");
+
+    Serial.print("\nMag: ");
+    Serial.print(calibData.mag_offset_x); Serial.print(" ");
+    Serial.print(calibData.mag_offset_y); Serial.print(" ");
+    Serial.print(calibData.mag_offset_z); Serial.print(" ");
+
+    Serial.print("\nAccel Radius: ");
+    Serial.print(calibData.accel_radius);
+
+    Serial.print("\nMag Radius: ");
+    Serial.print(calibData.mag_radius);
+}
+
+
+void setup()
+{
+  Serial.begin(115200);
+  Serial.println("-------------- START -------------\n");
+
+  SetupImu();
+  SetupMotors();
+  SetupPwmPin(ledPin);
+  SetupBle();
+
+  Serial.println("Connect using Python app");
+
+  StartAdvertisingBle();
+
+}
 
 void loop()
 {

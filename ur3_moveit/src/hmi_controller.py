@@ -8,9 +8,11 @@ import numpy as np
 import sys
 import signal
 import atexit
+from geometry_msgs.msg import Quaternion
 from std_srvs.srv import Empty
 import os
 import time
+import re
 import config
 
 debug = False  
@@ -21,6 +23,9 @@ class TimedCommand():
     def __init__(self, intensity, time):
         self.time = time
         self.intensity = intensity
+
+def __recieved_callback_1(data):
+    print(data)
 
 class HmiController():
     def __init__(self,
@@ -61,6 +66,17 @@ class HmiController():
         self.ble.initialize()
         self.ble.run_mainloop_with(self.__mainloop)
 
+    @staticmethod
+    def __recieved_callback(data):
+        if len(data) > 15:
+            regex_pattern = "Q\[(-?\d+.\d+); (-?\d+.\d+); (-?\d+.\d+); (-?\d+.\d+)]-C\[(\d); (\d); (\d); (\d)]"
+            m = re.search(regex_pattern, data, re.IGNORECASE)
+            if m: 
+                orientation = Quaternion(m.group(2), m.group(3), m.group(4), m.group(1))
+                calibration = [m.group(5), m.group(6), m.group(7), m.group(8)]
+                pass
+            print(data)
+
     def __mainloop(self):
         rospy.set_param(self.hmi_status_param, 0)
         rospy.set_param(obj_clearance_param, self.clearance_min)
@@ -90,7 +106,7 @@ class HmiController():
 
         print("Discovering services...")
         UART.discover(device, timeout_sec=self.timeouts)
-        self.uart = UART(device)
+        self.uart = UART(device, HmiController.__recieved_callback)
 
         self.__notify_ready()
 
@@ -179,8 +195,8 @@ class HmiController():
 
 
 if __name__ == "__main__":
-    # sys.argv.append("hmi-glove-right")
-    # sys.argv.append("_right")
+    sys.argv.append("hmi-glove-left")
+    sys.argv.append("_left")
     # for arg, i in zip(sys.argv, range(len(sys.argv))):
     #     print("Arg [%s]: %s" % (i, arg))
     hmi = HmiController(sys.argv[1], sys.argv[2])
