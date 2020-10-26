@@ -11,10 +11,11 @@ import os
 def __mainloop():
 
         print("Restarting adapter...")
-                os.system("rfkill block bluetooth")
-                time.sleep(0.5)
-                os.system("rfkill unblock bluetooth")
+        os.system("rfkill block bluetooth")
         time.sleep(0.5)
+        os.system("rfkill unblock bluetooth")
+        time.sleep(0.5)
+        
         print("Disconnecting all BLE devices...")
         ble.clear_cached_data()
         # Get the first available BLE network adapter and make sure it"s powered on.

@@ -101,7 +101,6 @@ class HmiController():
     def __set_initial_orient(self, current_orient):
         zero = [0.0, 0.0, 0.0, 1.0]
         return quaternion_multiply(zero, current_orient)
-       
 
     def __mainloop(self):
         rospy.set_param(self.hmi_status_param, 0)
@@ -207,9 +206,6 @@ class HmiController():
         if "right" in first_hand_name:
             return first_hand_name.replace("right", "left")
         raise AttributeError("Check hand name!")
-
-    #def __on_data_recieved(self, data):
-    #    print(self.__get_time() + " Recieved:" + data)
 
     def __on_exit(self):
         print("Disconnecting... *It is possible to set lower timeout*")
