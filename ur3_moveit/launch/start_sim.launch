@@ -9,7 +9,7 @@
   <!-- Simulation -->
   <arg name="spawn_left_hand" default="true"/>
   <arg name="spawn_right_hand" default="true"/>
-  <arg name="spawn_obstacle_3" default="false"/>
+  <arg name="spawn_cylinder" default="true"/>
   <arg name="spawn_obstacle_4" default="false"/>
   <arg name="sim_paused" default="true"/>
 
@@ -28,6 +28,7 @@
   </include>
 
   <param name="robot_description" command="xacro --inorder '$(arg xacro_path)'" />
+  <!-- -unpause is used to unpause the simulation after setting the robot to init position -->
   <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -x 0 -y 0 -z 0  -J shoulder_lift_joint -1.57 -unpause" respawn="false" output="screen" />
 
   <include file="$(find ur3_moveit)/launch/ros_controllers.launch"/>
@@ -51,10 +52,10 @@
   <group if="$(arg spawn_left_hand)">
     <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
       <arg name="model_name" value="left_hand" />
-      <arg name="x" value="0.7" />
-      <arg name="y" value="0.5" />
-      <arg name="z" value="0.9" />
-      <arg name="yaw" value="0.785398" />
+      <arg name="x" value="0.56" />
+      <arg name="y" value="0.1" />
+      <arg name="z" value="0.58" />
+      <arg name="yaw" value="0.32" />
       <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/hand_left/model.sdf" />
     </include>
   </group>
@@ -62,11 +63,21 @@
   <group if="$(arg spawn_right_hand)">
     <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
       <arg name="model_name" value="right_hand" />
-      <arg name="x" value="0.4" />
-      <arg name="y" value="0.70" />
-      <arg name="z" value="0.9" />
+      <arg name="x" value="0.27" />
+      <arg name="y" value="0.63" />
+      <arg name="z" value="0.65" />
       <arg name="yaw" value="0.785398" />
       <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/hand_right/model.sdf" />
+    </include>
+  </group>
+
+  <group if="$(arg spawn_cylinder)">
+    <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
+      <arg name="model_name" value="obstacle" />
+      <arg name="x" value="0.22" />
+      <arg name="y" value="0.26" />
+      <arg name="z" value="0.63" />
+      <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/cylinder/model.sdf" />
     </include>
   </group>
 

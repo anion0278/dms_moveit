@@ -8,12 +8,15 @@ import numpy as np
 import sys
 import signal
 import atexit
-from geometry_msgs.msg import Quaternion
+from geometry_msgs.msg import Quaternion, PoseStamped
 from std_srvs.srv import Empty
 import os
 import time
 import re
 import config
+from functools import partial
+from tf.transformations import *
+
 
 debug = False  
 
@@ -24,16 +27,16 @@ class TimedCommand():
         self.time = time
         self.intensity = intensity
 
-def __recieved_callback_1(data):
-    print(data)
-
 class HmiController():
     def __init__(self,
                  device_name,
                  clearance_hand_suffix,
-                 rosparam_name="hmi_value"):
+                 rosparam_name="hmi_value"): # TODO PUT INTO CONFIG EVERYWHERE!!!
         self.node_name = device_name.replace("-", "_")
         rospy.init_node(self.node_name)
+        self.orient_pub = rospy.Publisher(self.node_name + "_orientation",
+                                   PoseStamped,
+                                   queue_size=1)
         self.device = None
         self.uart = None
         self.ble = None
@@ -46,6 +49,7 @@ class HmiController():
         self.clearance_min = 0.15
         self.min_vib = config.dist_intensity_min
         self.max_vib = config.dist_intensity_max
+        self.orient_transf = None
 
     def send_speed_command(self, speed):
         rospy.set_param("debug_"+self.node_name, speed)
@@ -66,16 +70,38 @@ class HmiController():
         self.ble.initialize()
         self.ble.run_mainloop_with(self.__mainloop)
 
-    @staticmethod
-    def __recieved_callback(data):
-        if len(data) > 15:
-            regex_pattern = "Q\[(-?\d+.\d+); (-?\d+.\d+); (-?\d+.\d+); (-?\d+.\d+)]-C\[(\d); (\d); (\d); (\d)]"
-            m = re.search(regex_pattern, data, re.IGNORECASE)
-            if m: 
-                orientation = Quaternion(m.group(2), m.group(3), m.group(4), m.group(1))
-                calibration = [m.group(5), m.group(6), m.group(7), m.group(8)]
-                pass
-            print(data)
+    def __recieved_callback(self, data):
+        try:
+            if len(data) > 15:
+                regex_pattern = "Q\[x(-?\d+.\d+); y(-?\d+.\d+); z(-?\d+.\d+); w(-?\d+.\d+)]-C\[s(\d); g(\d); a(\d); m(\d)]"
+                m = re.search(regex_pattern, data, re.IGNORECASE)
+                print(data)
+                
+                if m: 
+                    p = PoseStamped()
+
+                    p.header.seq = 1
+                    p.header.stamp = rospy.Time.now()
+                    p.header.frame_id = "world"
+
+                    # if self.orient_transf is None:
+                        # self.orient_transf = self.__set_initial_orient([float(m.group(1)), float(m.group(2)), float(m.group(3)), -float(m.group(4))])
+                    # rel = quaternion_multiply(current_orient, self.orient_transf)
+                    # print(rel) 
+
+                    current_orient = [float(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4))]
+                    #ROS quaternion -> x,y,z,w
+                    p.pose.orientation = Quaternion(*current_orient)
+                    calibration = [m.group(5), m.group(6), m.group(7), m.group(8)]
+                    self.orient_pub.publish(p)
+                    pass
+        except Exception as ex:
+            print(ex) # otherwise the exception is swallowed
+
+    def __set_initial_orient(self, current_orient):
+        zero = [0.0, 0.0, 0.0, 1.0]
+        return quaternion_multiply(zero, current_orient)
+       
 
     def __mainloop(self):
         rospy.set_param(self.hmi_status_param, 0)
@@ -90,23 +116,27 @@ class HmiController():
         print("Using adapter: {0}".format(adapter.name))
         adapter.power_on()
 
-        try:
-            print("Searching for BLE UART device...")
-            adapter.start_scan(timeout_sec=self.timeouts)
-            time.sleep(1)
-            devs = UART.find_devices()
-            device = next((d for d in devs if d.name == self.device_name))
-            print("Connecting to device...")
-            device.connect(timeout_sec=self.timeouts)
-        except Exception as ex:
-            print("Failed to connect to UART device! %s" % ex)
-            UART.disconnect_devices()
-        finally:
-            adapter.stop_scan()
+        success = False
+        while not success:
+            try:
+                print("Searching for BLE UART device...")
+                adapter.start_scan(timeout_sec=self.timeouts)
+                time.sleep(1)
+                devs = UART.find_devices()
+                device = next((d for d in devs if d.name == self.device_name))
+                print("Connecting to device...")
+                device.connect(timeout_sec=self.timeouts)
+                success = True
+            except Exception as ex:
+                print("Failed to connect to UART device! %s" % ex)
+                UART.disconnect_devices()
+            finally:
+                adapter.stop_scan()
+            
 
         print("Discovering services...")
         UART.discover(device, timeout_sec=self.timeouts)
-        self.uart = UART(device, HmiController.__recieved_callback)
+        self.uart = UART(device, self.__recieved_callback)
 
         self.__notify_ready()
 
@@ -149,7 +179,7 @@ class HmiController():
             # choose the smallest value if the smallest value is not the same as for second hand
             if objs_clearance_level < this_hand_clearance_level and second_hand_clearance_level != objs_clearance_level:  
                 this_hand_clearance_level = objs_clearance_level
-
+    
             if this_hand_clearance_level < self.clearance_min:
                 vibration_level = (self.max_vib - self.min_vib) * (self.clearance_min -
                     this_hand_clearance_level) / self.clearance_min + self.min_vib
@@ -195,6 +225,9 @@ class HmiController():
 
 
 if __name__ == "__main__":
+    os.system("rfkill block bluetooth")
+    time.sleep(0.5)
+    os.system("rfkill unblock bluetooth")
     sys.argv.append("hmi-glove-left")
     sys.argv.append("_left")
     # for arg, i in zip(sys.argv, range(len(sys.argv))):

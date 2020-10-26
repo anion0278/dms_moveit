@@ -24,7 +24,7 @@ def get_bool(param):
 
 def get_rel_intensivity(param):
     val = rospy.get_param(param)
-    return round(val / (config.invalid_goal_intensity) * 100.0)
+    return round(float(val) / config.invalid_goal_intensity * 100.0)
 
 def get_rel_distance(param):
     dist = np.clip(rospy.get_param(param), 0, max_dist)

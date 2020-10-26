@@ -216,8 +216,8 @@ void SendImuData()
   uint8_t sys, gyro, accel, mag = 0;
   bno.getCalibration(&sys, &gyro, &accel, &mag);
 
-  String msg = "Q["+String(quat.w(),digits)+"; "+String(quat.x(),digits)+"; "+String(quat.y(),digits)+"; "+String(quat.z(),digits)+"]";
-  msg = msg + "-C["+sys+"; "+gyro+"; "+accel+"; "+mag+"]";
+  String msg = "Q[x"+String(quat.x(),digits)+"; y"+String(quat.y(),digits)+"; z"+String(quat.z(),digits)+"; w"+String(quat.w(),digits)+"]";
+  msg = msg + "-C[s"+sys+"; g"+gyro+"; a"+accel+"; m"+mag+"]";
 
   SendString(msg);
 }
@@ -335,7 +335,7 @@ void setup()
 
 void loop()
 {
- 
+  delay(50);
   ProcessBleUartData();
   SendImuData();
 }
