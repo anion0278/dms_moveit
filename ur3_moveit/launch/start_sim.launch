@@ -9,7 +9,7 @@
   <!-- Simulation -->
   <arg name="spawn_left_hand" default="true"/>
   <arg name="spawn_right_hand" default="true"/>
-  <arg name="spawn_cylinder" default="true"/>
+  <arg name="spawn_cylinder" default="false"/>
   <arg name="spawn_obstacle_4" default="false"/>
   <arg name="sim_paused" default="true"/>
 

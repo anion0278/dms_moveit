@@ -7,9 +7,7 @@ import Adafruit_BluefruitLE
 from Adafruit_BluefruitLE.services import UART
 import os
 
-# just could not do it any other way
-# tried all possibilities
-
+# no other way to start it correctly 
 rospy.init_node('hmi_starter', anonymous=True)
 os.system("rosrun ur3_moveit hmi_disconnector.py")
 

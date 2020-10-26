@@ -63,7 +63,7 @@ class HmiController():
             if debug:
                 print(self.__get_time() + " Sent:" + text)
         except Exception as ex:
-            print("SENDING {" + text + "} EXCEPTION: " + ex)
+            print("SENDING {" + text + "} EXCEPTION: " + ex.message)
 
     def start(self):
         self.ble = Adafruit_BluefruitLE.get_provider()
@@ -75,7 +75,7 @@ class HmiController():
             if len(data) > 15:
                 regex_pattern = "Q\[x(-?\d+.\d+); y(-?\d+.\d+); z(-?\d+.\d+); w(-?\d+.\d+)]-C\[s(\d); g(\d); a(\d); m(\d)]"
                 m = re.search(regex_pattern, data, re.IGNORECASE)
-                print(data)
+                print(self.node_name +"->"+data)
                 
                 if m: 
                     p = PoseStamped()
@@ -221,11 +221,15 @@ class HmiController():
 
 
 if __name__ == "__main__":
-    os.system("rfkill block bluetooth")
-    time.sleep(0.5)
-    os.system("rfkill unblock bluetooth")
-    sys.argv.append("hmi-glove-left")
-    sys.argv.append("_left")
+
+    if not "node" in sys.argv:
+        print("DEBUGGER MODE")
+        os.system("rfkill block bluetooth")
+        time.sleep(0.5)
+        os.system("rfkill unblock bluetooth")
+        sys.argv.append("hmi-glove-right")
+        sys.argv.append("_right")
+
     # for arg, i in zip(sys.argv, range(len(sys.argv))):
     #     print("Arg [%s]: %s" % (i, arg))
     hmi = HmiController(sys.argv[1], sys.argv[2])
