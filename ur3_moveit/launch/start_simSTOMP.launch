@@ -38,15 +38,10 @@
   <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
   <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load joint_group_position_controller" />
   
-   <group if="$(arg enable_both_hmi)">
-    <node name="hmi_starter" pkg="ur3_moveit" type="hmi_starter.py" respawn="false" output="screen"/>
-  </group>
-  <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen" />
-  <node name="task_commander" pkg="ur3_moveit" type="task_commander.py" respawn="false" output="screen" args="$(arg enable_both_hmi)" />
 
   <include file="$(find ur3_moveit)/launch/move_group.launch">
     <arg name="controllers_definition" value="controllers.yaml" />
-
+<arg name="pipeline" value="stomp" />
   </include>
 
   <!-- obstacle spawning -->
