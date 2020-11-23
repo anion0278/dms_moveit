@@ -77,20 +77,24 @@ def on_data(depth_msg, img_msg, left_pose_msg, right_pose_msg):
 
     if (right_hand is not None):
         publish_hand(depth_img, depth_msg.header, right_hand, right_hmi,
-                     right_pc_pub, right_pose_msg, debug)
+                     right_pc_pub, right_pose_msg)
     else:
         driver.remove_hmi_obj(right_hmi)
         publish_emtpy_pc(right_pc_pub, depth_msg.header)
         
     if (left_hand is not None):
         publish_hand(depth_img, depth_msg.header, left_hand, left_hmi,
-                     left_pc_pub, left_pose_msg, debug)
+                     left_pc_pub, left_pose_msg)
     else:
         driver.remove_hmi_obj(left_hmi)
         publish_emtpy_pc(left_pc_pub, depth_msg.header)
 
-    cv2.imshow('image', img)
-    cv2.waitKey(1)
+
+    # the topic is not published unless anyone is subcribed
+    if (cam_img_pub.get_num_connections() > 0):
+        img_msg = bridge.cv2_to_imgmsg(img)
+        cam_img_pub.publish(img_msg)
+    pass
 
 def get_hand_pose(orient_msg, frame_id, center_pos):
     p = PoseStamped()
@@ -107,8 +111,7 @@ def publish_hand(depth_img,
                  hand_tuple,
                  obj_name,
                  pc_pub,
-                 orient_msg,
-                 publish_pointcloud=False):
+                 orient_msg):
 
     cv2.drawContours(hand_tuple[3], [hand_tuple[2]],
                         0,
@@ -117,6 +120,9 @@ def publish_hand(depth_img,
     blob_pts = np.where(hand_tuple[3] > 0)
 
     radius = get_bounding_radius(hand_tuple[0], hand_tuple[2])
+
+    # the topic is not published unless anyone is subcribed
+    publish_pointcloud = pc_pub.get_num_connections() > 0
 
     heights = []
     pc_hand = []
@@ -214,5 +220,9 @@ if __name__ == "__main__":
     left_pc_pub = rospy.Publisher(left_hmi + "_points",
                                   PointCloud2,
                                   queue_size=1)
+
+    cam_img_pub = rospy.Publisher("tracker_image",
+                                   Image,
+                                   queue_size=1)
 
     rospy.spin()
