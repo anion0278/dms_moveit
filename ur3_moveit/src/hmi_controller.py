@@ -225,14 +225,14 @@ class HmiController():
 
 if __name__ == "__main__":
 
-    #causes problems
-    if not "node" in sys.argv:
-        print("DEBUGGER MODE")
-        os.system("rfkill block bluetooth")
-        time.sleep(0.5)
-        os.system("rfkill unblock bluetooth")
-        sys.argv.append("hmi-glove-left")
-        sys.argv.append("_left")
+    # # causes problems TODO solve
+    # if not "node" in sys.argv:
+    #     print("DEBUGGER MODE")
+    #     os.system("rfkill block bluetooth")
+    #     time.sleep(0.5)
+    #     os.system("rfkill unblock bluetooth")
+    #     sys.argv.append("hmi-glove-left")
+    #     sys.argv.append("_left")
 
     # for arg, i in zip(sys.argv, range(len(sys.argv))):
     #     print("Arg [%s]: %s" % (i, arg))
