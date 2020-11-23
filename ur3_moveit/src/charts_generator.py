@@ -1,5 +1,4 @@
 import csv
-import pandas as pd
 import numpy as np
 import os
 import re
@@ -20,15 +19,12 @@ current_script_path = os.path.dirname(__file__)
 measurements_dir = os.path.join(current_script_path, "measurements")
 
 margin = 0.005
-x_labels_rotation = 90
+x_labels_rotation = 70
 bar_width = 0.8
 chart_label_font = 7
-figure_size = (10, 4) #(14, 4) # 10, 3.5
+figure_size = (10, 3.5) #(14, 4) # 10, 3.5
 available_colors = ["#4e79a7", "#f28e2b", "#76b7b2",
                     "#e15759",   "#59a14f",  "#edc948", "#b07aa1", ]
-
-# just too lazy to rewrite the code of statistics generator
-
 
 def longestSubstringFinder(string1, string2):
     match = SequenceMatcher(None, string1, string2).find_longest_match(0, len(string1), 0, len(string2))
@@ -52,12 +48,15 @@ class ResultPlotter:
         # y_values = bars_dict.values()
 
         fig = plt.figure(figsize=figure_size)
+        # axes = plt.gca()
+        # axes.yaxis.grid()
         plt.autoscale(enable=True, axis="x", tight=True)
         bar_chart = plt.bar(x_pos, y_values, align="center", width=bar_width)
         plt.xticks(x_pos, x_labels, fontsize=chart_label_font,
                    rotation=x_labels_rotation)
         plt.title(title)
         plt.ylabel(y_label)
+
         if y_limit != None:
             plt.ylim(y_limit)
         fig.tight_layout()
@@ -106,7 +105,7 @@ class ResultPlotter:
         self.show_figure(fig)
 
     def save_figure(self, file_title):
-        plt.savefig(os.path.join(current_script_path, file_title + ".png"))
+        plt.savefig(os.path.join(current_script_path, file_title + ".png"), dpi=600)
 
     def show_figure(self, figure):
         plt.draw()
@@ -145,7 +144,7 @@ class ResultPlotter:
             relative_performances, lambda key, value: "obstacle" in key.lower())
         self.show_grouped_bar_plot(relative_performances,
                                    title="Relative performances - Obstacle 1 (Real robot)",
-                                   y_label="Relative average \n perfomance [%]")
+                                   y_label="Relative average perfomance [%]")
         self.show_relative_change_bar_plot(relative_performances)
 
     def calculate_relative_performance(self, movements, reader):
@@ -198,7 +197,7 @@ class ResultPlotter:
             val_new = keys[index].replace(common_substring, "").replace("0-","")
             new_key = param_name + "\n " + val_before  + " -> " + val_new
             relative_changes[new_key] = mean(values[index]) - mean(values[index + 1])
-        y_limit = (-50, 25)
+        y_limit = (-60, 20)
         self.show_bar_plot(relative_changes,
                            title="Relative performance change",
                            y_label="Relative change [%]",
@@ -207,7 +206,7 @@ class ResultPlotter:
     def show_grouped_bar_plot(self, relative_performance, title, y_label):
         x_labels = relative_performance.keys()
         x_base = np.arange(len(x_labels))
-        fig, axis = plt.subplots(figsize=(30, 4))
+        fig, axis = plt.subplots(figsize=(12, 4.5))
 
         members_labels = []
         for label in moveit_tester.movements:
