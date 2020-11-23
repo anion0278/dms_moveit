@@ -14,8 +14,8 @@ BLEDis  bledis;  // device information
 BLEUart bleuart; // uart over ble
 BLEBas  blebas;  // battery
 
-//const char* deviceName = "hmi-glove-right";
-const char* deviceName = "hmi-glove-left";
+const char* deviceName = "hmi-glove-right";
+//const char* deviceName = "hmi-glove-left";
 
 int ledPin = 17;
 float ledSensitivity = 3.5f;
@@ -26,6 +26,12 @@ uint8_t buf[64];
 short digits = 3;
 
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+
+const byte num_motors = 6;
+int motorPins[num_motors] = {PIN_A0,PIN_A1,PIN_A2,PIN_A3,PIN_A4,PIN_A5};
+
+int motorVals[num_motors];
+int stop_m[num_motors] = {0,0,0,0,0,0};
 
 void SetupBle()
 {
@@ -61,13 +67,19 @@ void SetupBle()
 
 void SetupMotors()
 {
-  SetupPwmPin(PIN_A0);
-  SetupPwmPin(PIN_A1);
-  SetupPwmPin(PIN_A2);
-  SetupPwmPin(PIN_A3);
-  
-  SetAllMotorsSpeed(0);
+  for (byte i = 0; i < num_motors; i = i + 1) 
+  {
+    SetupPwmPin(motorPins[i]);
+  }
+  StopMotors();
+  Serial.println("Motors OK");
 }
+
+void StopMotors()
+{
+  SetAllMotorsSpeed(stop_m);
+}
+
 
 void SetupPwmPin(int pin)
 {
@@ -103,16 +115,20 @@ void StartAdvertisingBle(void)
   Serial.println("Waiting to connect...");
 }
 
-void SetAllMotorsSpeed(int speed)
+void SetAllMotorsSpeed(int speed_vals[])
 {
   // when speeds values will be different use MAX(vals...)
-  analogWrite(ledPin, CalculateLedIntensity(speed));
+  analogWrite(ledPin, CalculateLedIntensity(speed_vals[0]));
 
-  int pwmValue = 255 - speed;
-  analogWrite(PIN_A0, pwmValue);
-  analogWrite(PIN_A1, pwmValue);
-  analogWrite(PIN_A2, pwmValue);
-  analogWrite(PIN_A3, pwmValue);
+  for (byte i = 0; i < num_motors; i = i + 1) 
+  {
+    analogWrite(motorPins[i], GetPwmFromSpeed(speed_vals[i]));
+  }
+}
+
+int GetPwmFromSpeed(int speed)
+{
+  return 255 - speed;
 }
 
 byte CalculateLedIntensity(int speed)
@@ -120,10 +136,26 @@ byte CalculateLedIntensity(int speed)
   return constrain(speed - vibrationMinSpeed, 0, 255);
 }
 
-int ParseSpeed(String message, byte pos_byte)
+// Arduino does not allow to return arrays :(
+void ParseSpeedValues(String message, int fill_array[num_motors])
 {
-  char speed_chars[3];
-  for (int i = 0; i < 3; i++)
+  //int vals[num_motors];
+  for (byte i = 0; i < num_motors; i = i + 1)  
+  {
+    byte start = i * 3 + i + 1;
+    if (i > 2)
+    {
+      start = i * 4 + i - 1;
+    }
+    fill_array[i] = ParseValue(message, start , 3); 
+  }
+}
+
+
+int ParseValue(String message, byte pos_byte, byte num_length)
+{
+  char speed_chars[num_length];
+  for (int i = 0; i < num_length; i++)
   {
     speed_chars[i] = message.charAt(pos_byte + i);
   }
@@ -134,7 +166,7 @@ void connect_callback(uint16_t conn_handle)
 {
   BLEConnection* connection = Bluefruit.Connection(conn_handle);
 
-  SetAllMotorsSpeed(0);
+  StopMotors();
   char central_name[32] = { 0 };
   connection->getPeerName(central_name, sizeof(central_name));
 
@@ -147,7 +179,7 @@ void disconnect_callback(uint16_t conn_handle, uint8_t reason)
 {
   (void) conn_handle;
   (void) reason;
-  SetAllMotorsSpeed(0);
+  StopMotors();
 
   Serial.println();
   Serial.print("Disconnected, reason = 0x"); 
@@ -166,7 +198,7 @@ void ProcessBleUartData()
     inputString += inChar;
     if (inChar == '\n')
     {
-      if ( inputString.charAt(0) == 'C' )
+      if ( inputString.charAt(0) == 'X' )
       {
         if (inputString == "CALIB")
         {
@@ -174,10 +206,15 @@ void ProcessBleUartData()
         }
         else 
         {
-          int currentSpeed = ParseSpeed(inputString, 1);
-          SetAllMotorsSpeed(currentSpeed);
+          ParseSpeedValues(inputString, motorVals);
+          SetAllMotorsSpeed(motorVals);
           Serial.print("Speed changed: ");
-          Serial.println(currentSpeed);
+          for (byte i = 0; i< num_motors; i = i +1)
+          {
+            Serial.print(motorVals[i]);
+            Serial.print("; ");
+          }
+          Serial.println();
         }
       }
       inputString = "";
@@ -195,7 +232,7 @@ void SetupImu()
     Serial.println("No IMU detected!");
     while(1);
   }
-  delay(1000);
+  delay(1000); // ???
 
   bno.setExtCrystalUse(true);  
   

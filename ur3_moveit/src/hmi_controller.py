@@ -53,9 +53,15 @@ class HmiController():
 
     def send_speed_command(self, speed):
         rospy.set_param("debug_"+self.node_name, speed)
-        speed_text = str(int(speed)).zfill(3)
-        self.send_text("C{}\r\n".format(speed_text))
+        st = self.__format_speed(speed)
+        speeds = [st,st,st, st,st,st]
+        #speeds = ["123", "234", "345", "456", "567", "678"]
+        msg ="X{0}Y{1}Z{2}-X{3}-Y{4}-Z{5}\r\n".format(*speeds) 
+        self.send_text(msg)
         rospy.sleep(rospy.Duration(secs=0, nsecs=500))
+
+    def __format_speed(self, speed):
+        return str(int(speed)).zfill(3)
 
     def send_text(self, text):
         try:
@@ -75,9 +81,9 @@ class HmiController():
             if len(data) > 15:
                 regex_pattern = "Q\[x(-?\d+.\d+); y(-?\d+.\d+); z(-?\d+.\d+); w(-?\d+.\d+)]-C\[s(\d); g(\d); a(\d); m(\d)]"
                 m = re.search(regex_pattern, data, re.IGNORECASE)
-                print(self.node_name +"->"+data)
                 
                 if m: 
+                    #print(self.node_name +"->"+data)
                     p = PoseStamped()
 
                     p.header.seq = 1
@@ -98,11 +104,8 @@ class HmiController():
         except Exception as ex:
             print(ex) # otherwise the exception is swallowed
 
-    def __set_initial_orient(self, current_orient):
-        zero = [0.0, 0.0, 0.0, 1.0]
-        return quaternion_multiply(zero, current_orient)
-
     def __mainloop(self):
+        # TODO wrap external ropspy calls into methods
         rospy.set_param(self.hmi_status_param, 0)
         rospy.set_param(obj_clearance_param, self.clearance_min)
         rospy.set_param(self.this_hand_clearance_param, self.clearance_min)
@@ -222,13 +225,14 @@ class HmiController():
 
 if __name__ == "__main__":
 
+    #causes problems
     if not "node" in sys.argv:
         print("DEBUGGER MODE")
         os.system("rfkill block bluetooth")
         time.sleep(0.5)
         os.system("rfkill unblock bluetooth")
-        sys.argv.append("hmi-glove-right")
-        sys.argv.append("_right")
+        sys.argv.append("hmi-glove-left")
+        sys.argv.append("_left")
 
     # for arg, i in zip(sys.argv, range(len(sys.argv))):
     #     print("Arg [%s]: %s" % (i, arg))
