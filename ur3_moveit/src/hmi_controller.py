@@ -8,7 +8,8 @@ import numpy as np
 import sys
 import signal
 import atexit
-from geometry_msgs.msg import Quaternion, PoseStamped
+from geometry_msgs.msg import *
+import tf2_geometry_msgs as tf2
 from std_srvs.srv import Empty
 import os
 import time
@@ -16,9 +17,12 @@ import re
 import config
 from functools import partial
 from tf.transformations import *
+import ros_numpy
+import tf
 
 
 debug = False  
+
 
 obj_clearance_param = "/move_group/collision/min_clearance"
 
@@ -34,9 +38,7 @@ class HmiController():
                  rosparam_name="hmi_value"): # TODO PUT INTO CONFIG EVERYWHERE!!!
         self.node_name = device_name.replace("-", "_")
         rospy.init_node(self.node_name)
-        self.orient_pub = rospy.Publisher(self.node_name + "_orientation",
-                                   PoseStamped,
-                                   queue_size=1)
+        self.orient_pub = rospy.Publisher(self.node_name + "_orientation", PoseStamped, queue_size=1)
         self.device = None
         self.uart = None
         self.ble = None
@@ -49,13 +51,57 @@ class HmiController():
         self.clearance_min = 0.15
         self.min_vib = config.dist_intensity_min
         self.max_vib = config.dist_intensity_max
-        self.orient_transf = None
+        # self.orient_transf = None
+        self.current_orientation = None
+        self.br = tf.TransformBroadcaster()
+
+
+    def __get_speed_vals(self, speed = 200):
+        speed_vals=[0,0,0,0,0,0]
+        if (self.current_orientation is not None):
+            vecs = PointStamped()
+            initial = Point(x = 1, y = 0, z = 0)
+            vecs.point = initial
+            trs = TransformStamped()
+            trs.header.frame_id = "hand_right"
+            tr = Transform()
+            tr.rotation = self.current_orientation
+
+            # needed an inverse matrix!
+            u = quaternion_from_matrix(inverse_matrix(ros_numpy.numpify(tr)))
+            
+            tr = Transform()
+            tr.rotation = Quaternion(*u)
+
+            trs.transform = tr
+
+            self.br.sendTransform((0, 0, 0), 
+            #tf.transformations.quaternion_from_euler(0, 0, msg.theta),
+            ros_numpy.numpify(self.current_orientation),
+            rospy.Time.now(),
+            "hand_right",
+            "world")
+
+            pa = tf2.do_transform_point(vecs, trs)
+            pa.header.frame_id = "hand_right"
+            vec_arr = speed * ros_numpy.numpify(pa.point)
+            # x, y, z, -x, -y, -z
+            for i in range(len(speed_vals) / 2):
+                if vec_arr[i] > 0: # positive
+                    speed_vals[i] = vec_arr[i]
+                else: # negative number
+                    speed_vals[i + 3] = abs(vec_arr[i])
+            
+            print(speed_vals)
+        return speed_vals
+        
 
     def send_speed_command(self, speed):
         rospy.set_param("debug_"+self.node_name, speed)
-        st = self.__format_speed(speed)
-        speeds = [st,st,st, st,st,st]
-        #speeds = ["123", "234", "345", "456", "567", "678"]
+        speeds = self.__get_speed_vals()
+        for i in range(6):
+            # if value < min vibration, but > (minvib / 2) -> set min vibration
+            speeds[i] = self.__format_speed(speeds[i])
         msg ="X{0}Y{1}Z{2}-X{3}-Y{4}-Z{5}\r\n".format(*speeds) 
         self.send_text(msg)
         rospy.sleep(rospy.Duration(secs=0, nsecs=500))
@@ -90,14 +136,10 @@ class HmiController():
                     p.header.stamp = rospy.Time.now()
                     p.header.frame_id = "world"
 
-                    # if self.orient_transf is None:
-                        # self.orient_transf = self.__set_initial_orient([float(m.group(1)), float(m.group(2)), float(m.group(3)), -float(m.group(4))])
-                    # rel = quaternion_multiply(current_orient, self.orient_transf)
-                    # print(rel) 
-
                     current_orient = [float(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4))]
                     #ROS quaternion -> x,y,z,w
                     p.pose.orientation = Quaternion(*current_orient)
+                    self.current_orientation = p.pose.orientation
                     calibration = [m.group(5), m.group(6), m.group(7), m.group(8)]
                     self.orient_pub.publish(p)
                     pass
@@ -225,14 +267,14 @@ class HmiController():
 
 if __name__ == "__main__":
 
-    # # causes problems TODO solve
+    # causes problems TODO solve
     # if not "node" in sys.argv:
-    #     print("DEBUGGER MODE")
+    #     print("DEBUGGER MODE !!! Will cause error in roslaunch!")
     #     os.system("rfkill block bluetooth")
     #     time.sleep(0.5)
     #     os.system("rfkill unblock bluetooth")
-    #     sys.argv.append("hmi-glove-left")
-    #     sys.argv.append("_left")
+    #     sys.argv.append("hmi-glove-right")
+    #     sys.argv.append("_right")
 
     # for arg, i in zip(sys.argv, range(len(sys.argv))):
     #     print("Arg [%s]: %s" % (i, arg))

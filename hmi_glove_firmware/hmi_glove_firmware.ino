@@ -2,36 +2,36 @@
 #include <Adafruit_LittleFS.h>
 #include <InternalFileSystem.h>
 #include <Firmata.h>
-
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
+const char* deviceName = "hmi-glove-right";
+//const char* deviceName = "hmi-glove-left";
 
 BLEDfu  bledfu;  // OTA DFU service
 BLEDis  bledis;  // device information
 BLEUart bleuart; // uart over ble
 BLEBas  blebas;  // battery
 
-const char* deviceName = "hmi-glove-right";
-//const char* deviceName = "hmi-glove-left";
 
 int ledPin = 17;
 float ledSensitivity = 3.5f;
 bool isBleLedActive = true;
 int vibrationMinSpeed = 50;
-
 uint8_t buf[64];
 short digits = 3;
 
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
-
 const byte num_motors = 6;
-int motorPins[num_motors] = {PIN_A0,PIN_A1,PIN_A2,PIN_A3,PIN_A4,PIN_A5};
+// motors                     X, Y, Z, -X, -Y, -Z
+int motorPins[num_motors] = {PIN_A3,PIN_A5,PIN_A1,PIN_A4,PIN_A2,PIN_A0};
+// TODO if pins are different in left and right versions -> make simple if(deviceName contains "left"/ right)
 
 int motorVals[num_motors];
 int stop_m[num_motors] = {0,0,0,0,0,0};
+
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 void SetupBle()
 {
@@ -139,7 +139,6 @@ byte CalculateLedIntensity(int speed)
 // Arduino does not allow to return arrays :(
 void ParseSpeedValues(String message, int fill_array[num_motors])
 {
-  //int vals[num_motors];
   for (byte i = 0; i < num_motors; i = i + 1)  
   {
     byte start = i * 3 + i + 1;
