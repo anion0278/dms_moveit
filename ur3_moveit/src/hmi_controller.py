@@ -51,56 +51,37 @@ class HmiController():
         self.clearance_min = 0.15
         self.min_vib = config.dist_intensity_min
         self.max_vib = config.dist_intensity_max
-        # self.orient_transf = None
         self.current_orientation = None
-        self.br = tf.TransformBroadcaster()
 
 
-    def __get_speed_vals(self, speed = 200):
-        speed_vals=[0,0,0,0,0,0]
+    def __get_speed_components(self, speed = 100):
+        speed_comps=[0,0,0,0,0,0]
         if (self.current_orientation is not None):
-            vecs = PointStamped()
-            initial = Point(x = 1, y = 0, z = 0)
-            vecs.point = initial
-            trs = TransformStamped()
-            trs.header.frame_id = "hand_right"
-            tr = Transform()
-            tr.rotation = self.current_orientation
+            vs = Vector3Stamped(vector = Vector3(x = 1, y = 0, z = 0))
 
             # needed an inverse matrix!
-            u = quaternion_from_matrix(inverse_matrix(ros_numpy.numpify(tr)))
-            
-            tr = Transform()
-            tr.rotation = Quaternion(*u)
+            qa = quaternion_inverse(ros_numpy.numpify(self.current_orientation))
+            trs = TransformStamped(transform = Transform(rotation = Quaternion(*qa)))
 
-            trs.transform = tr
-
-            self.br.sendTransform((0, 0, 0), 
-            #tf.transformations.quaternion_from_euler(0, 0, msg.theta),
-            ros_numpy.numpify(self.current_orientation),
-            rospy.Time.now(),
-            "hand_right",
-            "world")
-
-            pa = tf2.do_transform_point(vecs, trs)
-            pa.header.frame_id = "hand_right"
-            vec_arr = speed * ros_numpy.numpify(pa.point)
-            # x, y, z, -x, -y, -z
-            for i in range(len(speed_vals) / 2):
-                if vec_arr[i] > 0: # positive
-                    speed_vals[i] = vec_arr[i]
+            v = tf2.do_transform_vector3(vs, trs)
+            va = speed * ros_numpy.numpify(v.vector)
+            # components x, y, z, -x, -y, -z
+            for i in range(len(speed_comps) / 2):
+                if va[i] > 0: # positive
+                    speed_comps[i] = va[i]
                 else: # negative number
-                    speed_vals[i + 3] = abs(vec_arr[i])
-            
-            print(speed_vals)
-        return speed_vals
+                    speed_comps[i + 3] = abs(va[i])
+                # TODO if value < min vibration, but > (minvib / 2) -> set min vibration
+
+            print(speed_comps)
+        # TODO speed comps may be visualized in RViz as 3x points of magnitude size 
+        return speed_comps
         
 
     def send_speed_command(self, speed):
         rospy.set_param("debug_"+self.node_name, speed)
-        speeds = self.__get_speed_vals()
+        speeds = self.__get_speed_components()
         for i in range(6):
-            # if value < min vibration, but > (minvib / 2) -> set min vibration
             speeds[i] = self.__format_speed(speeds[i])
         msg ="X{0}Y{1}Z{2}-X{3}-Y{4}-Z{5}\r\n".format(*speeds) 
         self.send_text(msg)
@@ -267,14 +248,14 @@ class HmiController():
 
 if __name__ == "__main__":
 
-    # causes problems TODO solve
-    # if not "node" in sys.argv:
-    #     print("DEBUGGER MODE !!! Will cause error in roslaunch!")
-    #     os.system("rfkill block bluetooth")
-    #     time.sleep(0.5)
-    #     os.system("rfkill unblock bluetooth")
-    #     sys.argv.append("hmi-glove-right")
-    #     sys.argv.append("_right")
+    #### causes problems TODO solve
+    if not "node" in sys.argv:
+        print("DEBUGGER MODE !!! Will cause error in roslaunch!")
+        os.system("rfkill block bluetooth")
+        time.sleep(0.5)
+        os.system("rfkill unblock bluetooth")
+        sys.argv.append("hmi-glove-right")
+        sys.argv.append("_right")
 
     # for arg, i in zip(sys.argv, range(len(sys.argv))):
     #     print("Arg [%s]: %s" % (i, arg))
