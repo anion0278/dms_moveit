@@ -119,13 +119,8 @@ void SetAllMotorsSpeed(int speed_vals[])
 
   for (byte i = 0; i < num_motors; i = i + 1) 
   {
-    analogWrite(motorPins[i], GetPwmFromSpeed(speed_vals[i]));
+    analogWrite(motorPins[i], speed_vals[i]);
   }
-}
-
-int GetPwmFromSpeed(int speed)
-{
-  return 255 - speed;
 }
 
 byte CalculateLedIntensity(int speed)
@@ -360,6 +355,8 @@ void loop()
     Bluefruit.disconnect(0);
     startTime = 0;
   }
+
+// clientUart.discovered() pouzit???
 
 //  if(Bluefruit.connected() && startTime > 0)
 //    Serial.println(millis() - startTime);
