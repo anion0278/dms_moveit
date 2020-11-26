@@ -31,6 +31,10 @@ int motorPins[num_motors] = {PIN_A3,PIN_A5,PIN_A1,PIN_A4,PIN_A2,PIN_A0};
 int motorVals[num_motors];
 int stop_m[num_motors] = {0,0,0,0,0,0};
 
+unsigned long startTime;
+int disconnectionTimeoutMs = 500;
+
+
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 void SetupBle()
@@ -42,13 +46,6 @@ void SetupBle()
   Bluefruit.begin();
   Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
   Bluefruit.setName(deviceName);
-  
-  Bluefruit.Central.setConnectCallback(connect_callback);
-  Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
-  
-  // do not define this callback!
-  // it causes timeout auto-disconnection after 30sec
-  //Bluefruit.Periph.setConnectCallback(connect_callback); 
 
   bledfu.begin();// To be consistent OTA DFU should be added first if it exists
 
@@ -161,33 +158,9 @@ int ParseValue(String message, byte pos_byte, byte num_length)
   return atoi(speed_chars);
 }
 
-void connect_callback(uint16_t conn_handle)
+bool ProcessBleUartData()
 {
-  BLEConnection* connection = Bluefruit.Connection(conn_handle);
-
-  StopMotors();
-  char central_name[32] = { 0 };
-  connection->getPeerName(central_name, sizeof(central_name));
-
-  Serial.print("Connected to PC: ");
-  Serial.println(central_name);
-}
-
-// @param reason is a BLE_HCI_STATUS_CODE which can be found in ble_hci.h
-void disconnect_callback(uint16_t conn_handle, uint8_t reason)
-{
-  (void) conn_handle;
-  (void) reason;
-  StopMotors();
-
-  Serial.println();
-  Serial.print("Disconnected, reason = 0x"); 
-  Serial.println(reason, HEX);
-  //Bluefruit.disconnect(conn_handle);
-}
-
-void ProcessBleUartData()
-{
+  bool flag = false;
   String inputString = "";
   int len = 0;
   while ( bleuart.available() )
@@ -199,6 +172,7 @@ void ProcessBleUartData()
     {
       if ( inputString.charAt(0) == 'X' )
       {
+        flag = true; // got a msg
         if (inputString == "CALIB")
         {
           SaveCalibration();
@@ -219,6 +193,7 @@ void ProcessBleUartData()
       inputString = "";
     }
   }
+  return flag;
 }
 
 //////////////////////////////////////////////////////////////////////// IMU
@@ -291,7 +266,6 @@ void RestoreImuCalibration()
     if (bnoID != sensor.sensor_id)
     {
         Serial.println("\nNo Calibration Data for this sensor exists in EEPROM");
-        delay(500);
     }
     else
     {
@@ -366,12 +340,29 @@ void setup()
   Serial.println("Connect using Python app");
 
   StartAdvertisingBle();
-
 }
 
 void loop()
 {
-  delay(50);
-  ProcessBleUartData();
+  delay(60);
+
   SendImuData();
+
+  bool isMsgRecieved = ProcessBleUartData();
+  if (Bluefruit.connected() && isMsgRecieved)
+  {
+    startTime = millis();
+  }
+  if (Bluefruit.connected() && millis() - startTime > disconnectionTimeoutMs && startTime > 0)
+  {
+    Serial.println("Disconnected due to inactivity on the PC side");
+    StopMotors();
+    Bluefruit.disconnect(0);
+    startTime = 0;
+  }
+
+//  if(Bluefruit.connected() && startTime > 0)
+//    Serial.println(millis() - startTime);
+//  else
+//    Serial.println("Not connected yet");
 }
