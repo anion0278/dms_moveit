@@ -31,11 +31,12 @@ int motorPins[num_motors] = {PIN_A3,PIN_A5,PIN_A1,PIN_A4,PIN_A2,PIN_A0};
 int motorVals[num_motors];
 int stop_m[num_motors] = {0,0,0,0,0,0};
 
-unsigned long startTime;
+unsigned long prevRecTime, prevSendTime, currentTime;
 int disconnectionTimeoutMs = 500;
+int sendIntervalMs = 65;
 
+Adafruit_BNO055 bno;
 
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 void SetupBle()
 {
@@ -64,7 +65,7 @@ void SetupBle()
 
 void SetupMotors()
 {
-  for (byte i = 0; i < num_motors; i = i + 1) 
+  for (byte i = 0; i < num_motors; i++) 
   {
     SetupPwmPin(motorPins[i]);
   }
@@ -82,6 +83,29 @@ void SetupPwmPin(int pin)
 {
   pinMode(pin, OUTPUT);
   Firmata.setPinMode(pin, PIN_MODE_PWM);
+}
+
+void SetAllMotorsSpeed(int speed_comps[])
+{
+  analogWrite(ledPin, GetMax(speed_comps));
+
+  for (byte i = 0; i < num_motors; i++) 
+  {
+    analogWrite(motorPins[i], speed_comps[i]);
+  }
+}
+
+byte GetMax(int speed_comps[])
+{
+  byte maxv=0;
+  for (byte i=0; i < num_motors; i++)
+  {
+    if (speed_comps[i] > maxv) 
+    {
+       maxv = speed_comps[i];
+    }
+  }
+  return maxv;
 }
 
 void StartAdvertisingBle(void)
@@ -112,17 +136,6 @@ void StartAdvertisingBle(void)
   Serial.println("Waiting to connect...");
 }
 
-void SetAllMotorsSpeed(int speed_vals[])
-{
-  // when speeds values will be different use MAX(vals...)
-  analogWrite(ledPin, CalculateLedIntensity(speed_vals[0]));
-
-  for (byte i = 0; i < num_motors; i = i + 1) 
-  {
-    analogWrite(motorPins[i], speed_vals[i]);
-  }
-}
-
 byte CalculateLedIntensity(int speed)
 {
   return constrain(speed - vibrationMinSpeed, 0, 255);
@@ -131,7 +144,7 @@ byte CalculateLedIntensity(int speed)
 // Arduino does not allow to return arrays :(
 void ParseSpeedValues(String message, int fill_array[num_motors])
 {
-  for (byte i = 0; i < num_motors; i = i + 1)  
+  for (byte i = 0; i < num_motors; i++)  
   {
     byte start = i * 3 + i + 1;
     if (i > 2)
@@ -196,17 +209,14 @@ bool ProcessBleUartData()
 
 void SetupImu()
 {
+  bno = Adafruit_BNO055(55, 0x28);
   if(!bno.begin())
   {
     Serial.println("No IMU detected!");
-    while(1);
+    while(true);
   }
-  delay(1000); // ???
 
   bno.setExtCrystalUse(true);  
-  
-  //RestoreImuCalibration();
-
   Serial.println("IMU OK");
 }
 
@@ -339,27 +349,31 @@ void setup()
 
 void loop()
 {
-  delay(60);
-
-  SendImuData();
+  currentTime = millis();
+  
+  if (currentTime - prevSendTime > sendIntervalMs)
+  {
+    SendImuData();
+    prevSendTime = currentTime;
+  }
 
   bool isMsgRecieved = ProcessBleUartData();
   if (Bluefruit.connected() && isMsgRecieved)
   {
-    startTime = millis();
+    prevRecTime = currentTime;
   }
-  if (Bluefruit.connected() && millis() - startTime > disconnectionTimeoutMs && startTime > 0)
+  if (Bluefruit.connected() && prevRecTime > 0 && currentTime - prevRecTime > disconnectionTimeoutMs)
   {
     Serial.println("Disconnected due to inactivity on the PC side");
     StopMotors();
     Bluefruit.disconnect(0);
-    startTime = 0;
+    prevRecTime = 0;
   }
 
 // clientUart.discovered() pouzit???
 
-//  if(Bluefruit.connected() && startTime > 0)
-//    Serial.println(millis() - startTime);
+//  if(Bluefruit.connected() && prevRecTime > 0)
+//    Serial.println(millis() - prevRecTime);
 //  else
 //    Serial.println("Not connected yet");
 }

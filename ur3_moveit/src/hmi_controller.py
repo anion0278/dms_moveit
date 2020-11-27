@@ -23,7 +23,6 @@ import tf
 
 debug = False  
 
-
 obj_clearance_param = "/move_group/collision/min_clearance"
 
 class TimedCommand():
@@ -48,31 +47,28 @@ class HmiController():
         self.hmi_status_param = rosparam_name
         rospy.set_param(rosparam_name, 0)
         self.timeouts = 1
-        self.clearance_min = 0.15
+        self.clearance_min = 0.15 
         self.min_vib = config.dist_intensity_min
         self.max_vib = config.dist_intensity_max
         self.current_orientation = None
 
 
-    def __get_speed_components(self, speed = 100):
+    def __get_speed_components(self, speed = 150):
         speed_comps=[0,0,0,0,0,0]
         if (self.current_orientation is not None):
             vs = Vector3Stamped(vector = Vector3(x = 1, y = 0, z = 0))
-
             # needed an inverse matrix!
             qa = quaternion_inverse(ros_numpy.numpify(self.current_orientation))
             trs = TransformStamped(transform = Transform(rotation = Quaternion(*qa)))
-
             v = tf2.do_transform_vector3(vs, trs)
             va = speed * ros_numpy.numpify(v.vector)
+
             # components x, y, z, -x, -y, -z
             for i in range(len(speed_comps) / 2):
                 if va[i] > 0: # positive
                     speed_comps[i] = va[i]
                 else: # negative number
                     speed_comps[i + 3] = abs(va[i])
-                # TODO if value < min vibration, but > (minvib / 2) -> set min vibration
-
             print(speed_comps)
         # TODO speed comps may be visualized in RViz as 3x points of magnitude size 
         return speed_comps
@@ -80,15 +76,18 @@ class HmiController():
 
     def send_speed_command(self, speed):
         rospy.set_param("debug_"+self.node_name, speed)
-        speeds = self.__get_speed_components()
-        for i in range(6):
-            speeds[i] = self.__format_speed(speeds[i])
+        speeds = self.__format_speed_msg(self.__get_speed_components())
         msg ="X{0}Y{1}Z{2}-X{3}-Y{4}-Z{5}\r\n".format(*speeds) 
         self.send_text(msg)
         rospy.sleep(rospy.Duration(secs=0, nsecs=500))
 
-    def __format_speed(self, speed):
-        return str(int(speed)).zfill(3)
+    def __format_speed_msg(self, speed_comps):
+        for i in range(6):
+            val = speed_comps[i]
+            if speed_comps[i] < config.vibr_min and speed_comps[i] > config.vibr_min / 2:
+                val = config.vibr_min
+            speed_comps[i] = str(int(val)).zfill(3)
+        return speed_comps
 
     def send_text(self, text):
         try:
@@ -110,10 +109,10 @@ class HmiController():
                 m = re.search(regex_pattern, data, re.IGNORECASE)
                 
                 if m: 
-                    #print(self.node_name +"->"+data)
+                    print(self.node_name +"->"+data)
                     p = PoseStamped()
 
-                    p.header.seq = 1
+                    #p.header.seq = 1 # just ID
                     p.header.stamp = rospy.Time.now()
                     p.header.frame_id = "world"
 
