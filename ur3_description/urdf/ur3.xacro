@@ -9,7 +9,7 @@
   <joint name="table_to_camera" type="fixed">
     <parent link="table"/>
     <child link="base_link_camera"/>
-    <origin xyz="0.165 0.94 0.55" rpy="0 ${pi/6} -${pi/2}"/>
+    <origin xyz="-0.4 1.4 1.6" rpy="0 ${pi/6} -${pi/2}"/>
   </joint>
 
   <link name="world" />
@@ -17,31 +17,73 @@
   <link name="table">
     <visual>
       <geometry>
-        <mesh filename="package://ur3_description/meshes/stul.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://ur3_description/meshes/table.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <origin rpy="0 ${-pi/2} 0" xyz="0.47 -0.18 -0.51"/>
+      <origin rpy="0 ${-pi/2} 0" xyz="0.0 0.0 0.0"/>
       <material name="grey">
         <color rgba="0.5 0.5 0.5 1" />
       </material>
     </visual>
     <collision>
       <geometry>
-        <box size="0.56 0.76 0.6"/>
+        <mesh filename="package://ur3_description/meshes/table_collision.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0.205 0.185 -0.295"/>
+      <origin rpy="0 ${-pi/2} 0" xyz="0 0 0 "/>
     </collision>
   </link>
+
+  <link name="table_left_sup">
+    <collision>
+      <geometry>
+        <mesh filename="package://ur3_description/meshes/table_left_sup.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 ${-pi/2} 0" xyz="0 0 0 "/>
+    </collision>
+  </link>
+  <joint name="table_left_sup_j" type="fixed">
+    <parent link="table"/>
+    <child link="table_left_sup"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+    <link name="table_right_sup">
+    <collision>
+      <geometry>
+        <mesh filename="package://ur3_description/meshes/table_right_sup.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 ${-pi/2} 0" xyz="0 0 0 "/>
+    </collision>
+  </link>
+  <joint name="table_right_sup_j" type="fixed">
+    <parent link="table"/>
+    <child link="table_right_sup"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="table_back_sup">
+    <collision>
+      <geometry>
+        <mesh filename="package://ur3_description/meshes/table_back_sup.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 ${-pi/2} 0" xyz="0 0 0 "/>
+    </collision>
+  </link>
+  <joint name="table_back_sup_j" type="fixed">
+    <parent link="table"/>
+    <child link="table_back_sup"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
 
   <joint name="world_to_table" type="fixed">
     <parent link="world"/>
     <child link="table"/>
-    <origin xyz="0 0 0.61" rpy="0 0 0"/>
+    <origin xyz="1 0 0" rpy="0 0 0"/>
   </joint>
 
   <joint name="table_to_robot" type="fixed">
     <parent link="table"/>
     <child link="base_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="-0.58 0.49 0.972" rpy="0 0 0"/>
   </joint>
 
   <link name="force_sensor">

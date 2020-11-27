@@ -3,8 +3,8 @@
 
   <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
   
-  <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" />
-  <xacro:include filename="$(find ur_description)/urdf/ur3.urdf.xacro" />
-  <xacro:ur3_robot prefix="" joint_limited="false" transmission_hw_interface="$(arg transmission_hw_interface)" />
+  <xacro:include filename="$(find ur_e_description)/urdf/common.gazebo.xacro" />
+  <xacro:include filename="$(find ur_e_description)/urdf/ur3e.urdf.xacro" />
+  <xacro:ur3e_robot prefix="" joint_limited="false" transmission_hw_interface="$(arg transmission_hw_interface)" />
 
 </robot>
