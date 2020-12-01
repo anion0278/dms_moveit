@@ -18,12 +18,32 @@ import config
 from functools import partial
 from tf.transformations import *
 import ros_numpy
-import tf
+import tf, tf2_ros
 
 
 debug = False  
 
+
 obj_clearance_param = "/move_group/collision/min_clearance"
+#regex_msg_pattern = "Q\[x(-?\d+.\d+); y(-?\d+.\d+); z(-?\d+.\d+); w(-?\d+.\d+)]" #-C\[s(\d); g(\d); a(\d); m(\d)](?:-O\[(.+)\])?
+#regex_msg_pattern = "Q(-?\d\.\d{2})(-?\d\.\d{2})(-?\d\.\d{2})(-?\d\.\d{2})" #-C\[s(\d); g(\d); a(\d); m(\d)](?:-O\[(.+)\])?
+regex_msg_pattern = "Q(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(\d)(\d)(\d)(\d)"
+
+class SensorCalibration():
+    def __init__(self, sys, gyro, acc, mag):
+        self.sys = int(sys)
+        self.gyro = int(gyro)
+        self.acc = int(acc)
+        self.mag = int(mag)
+    
+    @property
+    def is_ready(self):
+        #Therefore we recommend that as long as Magnetometer is 3/3, and Gyroscope is 3/3, the data can be trusted
+        if self.sys == 3 and self.gyro == 3 and self.acc == 3 and self.mag == 3:
+            pass
+
+    def __str__(self):
+        return "Sys: {0}; Gyro: {1}; Acc: {2}; Mag: {3}".format(self.sys, self.gyro, self.acc, self.mag)
 
 class TimedCommand():
     def __init__(self, intensity, time):
@@ -33,13 +53,14 @@ class TimedCommand():
 class HmiController():
     def __init__(self,
                  device_name,
-                 clearance_hand_suffix,
+                 clearance_hand_suffix, 
+                 is_calib_enabled,
                  rosparam_name="hmi_value"): # TODO PUT INTO CONFIG EVERYWHERE!!!
         self.node_name = device_name.replace("-", "_")
         rospy.init_node(self.node_name)
         self.orient_pub = rospy.Publisher(self.node_name + "_orientation", PoseStamped, queue_size=1)
         self.device = None
-        self.uart = None
+        self.__uart = None
         self.ble = None
         self.device_name = device_name
         self.this_hand_clearance_param = obj_clearance_param + clearance_hand_suffix
@@ -48,16 +69,24 @@ class HmiController():
         rospy.set_param(rosparam_name, 0)
         self.timeouts = 1
         self.clearance_min = 0.15 
-        self.min_vib = config.dist_intensity_min
-        self.max_vib = config.dist_intensity_max
+        self.__min_vib = config.dist_intensity_min
+        self.__max_vib = config.dist_intensity_max
         self.current_orientation = None
+        self.__calib_quality_counter = 0
+        self.__imu_offsets = None
+        self.is_calib_enabled = True
+        self.zero_frame_clib = None
+        self.tf_pub = tf2_ros.TransformBroadcaster() # tf2_ros pubs are more effective
+        self.speed_pub = rospy.Publisher(self.node_name + "_speed", PoseArray, queue_size=1)
 
 
-    def __get_speed_components(self, speed = 150):
+    def __get_speed_components(self, speed = 100):
         speed_comps=[0,0,0,0,0,0]
-        if (self.current_orientation is not None):
+        if self.current_orientation is not None: 
+
             vs = Vector3Stamped(vector = Vector3(x = 1, y = 0, z = 0))
-            # needed an inverse matrix!
+            # needed an inverse matrix!  
+            
             qa = quaternion_inverse(ros_numpy.numpify(self.current_orientation))
             trs = TransformStamped(transform = Transform(rotation = Quaternion(*qa)))
             v = tf2.do_transform_vector3(vs, trs)
@@ -69,8 +98,8 @@ class HmiController():
                     speed_comps[i] = va[i]
                 else: # negative number
                     speed_comps[i + 3] = abs(va[i])
-            print(speed_comps)
-        # TODO speed comps may be visualized in RViz as 3x points of magnitude size 
+            #print(speed_comps)
+        
         return speed_comps
         
 
@@ -79,19 +108,22 @@ class HmiController():
         speeds = self.__format_speed_msg(self.__get_speed_components())
         msg ="X{0}Y{1}Z{2}-X{3}-Y{4}-Z{5}\r\n".format(*speeds) 
         self.send_text(msg)
-        rospy.sleep(rospy.Duration(secs=0, nsecs=500))
+        rospy.sleep(rospy.Duration(secs=0, nsecs=5000))
 
     def __format_speed_msg(self, speed_comps):
-        for i in range(6):
+        for i in range(len(speed_comps)):
             val = speed_comps[i]
             if speed_comps[i] < config.vibr_min and speed_comps[i] > config.vibr_min / 2:
                 val = config.vibr_min
             speed_comps[i] = str(int(val)).zfill(3)
         return speed_comps
 
+    def send_handshake(self):
+        self.send_text("handshake:%s\r\n" % int(self.is_calib_enabled))
+
     def send_text(self, text):
         try:
-            self.uart.write(text)
+            self.__uart.write(text)
             if debug:
                 print(self.__get_time() + " Sent:" + text)
         except Exception as ex:
@@ -103,28 +135,68 @@ class HmiController():
         self.ble.run_mainloop_with(self.__mainloop)
 
     def __recieved_callback(self, data):
-        try:
-            if len(data) > 15:
-                regex_pattern = "Q\[x(-?\d+.\d+); y(-?\d+.\d+); z(-?\d+.\d+); w(-?\d+.\d+)]-C\[s(\d); g(\d); a(\d); m(\d)]"
-                m = re.search(regex_pattern, data, re.IGNORECASE)
-                
-                if m: 
-                    print(self.node_name +"->"+data)
-                    p = PoseStamped()
+        #print(data)
+        match = re.search(regex_msg_pattern, data, re.IGNORECASE)
+        if match: 
+            da = np.array(match.groups())
 
-                    #p.header.seq = 1 # just ID
-                    p.header.stamp = rospy.Time.now()
-                    p.header.frame_id = "world"
+            print(self.node_name +"->"+data)
+            p = PoseStamped()
+            #p.header.seq = 1 # just ID
+            p.header.stamp = rospy.Time.now()
+            p.header.frame_id = "world"
 
-                    current_orient = [float(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4))]
-                    #ROS quaternion -> x,y,z,w
-                    p.pose.orientation = Quaternion(*current_orient)
-                    self.current_orientation = p.pose.orientation
-                    calibration = [m.group(5), m.group(6), m.group(7), m.group(8)]
-                    self.orient_pub.publish(p)
-                    pass
-        except Exception as ex:
-            print(ex) # otherwise the exception is swallowed
+            q_real = ros_numpy.numpify(self.__get_compressed_quarternion(da))
+            inv = quaternion_inverse(ros_numpy.numpify(self.__get_compressed_quarternion(da)))
+            calib = [0.02982404,  0.00994135, -0.99413461, -0.06958942]
+            current = quaternion_multiply(q_real, calib)
+            #current = ros_numpy.numpify(self.__get_compressed_quarternion(da))
+            #ROS quaternion -> x,y,z,w
+            p.pose.orientation = Quaternion(*current)
+            self.current_orientation = p.pose.orientation
+
+            
+            tfs = TransformStamped(transform = Transform(rotation = Quaternion(*q_real)))
+            tfs.header.stamp = rospy.Time.now()
+            tfs.header.frame_id = "world"
+            tfs.child_frame_id = self.device_name+"_real"
+            self.tf_pub.sendTransform(tfs)
+
+            # tfs.transform.rotation = p.pose.orientation
+            # tfs.child_frame_id = self.device_name+"_offset"
+            # self.tf_pub.sendTransform(tfs)
+
+            # both options work correctly, however this one is correct structure
+            tfs.transform.rotation = Quaternion(*calib)
+            tfs.header.frame_id = self.device_name+"_real"
+            tfs.child_frame_id = self.device_name+"_offset"
+            self.tf_pub.sendTransform(tfs)
+
+            if (self.orient_pub.get_num_connections() > 0):
+                self.orient_pub.publish(p)
+
+            calibration = SensorCalibration(da[8], da[9], da[10], da[11])
+            print(str(calibration))
+            # if m.group(9) is not None:
+            #     self.__imu_offsets = filter(None, m.group(9).split(';'))
+            pass 
+
+    def __get_zero_frame_calib(self):
+        # avoid TF for maximum performance
+        q_zero = ros_numpy.numpify(self.current_orientation) #ros_numpy.numpify(Quaternion())
+        q_inv = quaternion_inverse(quaternion_from_euler(0,0,0))
+        q_rel = quaternion_multiply(q_zero, q_inv)
+        return q_rel
+        #trs = TransformStamped(transform = Transform(rotation = Quaternion(*qa)))
+        #v = tf2.do_transform_vector3(vs, trs)
+
+
+    def __get_compressed_quarternion(self, data):
+        floats = [0,0,0,0]
+        for i in range(len(floats)):
+            floats[i] = float(data[i * 2]+'.'+data[i * 2 + 1])
+        q = Quaternion(*floats)
+        return q
 
     def __mainloop(self):
         # TODO wrap external ropspy calls into methods
@@ -160,7 +232,7 @@ class HmiController():
 
         print("Discovering services...")
         UART.discover(device, timeout_sec=self.timeouts)
-        self.uart = UART(device, self.__recieved_callback)
+        self.__uart = UART(device, self.__recieved_callback)
 
         self.__notify_ready()
 
@@ -205,20 +277,21 @@ class HmiController():
                 this_hand_clearance_level = objs_clearance_level
     
             if this_hand_clearance_level < self.clearance_min:
-                vibration_level = (self.max_vib - self.min_vib) * (self.clearance_min -
-                    this_hand_clearance_level) / self.clearance_min + self.min_vib
+                vibration_level = (self.__max_vib - self.__min_vib) * (self.clearance_min -
+                    this_hand_clearance_level) / self.clearance_min + self.__min_vib
                 return vibration_level
             else:
                 return 0
 
     def __notify_ready(self):
+        self.send_handshake()
         # service notifying that HMI is ready
         self.ready_service = rospy.Service(self.node_name + "_service", Empty,None)
         self.send_speed_command(0)
         print("Device %s is ready." % self.device_name)
 
     def read_with_timeout(self, timeout_sec=1):
-        received = self.uart.read(timeout_sec=timeout_sec)
+        received = self.__uart.read(timeout_sec=timeout_sec)
         if received is not None:
             print("Received: {0}".format(received))
         else:
@@ -253,10 +326,12 @@ if __name__ == "__main__":
         os.system("rfkill block bluetooth")
         time.sleep(0.5)
         os.system("rfkill unblock bluetooth")
-        sys.argv.append("hmi-glove-right")
-        sys.argv.append("_right")
+        sys.argv.append("hmi-glove-left")
+        sys.argv.append("_left")
 
     # for arg, i in zip(sys.argv, range(len(sys.argv))):
     #     print("Arg [%s]: %s" % (i, arg))
-    hmi = HmiController(sys.argv[1], sys.argv[2])
+    hmi = HmiController(sys.argv[1], sys.argv[2], is_calib_enabled = True)
     hmi.start()
+
+    
