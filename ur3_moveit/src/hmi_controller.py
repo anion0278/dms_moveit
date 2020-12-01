@@ -17,17 +17,18 @@ import re
 import config
 from functools import partial
 from tf.transformations import *
+from visualization_msgs.msg import *
+from std_msgs.msg import ColorRGBA
 import ros_numpy
 import tf, tf2_ros
 
 
 debug = False  
 
-
 obj_clearance_param = "/move_group/collision/min_clearance"
-#regex_msg_pattern = "Q\[x(-?\d+.\d+); y(-?\d+.\d+); z(-?\d+.\d+); w(-?\d+.\d+)]" #-C\[s(\d); g(\d); a(\d); m(\d)](?:-O\[(.+)\])?
-#regex_msg_pattern = "Q(-?\d\.\d{2})(-?\d\.\d{2})(-?\d\.\d{2})(-?\d\.\d{2})" #-C\[s(\d); g(\d); a(\d); m(\d)](?:-O\[(.+)\])?
 regex_msg_pattern = "Q(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(\d)(\d)(\d)(\d)"
+
+i_quat = Quaternion(0,0,0,1) # identity quaternion
 
 class SensorCalibration():
     def __init__(self, sys, gyro, acc, mag):
@@ -77,7 +78,18 @@ class HmiController():
         self.is_calib_enabled = True
         self.zero_frame_clib = None
         self.tf_pub = tf2_ros.TransformBroadcaster() # tf2_ros pubs are more effective
-        self.speed_pub = rospy.Publisher(self.node_name + "_speed", PoseArray, queue_size=1)
+        self.speed_pub = rospy.Publisher(self.node_name + "_markers", MarkerArray, queue_size=1)
+        self.__real_frame = self.device_name+"_real"
+        self.__calibr_frame = self.device_name+"_offset"
+        self.__k = 1 # marker size
+        self.__marker_scale = Vector3(self.__k* 0.05, self.__k*0.1, 0)
+        if "left" in self.device_name: #TODO put this logic into config
+            col = config.color_left
+        if "right" in self.device_name:
+            col = config.color_right
+        col.append(0.7) # alpha
+        self.__marker_color = ColorRGBA(*col)
+        pass
 
 
     def __get_speed_components(self, speed = 100):
@@ -89,8 +101,11 @@ class HmiController():
             
             qa = quaternion_inverse(ros_numpy.numpify(self.current_orientation))
             trs = TransformStamped(transform = Transform(rotation = Quaternion(*qa)))
-            v = tf2.do_transform_vector3(vs, trs)
-            va = speed * ros_numpy.numpify(v.vector)
+            v = tf2.do_transform_vector3(vs, trs).vector
+            va = speed * ros_numpy.numpify(v)
+
+            if (self.speed_pub.get_num_connections() > 0):
+                self.__publish_speed_markers(v)
 
             # components x, y, z, -x, -y, -z
             for i in range(len(speed_comps) / 2):
@@ -99,9 +114,25 @@ class HmiController():
                 else: # negative number
                     speed_comps[i + 3] = abs(va[i])
             #print(speed_comps)
-        
         return speed_comps
         
+    def __publish_speed_markers(self, speed_vec): # TODO possible more refact.
+        points1 = [Point(), Point(x = self.__k * speed_vec.x)]
+        m1 = self.__get_arrow(points1, "x", 1)
+
+        points2 = [Point(), Point(y = self.__k * speed_vec.y)]
+        m2 = self.__get_arrow(points2, "y", 2)
+
+        points3 = [Point(), Point(z = self.__k * speed_vec.z)]
+        m3 = self.__get_arrow(points3, "z", 3)
+
+        ma = MarkerArray(markers = [m1, m2, m3])
+        self.speed_pub.publish(ma)
+
+    def __get_arrow(self, points, ns, id):
+        m = Marker(type = Marker.ARROW, pose = Pose(orientation = i_quat), action = Marker.ADD, scale = self.__marker_scale, color = self.__marker_color, points = points , ns = ns, id = id)
+        m.header.frame_id = self.__calibr_frame
+        return m
 
     def send_speed_command(self, speed):
         rospy.set_param("debug_"+self.node_name, speed)
@@ -167,6 +198,7 @@ class HmiController():
             # self.tf_pub.sendTransform(tfs)
 
             # both options work correctly, however this one is correct structure
+            # publish only if Debug? need it for Markers
             tfs.transform.rotation = Quaternion(*calib)
             tfs.header.frame_id = self.device_name+"_real"
             tfs.child_frame_id = self.device_name+"_offset"
@@ -177,19 +209,7 @@ class HmiController():
 
             calibration = SensorCalibration(da[8], da[9], da[10], da[11])
             print(str(calibration))
-            # if m.group(9) is not None:
-            #     self.__imu_offsets = filter(None, m.group(9).split(';'))
             pass 
-
-    def __get_zero_frame_calib(self):
-        # avoid TF for maximum performance
-        q_zero = ros_numpy.numpify(self.current_orientation) #ros_numpy.numpify(Quaternion())
-        q_inv = quaternion_inverse(quaternion_from_euler(0,0,0))
-        q_rel = quaternion_multiply(q_zero, q_inv)
-        return q_rel
-        #trs = TransformStamped(transform = Transform(rotation = Quaternion(*qa)))
-        #v = tf2.do_transform_vector3(vs, trs)
-
 
     def __get_compressed_quarternion(self, data):
         floats = [0,0,0,0]
@@ -286,7 +306,7 @@ class HmiController():
     def __notify_ready(self):
         self.send_handshake()
         # service notifying that HMI is ready
-        self.ready_service = rospy.Service(self.node_name + "_service", Empty,None)
+        self.ready_service = rospy.Service(self.node_name + "_service", Empty, None)
         self.send_speed_command(0)
         print("Device %s is ready." % self.device_name)
 
@@ -305,14 +325,13 @@ class HmiController():
             return first_hand_name.replace("right", "left")
         raise AttributeError("Check hand name!")
 
-    def __on_exit(self):
-        print("Disconnecting... *It is possible to set lower timeout*")
+    def __on_exit(self): # TODO investigate
+        print("Disconnecting... *It is possible to set lower timeout in uart.py*")
         try:
             from Adafruit_BluefruitLE.services import UART
-            # it is not possible to connect again after disconnection!!! Only restart
             UART.disconnect_devices()
         except:
-            pass  # nevermind it
+            pass  # if did not connect
 
     def __get_time(self):
         return datetime.now().strftime("%H:%M:%S.%f")[:-3]
@@ -329,8 +348,8 @@ if __name__ == "__main__":
         sys.argv.append("hmi-glove-left")
         sys.argv.append("_left")
 
-    # for arg, i in zip(sys.argv, range(len(sys.argv))):
-    #     print("Arg [%s]: %s" % (i, arg))
+    for arg, i in zip(sys.argv, range(len(sys.argv))):
+        print("Arg [%s]: %s" % (i, arg))
     hmi = HmiController(sys.argv[1], sys.argv[2], is_calib_enabled = True)
     hmi.start()
 
