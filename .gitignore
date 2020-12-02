@@ -976,3 +976,4 @@ ur3_moveit/src/measurements MAIN/Planner/STRIDE_measurement.txt
 ur3_moveit/src/measurements MAIN/Planner/STRIDE_short_successful_attempts_measurement.txt
 ur3_moveit/src/measurements MAIN/Planner/TRRT_measurement.txt
 ur3_moveit/src/measurements MAIN/Planner/TRRT_short_successful_attempts_measurement.txt
+ur3_moveit/src/hmi_visualisation.pyc

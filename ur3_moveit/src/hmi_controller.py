@@ -16,18 +16,17 @@ import time
 import re
 from functools import partial
 from tf.transformations import *
-from visualization_msgs.msg import *
-from std_msgs.msg import ColorRGBA
+
 import ros_numpy
 import tf, tf2_ros
 
 import config
+import hmi_visualisation as vis
 
 
 debug = False  
 obj_clearance_param = "/move_group/collision/min_clearance"
 regex_msg_pattern = "Q(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(\d)(\d)(\d)(\d)"
-i_quat = Quaternion(0,0,0,1) # identity quaternion
 
 class SensorCalibration():
     def __init__(self, sys, gyro, acc, mag):
@@ -77,19 +76,14 @@ class HmiController():
         self.is_calib_enabled = True
         self.zero_frame_clib = None
         self.tf_pub = tf2_ros.TransformBroadcaster() # tf2_ros pubs are more effective
-        self.speed_pub = rospy.Publisher(self.node_name + "_markers", MarkerArray, queue_size=1)
         self.__real_frame = self.device_name+"_real"
         self.__calibr_frame = self.device_name+"_offset"
-        self.__k = 1 # marker size
-        self.__marker_scale = Vector3(self.__k* 0.05, self.__k*0.1, 0)
         if "left" in self.device_name: #TODO put this logic into config
-            col = config.color_left
+            color = config.color_left
         if "right" in self.device_name:
-            col = config.color_right
-        col.append(0.7) # alpha
-        self.__marker_color = ColorRGBA(*col)
-        pass
-
+            color = config.color_right
+        color.append(0.7) # alpha
+        self.__visualizer = vis.RVizVisualiser(color, self.node_name + "_markers", self.__calibr_frame, 1.0)
 
     def __get_speed_components(self, speed = 100):
         speed_comps=[0,0,0,0,0,0]
@@ -103,8 +97,7 @@ class HmiController():
             v = tf2.do_transform_vector3(vs, trs).vector
             va = speed * ros_numpy.numpify(v)
 
-            if (self.speed_pub.get_num_connections() > 0):
-                self.__publish_speed_markers(v)
+            self.__visualizer.publish_if_required(v)
 
             # components x, y, z, -x, -y, -z
             for i in range(len(speed_comps) / 2):
@@ -114,30 +107,6 @@ class HmiController():
                     speed_comps[i + 3] = abs(va[i])
             #print(speed_comps)
         return speed_comps
-        
-    def __publish_speed_markers(self, speed_vec): # TODO possible more refact.
-        points1 = [Point(), Point(x = self.__k * speed_vec.x)]
-        m1 = self.__get_arrow(points1, "x", 1)
-
-        points2 = [Point(), Point(y = self.__k * speed_vec.y)]
-        m2 = self.__get_arrow(points2, "y", 2)
-
-        points3 = [Point(), Point(z = self.__k * speed_vec.z)]
-        m3 = self.__get_arrow(points3, "z", 3)
-
-        ma = MarkerArray(markers = [m1, m2, m3])
-        self.speed_pub.publish(ma)
-
-    def __get_arrow(self, points, ns, id):
-        m = Marker(type = Marker.ARROW, 
-                    pose = Pose(orientation = i_quat), 
-                    action = Marker.ADD,
-                    scale = self.__marker_scale, 
-                    color = self.__marker_color, 
-                    points = points , 
-                    ns = ns, id = id)
-        m.header.frame_id = self.__calibr_frame
-        return m
 
     def send_speed_command(self, speed):
         rospy.set_param("debug_"+self.node_name, speed)
