@@ -8,12 +8,13 @@ import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import message_filters
-import robot_driver
 import numpy as np
 from scipy.spatial import distance
-import task_commander as com
 import sys
 from geometry_msgs.msg import Quaternion, PoseStamped
+
+import task_commander as com
+import robot_driver
 
 debug = False
 

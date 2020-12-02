@@ -14,7 +14,6 @@ from std_srvs.srv import Empty
 import os
 import time
 import re
-import config
 from functools import partial
 from tf.transformations import *
 from visualization_msgs.msg import *
@@ -22,12 +21,12 @@ from std_msgs.msg import ColorRGBA
 import ros_numpy
 import tf, tf2_ros
 
+import config
+
 
 debug = False  
-
 obj_clearance_param = "/move_group/collision/min_clearance"
 regex_msg_pattern = "Q(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(\d)(\d)(\d)(\d)"
-
 i_quat = Quaternion(0,0,0,1) # identity quaternion
 
 class SensorCalibration():
@@ -130,7 +129,13 @@ class HmiController():
         self.speed_pub.publish(ma)
 
     def __get_arrow(self, points, ns, id):
-        m = Marker(type = Marker.ARROW, pose = Pose(orientation = i_quat), action = Marker.ADD, scale = self.__marker_scale, color = self.__marker_color, points = points , ns = ns, id = id)
+        m = Marker(type = Marker.ARROW, 
+                    pose = Pose(orientation = i_quat), 
+                    action = Marker.ADD,
+                    scale = self.__marker_scale, 
+                    color = self.__marker_color, 
+                    points = points , 
+                    ns = ns, id = id)
         m.header.frame_id = self.__calibr_frame
         return m
 

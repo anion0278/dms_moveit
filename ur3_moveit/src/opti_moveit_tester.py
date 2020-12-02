@@ -1,14 +1,11 @@
 #!/usr/bin/python
 
 import time
-import robot_driver
 import rospy
 import os
 import subprocess
 import rospkg
 import yaml
-import ros_process
-import logger as log
 from gazebo_msgs.srv import GetWorldProperties, GetModelState
 from std_srvs.srv import Empty
 from StringIO import StringIO
@@ -16,7 +13,10 @@ import rospkg
 import argparse
 import sys
 
+import opti_logger as log
 import pyswarm
+import util_ros_process as ros_process
+import robot_driver
 
 current_script_path = os.path.dirname(os.path.realpath(__file__))
 measurements_dir = os.path.join(current_script_path, "measurements")

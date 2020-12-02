@@ -7,8 +7,6 @@ import moveit_commander
 from math import pi
 import time
 import os
-import ros_process
-
 from std_msgs.msg import String
 from std_srvs.srv import Empty
 import moveit_msgs.msg
@@ -16,10 +14,11 @@ import geometry_msgs.msg
 from geometry_msgs.msg import Point, Quaternion, PoseStamped
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
-import timeout
 import rosnode
-
 from controller_manager_msgs.srv import SwitchController, SwitchControllerRequest, SwitchControllerResponse
+
+import util_timeout as timeout
+import util_ros_process as ros_process
 
 home_position = "Home"
 group_name = "manipulator"
@@ -73,7 +72,6 @@ def restart_moveit_node():
             print("Killing move group node")
             rosnode.kill_nodes(["/move_group"])
             ros_process.kill_process_by_name("move_group")
-            rosnode.rosnode_cleanup(override=True)
             time.sleep(1)
             rospy.wait_for_service("/move_group/load_map", timeout=5)
             rospy.wait_for_service("/move_group/trajectory_execution/set_parameters", timeout=1)

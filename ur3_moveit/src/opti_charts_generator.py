@@ -4,14 +4,15 @@ import os
 import re
 import matplotlib.pyplot as plt
 import json
-import moveit_tester
 from functools import reduce
 import collections
-import data_reader
 from statistics import mean
 from matplotlib.pyplot import cm
 import matplotlib.lines as mlines
 from difflib import SequenceMatcher
+
+import opti_moveit_tester
+import opti_data_reader
 
 plt.rcdefaults()
 
@@ -113,8 +114,8 @@ class ResultPlotter:
         plt.close(figure)
 
     def plot_all(self):
-        self.show_relative_performances(moveit_tester.movements, self.reader, "Planner")
-        self.show_durations_box_plots(moveit_tester.movements, self.reader)
+        self.show_relative_performances(opti_moveit_tester.movements, self.reader, "Planner")
+        self.show_durations_box_plots(opti_moveit_tester.movements, self.reader)
         success_statistics = self.reader.get_success_statistics()
         self.show_bar_plot(success_statistics,
                            title="Success probability",
@@ -154,7 +155,7 @@ class ResultPlotter:
             max_duration = max(plan_durations.values())
             min_duration = min(plan_durations.values())
             for key, value in sorted(plan_durations.items()):
-                rel_value = moveit_tester.calculate_relative(
+                rel_value = opti_moveit_tester.calculate_relative(
                     value, min_duration, max_duration)
                 if not (key in relative_performances):
                     relative_performances[key] = []
@@ -165,7 +166,7 @@ class ResultPlotter:
             max_exec_duration = max(execution_durations.values())
             min_exec_duration = min(execution_durations.values())
             for key, value in execution_durations.items():
-                rel_value = moveit_tester.calculate_relative(
+                rel_value = opti_moveit_tester.calculate_relative(
                     value, min_exec_duration, max_exec_duration)
                 if not (key in relative_performances):
                     relative_performances[key] = []
@@ -209,7 +210,7 @@ class ResultPlotter:
         fig, axis = plt.subplots(figsize=(12, 4.5))
 
         members_labels = []
-        for label in moveit_tester.movements:
+        for label in opti_moveit_tester.movements:
             members_labels.append("Plan " + label)
             members_labels.append("Execute " + label)
         members_labels.append("Success")
@@ -262,7 +263,7 @@ class ResultPlotter:
         self.show_figure(fig)
 
 
-reader = data_reader.MeasurementsReader(measurements_dir)
+reader = opti_data_reader.MeasurementsReader(measurements_dir)
 reader.parse_all_measurements()
 
 plotter = ResultPlotter(reader)

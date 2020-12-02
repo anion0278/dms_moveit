@@ -2,33 +2,34 @@
 import os
 import sys
 import subprocess
-import ros_process
-import moveit_tester
 import rospy
 import time
-import logger
-import pyswarm
-import robot_driver
-
 from statistics import mean
 from collections import OrderedDict
+
+import pyswarm
+
+import robot_driver
+import opti_logger
+import opti_moveit_tester
+
 
 current_script_path = os.path.dirname(os.path.realpath(__file__))
 
 repetitions = 5
 
 actions_min_max_vals = {
-    moveit_tester.plan_param_name + moveit_tester.movements[0]: (0.074, 0.33),
-    moveit_tester.exec_param_name + moveit_tester.movements[0]: (2.8, 9.59),
-    moveit_tester.plan_param_name + moveit_tester.movements[1]: (0.051, 0.344),
-    moveit_tester.exec_param_name + moveit_tester.movements[1]: (2.685, 9.94),
-    moveit_tester.plan_param_name + moveit_tester.movements[2]: (0.05, 0.4),
-    moveit_tester.exec_param_name + moveit_tester.movements[2]: (2.68, 10),
+    opti_moveit_tester.plan_param_name + opti_moveit_tester.movements[0]: (0.074, 0.33),
+    opti_moveit_tester.exec_param_name + opti_moveit_tester.movements[0]: (2.8, 9.59),
+    opti_moveit_tester.plan_param_name + opti_moveit_tester.movements[1]: (0.051, 0.344),
+    opti_moveit_tester.exec_param_name + opti_moveit_tester.movements[1]: (2.685, 9.94),
+    opti_moveit_tester.plan_param_name + opti_moveit_tester.movements[2]: (0.05, 0.4),
+    opti_moveit_tester.exec_param_name + opti_moveit_tester.movements[2]: (2.68, 10),
 }
 
 __pso_cycle = 0
 pso_swarm_size = 20
-logger = logger.MeasurementLogger("PSO", "Values", current_script_path)
+logger = opti_logger.MeasurementLogger("PSO", "Values", current_script_path)
 
 planner = "RRTConnect" #"BiTRRT" 
 
@@ -66,19 +67,19 @@ def get_overal_preformance(parameters):
 
 
 def calculate_fittness(averages):
-    for movement in moveit_tester.movements:
-        plan_name = moveit_tester.plan_param_name+movement
-        exec_name = moveit_tester.exec_param_name+movement
+    for movement in opti_moveit_tester.movements:
+        plan_name = opti_moveit_tester.plan_param_name+movement
+        exec_name = opti_moveit_tester.exec_param_name+movement
 
         if averages[plan_name] == 0 or averages[exec_name] == 0:
             averages[plan_name] = averages[exec_name] = 1000
 
-        averages[plan_name] = moveit_tester.calculate_relative(
+        averages[plan_name] = opti_moveit_tester.calculate_relative(
             averages[plan_name],
             actions_min_max_vals[plan_name][0],
             actions_min_max_vals[plan_name][1])
 
-        averages[exec_name] = moveit_tester.calculate_relative(
+        averages[exec_name] = opti_moveit_tester.calculate_relative(
             averages[exec_name],
             actions_min_max_vals[exec_name][0],
             actions_min_max_vals[exec_name][1])
@@ -90,13 +91,13 @@ def calculate_fittness(averages):
 
 def update_averages(cycle, averages):
     k = 10
-    if rospy.get_param(moveit_tester.success_param_name):
+    if rospy.get_param(opti_moveit_tester.success_param_name):
         averages["success"] += 1
         k = 1   
 
-    for movement in moveit_tester.movements:
-        plan_name = moveit_tester.plan_param_name+movement
-        exec_name = moveit_tester.exec_param_name+movement
+    for movement in opti_moveit_tester.movements:
+        plan_name = opti_moveit_tester.plan_param_name+movement
+        exec_name = opti_moveit_tester.exec_param_name+movement
         if cycle == 0:
             averages[plan_name] = rospy.get_param(plan_name)
             averages[exec_name] = rospy.get_param(exec_name)
@@ -112,10 +113,10 @@ def get_averages_container():
 
 
 def initialize_meas_params():
-    rospy.set_param(moveit_tester.success_param_name, False)
-    for movement in moveit_tester.movements:
-        plan_name = moveit_tester.plan_param_name+movement
-        exec_name = moveit_tester.exec_param_name+movement
+    rospy.set_param(opti_moveit_tester.success_param_name, False)
+    for movement in opti_moveit_tester.movements:
+        plan_name = opti_moveit_tester.plan_param_name+movement
+        exec_name = opti_moveit_tester.exec_param_name+movement
         rospy.set_param(plan_name, 0)
         rospy.set_param(exec_name, 0)
 
@@ -126,7 +127,7 @@ if __name__ == "__main__":
     lower_boundaries = [0.01, 1, 0.001]
     upper_boundaries = [0.1, 200, 0.01]
 
-    tester = moveit_tester.ParametersTester(moveit_tester.tested_parameters, 1, is_obstacle_present=True, sim_env=True)
+    tester = opti_moveit_tester.ParametersTester(opti_moveit_tester.tested_parameters, 1, is_obstacle_present=True, sim_env=True)
     tester.start()
 
     # just initialization

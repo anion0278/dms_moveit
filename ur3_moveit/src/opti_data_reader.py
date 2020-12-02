@@ -4,9 +4,10 @@ import os
 import re
 import matplotlib.pyplot as plt
 import json
-import moveit_tester
 from functools import reduce
 import collections
+
+import opti_moveit_tester
 
 
 successful_attempts_name = "_short_successful_attempts_measurement.txt"
@@ -39,7 +40,7 @@ class VariantMeasurementSeries:
     @property
     def success_rate(self):
         # FIXME should read value from file! because it could have changed
-        return len(self.measurements) / float(moveit_tester.test_repetitions)
+        return len(self.measurements) / float(opti_moveit_tester.test_repetitions)
 
     def get_average_execution_time_for_point(self, point_num):
         return self.__get_average_time(point_num, lambda x: x.execution_time)

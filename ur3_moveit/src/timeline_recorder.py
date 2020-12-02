@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 import roslaunch
-import ros_process
 import rospy
 import os
 import csv
-import config
 import numpy as np
+
+import config
+import util_ros_process as ros_process
 
 rospy.init_node('timeline_recorder', anonymous=True)
 

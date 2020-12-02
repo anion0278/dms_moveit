@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import robot_driver as r
 import rospy
 import sys
+
+import robot_driver as r
 import config
 
 hmi_status_param = "hmi_value"

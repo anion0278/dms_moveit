@@ -4,9 +4,10 @@ import matplotlib.colors as mcolors
 import matplotlib.cm as cm
 import csv
 import os
-import config as c
 from matplotlib.patches import ConnectionPatch
 from matplotlib.pyplot import text as pytext
+
+import config as c
 
 class meas():
        def __init__(self, name, y_label, color, max_val = 100, extra_y_ticks = None, y_ticks = None, is_num = True):

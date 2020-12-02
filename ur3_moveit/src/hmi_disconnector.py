@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import roslaunch
-import ros_process
 import rospy
 import Adafruit_BluefruitLE
 from Adafruit_BluefruitLE.services import UART
