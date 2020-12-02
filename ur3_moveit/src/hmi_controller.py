@@ -16,7 +16,7 @@ import time
 import re
 from functools import partial
 from tf.transformations import *
-
+from std_srvs.srv import Trigger
 import ros_numpy
 import tf, tf2_ros
 
@@ -65,7 +65,7 @@ class HmiController():
         self.this_hand_clearance_param = obj_clearance_param + clearance_hand_suffix
         self.second_hand_clearance_param = self.__get_second_hand_name(self.this_hand_clearance_param)
         self.hmi_status_param = rosparam_name
-        rospy.set_param(rosparam_name, 0)
+        rospy.set_param(rosparam_name, 0) # TODO abstraction 
         self.timeouts = 1
         self.clearance_min = 0.15 
         self.__min_vib = config.dist_intensity_min
@@ -78,6 +78,7 @@ class HmiController():
         self.tf_pub = tf2_ros.TransformBroadcaster() # tf2_ros pubs are more effective
         self.__real_frame = self.device_name+"_real"
         self.__calibr_frame = self.device_name+"_offset"
+        self.calibr_service = None # service for calibrating Frame
         if "left" in self.device_name: #TODO put this logic into config
             color = config.color_left
         if "right" in self.device_name:
@@ -160,7 +161,6 @@ class HmiController():
             p.pose.orientation = Quaternion(*current)
             self.current_orientation = p.pose.orientation
 
-            
             tfs = TransformStamped(transform = Transform(rotation = Quaternion(*q_real)))
             tfs.header.stamp = rospy.Time.now()
             tfs.header.frame_id = "world"
@@ -223,7 +223,6 @@ class HmiController():
             finally:
                 adapter.stop_scan()
             
-
         print("Discovering services...")
         UART.discover(device, timeout_sec=self.timeouts)
         self.__uart = UART(device, self.__recieved_callback)
@@ -280,7 +279,7 @@ class HmiController():
     def __notify_ready(self):
         self.send_handshake()
         # service notifying that HMI is ready
-        self.ready_service = rospy.Service(self.node_name + "_service", Empty, None)
+        self.calibr_service = rospy.Service(self.node_name + "_service", Empty, None)
         self.send_speed_command(0)
         print("Device %s is ready." % self.device_name)
 

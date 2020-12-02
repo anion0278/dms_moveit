@@ -37,11 +37,11 @@ class Commander():
         self.set_goal_name("none")
         pass
 
-    def wait_for_hmi(self):
-        print("HMI: Waiting for RIGHT HMI")
-        rospy.wait_for_service("hmi_glove_right_service")
-        print("HMI: Waiting for LEFT HMI")
-        rospy.wait_for_service("hmi_glove_left_service")
+    def wait_for_hmi(self): # TODO ubiquitus names for whole ROS system
+        print("HMI: Waiting for Right HMI")
+        rospy.wait_for_service("hmi_glove_right" + config.calibr_service)
+        print("HMI: Waiting for Left HMI")
+        rospy.wait_for_service("hmi_glove_left_service" + config.calibr_service)
 
     def move_to(self, pose, retreat_on_fail=True):
         if isinstance(pose, str):
@@ -79,7 +79,7 @@ class Commander():
         return success
 
     def replan(self):
-        #set_env_change(True)
+        #set_env_change(True) # Depends on whether usual Planning is also change of plan
         result = self.robot_driver.perform_planning()
         #set_env_change(False)
         return result
@@ -111,13 +111,12 @@ class Commander():
         rospy.set_param("/replan", True)
         rospy.set_param("/env_change_impulse", True)
         rospy.set_param(hmi_status_param, config.status_replan)
-        #rospy.sleep(duration=0.3)
         rospy.set_param("/replan", False)
 
     def status_ok(self):
         rospy.set_param(hmi_status_param, 0)
 
-    def demo(self):
+    def demo_task(self):
         while True:
             try:
                 commander.move_to(r.home_position)
@@ -140,4 +139,4 @@ if __name__ == "__main__":
     args = rospy.myargv(argv=sys.argv)
     wait_for_hmi = args[1] if len(args) > 1 else False
     commander = Commander(driver, wait_for_hmi, num_attempts=0) # 0 attempts -> infinite
-    commander.demo()
+    commander.demo_task()

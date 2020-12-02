@@ -16,3 +16,4 @@ vibr_min = 60
 color_left = [0, 0, 1]
 color_right = [1, 0, 0]
 
+calibr_service = "_frame_calibration"

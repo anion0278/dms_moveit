@@ -24,6 +24,7 @@ home_position = "Home"
 group_name = "manipulator"
 clear_octomap_service = "/clear_octomap"
 state_validity_service = "/check_state_validity"
+
 class NamedJointPose():
     def __init__(self, joint_angles, name):
         self.pose = joint_angles
@@ -63,25 +64,6 @@ joint_pose_B = NamedJointPose([1.012419230110138,
                                -1.5601357714877526,
                                1.3836915426267309],
                               "Pose B")
-
-
-def restart_moveit_node():
-    success = False
-    while success is False:
-        try:
-            print("Killing move group node")
-            rosnode.kill_nodes(["/move_group"])
-            ros_process.kill_process_by_name("move_group")
-            time.sleep(1)
-            rospy.wait_for_service("/move_group/load_map", timeout=5)
-            rospy.wait_for_service("/move_group/trajectory_execution/set_parameters", timeout=1)
-            rospy.wait_for_service("/check_state_validity", timeout=1)
-            rospy.wait_for_service(clear_octomap_service, timeout=5)
-            service = rospy.ServiceProxy(clear_octomap_service, Empty)
-            timeout.action_with_timeout(service, 5)
-            success = True
-        except Exception as ex:
-            success = False
 
 
 def set_dynamic_params(params):
@@ -137,15 +119,7 @@ class RobotDriver:
         print("Octomap clearing...")
         self.__clear_octomap_service()
 
-    def __del__(self):
-        self.cleanup()
-        del self.robot
-        del self.scene
-        del self.move_group
-        os.system("rosnode cleanup")
-
     # returns measured time - for planning and for execution
-
     def move_to_pose(self, target):
         self.set_target_pose(target)
         if not self.perform_planning(): return False
@@ -158,10 +132,8 @@ class RobotDriver:
     def set_target_pose(self, target):
         if (isinstance(target, str)):
             self.move_group.set_named_target(target)
-
         if (isinstance(target, NamedJointPose)):
             self.move_group.set_joint_value_target(target.pose)
-
         if (isinstance(target, NamedPointPose)):
             self.move_group.set_pose_target(target.pose)
 
