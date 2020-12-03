@@ -6,10 +6,6 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
-#include <Adafruit_LittleFS.h>
-#include <InternalFileSystem.h>
-
-using namespace Adafruit_LittleFS_Namespace;
 
 //const char* deviceName = "hmi-glove-right";
 const char* deviceName = "hmi-glove-left";
@@ -18,9 +14,6 @@ BLEDfu  bledfu;  // OTA DFU service
 BLEDis  bledis;  // device information
 BLEUart bleuart; // uart over ble
 BLEBas  blebas;  // battery
-
-#define CALIBRATION_FILENAME "/offsets.txt"
-File file(InternalFS);
 
 int ledPin = 17;
 float ledSensitivity = 3.5f;
@@ -31,25 +24,22 @@ uint8_t buf[BUF_LENGTH];
 short digits = 2;
 
 const byte NUM_MOTORS = 6;
-// motors X, Y, Z, -X, -Y, -Z
-int motorPins[NUM_MOTORS] = {PIN_A3,PIN_A5,PIN_A1,PIN_A4,PIN_A2,PIN_A0};
-// TODO if pins are different in left and right versions -> make simple if(deviceName contains "left"/ right)
-
-int motorVals[NUM_MOTORS];
-int stop_m[NUM_MOTORS] = {0,0,0,0,0,0};
+int motorPins[NUM_MOTORS];
 
 unsigned long prevRecTime, prevSendTime, currentTime;
 int disconnectionTimeoutMs = 1000;
 int sendIntervalMs = 30;
 
 const byte NUM_OFFSETS = NUM_BNO055_OFFSET_REGISTERS; 
-uint8_t offsets [NUM_OFFSETS]; // = {8,2,3,4,5,6,7,8,9,10,11,12,13,14,45,16,78,18,19,20,21,22};
+uint8_t offsets [NUM_OFFSETS]; 
 
 Adafruit_BNO055 bno;
 
 bool hasHandshake = false;
 bool canRecalibrate = false;
-String handshake = "handshake:";
+
+String offsetsRequest = "request-offsets";
+String offsetsUpdate = "offsets:";
 
 void SetupBle()
 {
@@ -63,8 +53,6 @@ void SetupBle()
 
   bledfu.begin();// To be consistent OTA DFU should be added first if it exists
 
-  //Bluefruit.Periph.setConnectCallback(connect_callback);
-
   bledis.setManufacturer("VSB-TUO 354");
   bledis.setModel(deviceName);
   bledis.begin();
@@ -77,42 +65,19 @@ void SetupBle()
   Serial.println("BLE OK");
 }
 
-// CHECK IT OUT !!!!!!
-//void connect_callback(uint16_t conn_handle)
-//{
-//  BLEConnection* conn = Bluefruit.Connection(conn_handle);
-//  Serial.println("Connected");
-//
-//  // request PHY changed to 2MB
-//  Serial.println("Request to change PHY");
-//  conn->requestPHY();
-//
-//  // request to update data length
-//  Serial.println("Request to change Data Length");
-//  conn->requestDataLengthUpdate();
-//    
-//  // request mtu exchange
-//  Serial.println("Request to change MTU");
-//  conn->requestMtuExchange(247);
-//
-//  // request connection interval of 7.5 ms
-//  //conn->requestConnectionParameter(6); // in unit of 1.25
-//
-//  // delay a bit for all the request to complete
-//  delay(1000);
-////}
-//
-//void disconnect_callback(uint16_t conn_handle, uint8_t reason)
-//{
-//  (void) conn_handle;
-//  (void) reason;
-//
-//  Serial.println();
-//  Serial.print("Disconnected, reason = 0x"); Serial.println(reason, HEX);
-//}
-
 void SetupMotors()
 {
+  if (String(deviceName).indexOf("right") != -1)
+  {
+    // motors X, Y, Z, -X, -Y, -Z
+    int motorPins[NUM_MOTORS] = {PIN_A3,PIN_A5,PIN_A1,PIN_A4,PIN_A2,PIN_A0};
+  }
+  if (String(deviceName).indexOf("left") != -1)
+  {
+    // motors X, Y, Z, -X, -Y, -Z
+    int motorPins[NUM_MOTORS] = {PIN_A3,PIN_A5,PIN_A1,PIN_A4,PIN_A2,PIN_A0};
+  }
+  // exception on incorrect name is by design
   for (byte i = 0; i < NUM_MOTORS; i++) 
   {
     SetupPwmPin(motorPins[i]);
@@ -123,6 +88,7 @@ void SetupMotors()
 
 void StopMotors()
 {
+  int stop_m[NUM_MOTORS] = {0,0,0,0,0,0};
   SetAllMotorsSpeed(stop_m);
 }
 
@@ -135,7 +101,6 @@ void SetupPwmPin(int pin)
 void SetAllMotorsSpeed(int *speedComps)
 {
   analogWrite(ledPin, CalculateLedIntensity(GetMax(speedComps, NUM_MOTORS)));
-
   for (byte i = 0; i < NUM_MOTORS; i++) 
   {
     analogWrite(motorPins[i], speedComps[i]);
@@ -213,6 +178,7 @@ bool ProcessBleUartData()
 {
   bool isMsgRecieved = false;
   String inputString = "";
+  
   int len = 0;
   while ( bleuart.available() )
   {
@@ -222,27 +188,21 @@ bool ProcessBleUartData()
     if (inChar == '\n')
     {
       hasHandshake = true; // any msg, not only handshake
-      if (inputString.charAt(0) == 'X' || inputString.startsWith(handshake))
+      if (inputString.charAt(0) == 'X' || inputString.startsWith(offsetsRequest) 
+        || inputString.startsWith(offsetsUpdate))
       {        
         isMsgRecieved = true; 
         if (inputString.charAt(0) == 'X')
         {
-          ParseSpeedValues(inputString, motorVals);
-          SetAllMotorsSpeed(motorVals);
-          Serial.print("Speed changed: ");
-          for (byte i = 0; i< NUM_MOTORS; i = i +1)
-          {
-            Serial.print(motorVals[i]);
-            Serial.print("; ");
-          }
-          Serial.println();
+          ProcesMotorData(inputString);
         }
-        if (inputString.startsWith(handshake))
-        {
-          if (inputString[handshake.length() + 1] == 1)
-            canRecalibrate = true;
-          else
-            canRecalibrate = false;
+        if (inputString.startsWith(offsetsRequest))
+        {  
+          ProcessImuOffsetsRequest(inputString);
+        }
+        if (inputString.startsWith(offsetsUpdate))
+        { 
+          ProcessOffsetsUpdate(inputString);
         }
       }
       inputString = "";
@@ -252,6 +212,41 @@ bool ProcessBleUartData()
 }
 
 //////////////////////////////////////////////////////////////////////// IMU
+
+void ProcesMotorData(String inputString)
+{
+  int motorVals[NUM_MOTORS];
+  ParseSpeedValues(inputString, motorVals);
+  SetAllMotorsSpeed(motorVals);
+  Serial.print("Speed changed: ");
+  for (byte i = 0; i< NUM_MOTORS; i = i +1) // TODO into method
+  {
+    Serial.print(motorVals[i]);
+    Serial.print("; ");
+  }
+  Serial.println();
+}
+
+void ProcessImuOffsetsRequest(String inputString)
+{
+  String msg = FormatCalibrationStatus() + "-" + FormatOffsets();
+  SendString(msg);
+  Serial.println(msg);
+  delay(10); // 2x message packets!
+}
+
+void ProcessOffsetsUpdate(String inputString)
+{
+  inputString.replace(offsetsUpdate, "");
+  for (byte i = 0; i < NUM_OFFSETS; i++)
+  {
+    offsets[i] = (int8_t)inputString[i];
+    Serial.print(offsets[i]);
+    Serial.print("; ");
+  }
+  bno.setSensorOffsets(offsets);
+  Serial.println("Restored offsets succesfully");
+}
 
 
 void SetupImu()
@@ -280,49 +275,11 @@ void SendImuData()
   // so the packets will be divided 
   // packets over 20 bytes cause errors in long-term (some bug in Bluefruit Firmware)
   String msg = "Q"+String(quat.x(),digits)+String(quat.y(),digits)+String(quat.z(),digits)+String(quat.w(),digits);
-  
   msg.replace(".", "");
-  msg = msg + String(sys) + String(gyro) + String(accel) + String(mag);
-  
-//  
-//  if (bno.isFullyCalibrated())
-//  {
-//    bno.getSensorOffsets(offsets);
-//    //msg = msg + "-O["+FormatOffsets(offsets)+"]";
-//  }
+  msg = msg + FormatCalibrationStatus();
   
   SendString(msg);
 }
-
-bool GetStoredOffsets() 
-{
-  if(file.open(CALIBRATION_FILENAME, FILE_O_READ)) 
-  {
-    file.read(offsets, sizeof(offsets));
-    Serial.print("Got data from file: ");
-    for (byte i = i; i < sizeof(offsets); i++)
-      {Serial.print(offsets[i]); Serial.print(";");}
-    Serial.println(); 
-    file.close();
-    return true;
-  }
-  return false;
-}
-
-void StoreOffsets() 
-{
-  if (file.open(CALIBRATION_FILENAME, FILE_O_WRITE)) 
-  {
-    InternalFS.format();
-    file.write(offsets, sizeof(offsets));
-    file.close();
-    Serial.println("Saved offsets to file");    
-    for (byte i = i; i < sizeof(offsets); i++)
-      {Serial.print(offsets[i]); Serial.print(";");}
-    Serial.println();
-  }
-}
-
 
 void SendString(String &str)
 {
@@ -346,19 +303,27 @@ void SetImuCalibration(const adafruit_bno055_offsets_t &calibData)
     Serial.println("\n\nCalibration data set");
  }
 
+String FormatCalibrationStatus()
+{
+  uint8_t sys, gyro, accel, mag = 0;
+  bno.getCalibration(&sys, &gyro, &accel, &mag);
+  return String(sys) + String(gyro) + String(accel) + String(mag);
+}
+
+
 String FormatCalibration()
 {
     adafruit_bno055_offsets_t currentCalib;
     bno.getSensorOffsets(currentCalib);
 }
 
-String FormatOffsets(const uint8_t *calibData)
+String FormatOffsets()
 {
+  bno.getSensorOffsets(offsets);
   String offsetMsg = "";
   for (byte i=0; i < NUM_OFFSETS; i++)
   {
-    offsetMsg += String(calibData[i]) + ';';
-   // offsetMsg += (char)calibData[i] + ';';
+    offsetMsg += (char)offsets[i];
   }
   Serial.println(offsetMsg);
   return offsetMsg;
@@ -369,11 +334,6 @@ void setup()
   Serial.begin(115200);
   Serial.println("-------------- START -------------\n");
 
-  InternalFS.begin();
-  
-  //StoreOffsets();
-  //GetStoredOffsets();
-  
   SetupImu();
   SetupMotors();
   SetupPwmPin(ledPin);
@@ -412,10 +372,4 @@ void loop()
   }
 
  // Serial.print("Time:"); Serial.println(currentTime);
-
-
-//  if(Bluefruit.connected() && prevRecTime > 0)
-//    Serial.println(millis() - prevRecTime);
-//  else
-//    Serial.println("Not connected yet");
 }

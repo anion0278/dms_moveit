@@ -38,11 +38,3 @@ class RVizVisualiser:
 
         self.pub.publish(ma)
 
-        # more abstracted version, however less comp-effective, just to show that its possible 
-        # ma = MarkerArray() 
-        # for comp, id in zip(speed_vec.__slots__, range(len(speed_vec.__slots__))):
-        #     p2 = Point()
-        #     p2.__setattr__(comp, self.__k * speed_vec.__getattribute__(comp))
-        #     points = [Point(), p2]
-        #     marker = self.__get_arrow(points, comp, id)
-        #     ma.markers.append(marker)
