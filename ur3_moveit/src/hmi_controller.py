@@ -140,14 +140,12 @@ class HmiController():
         self.send_text("offsets:"+offsets)
 
     def send_text(self, text, newline = True):
-        try:
-            if newline:
-                text += "\r\n" 
-            self.__uart.write(text)
-            if debug:
-                print(self.__get_time() + " Sent:" + text)
-        except Exception as ex:
-            print("SENDING {" + text + "} EXCEPTION: " + ex.message)
+        if newline:
+            text += "\r\n" 
+        self.__uart.write(text)
+        if debug:
+            print(self.__get_time() + " Sent:" + text)
+
 
     def start(self):
         self.ble = Adafruit_BluefruitLE.get_provider()
@@ -341,11 +339,15 @@ class HmiController():
             else:
                 return 0
 
+    def send_handshake(self):
+        self.send_text("handshake")
+
     def __notify_ready(self):
-        #self.send_handshake()
         offsets = self.__restore_imu_offsets()
         if offsets is not None:
             self.send_offsets(offsets)
+        else:
+            self.send_handshake()
         # service notifying that HMI is ready
         self.calibr_service = rospy.Service(self.node_name + config.calibr_service, Trigger, self.__calibrate)
         self.send_speed_command(0)
