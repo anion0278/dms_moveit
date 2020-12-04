@@ -99,14 +99,8 @@ class RobotDriver:
         self.clear_octomap()
 
     def update_hmi_obj(self, pose, name, size = 0.1):
-        #  p = PoseStamped()
-        #  p.header.frame_id = frame_id
-        #  p.pose.position.x = center[0]
-        #  p.pose.position.y = center[1]
-        #  p.pose.position.z = center[2]
-        #  p.pose.orientation = Quaternion(0.1, 0.1, 0.1, 0.1) # any
-        #  self.scene.add_sphere(name, p, size * 2)
-         self.scene.add_box(name, pose, (size * 4, size * 3, size * 2))
+        self.scene.add_sphere(name, pose, size * 2)
+        #  self.scene.add_box(name, pose, (size * 4, size * 3, size * 2))
 
     def remove_hmi_obj(self, name):
         self.scene.remove_world_object(name)

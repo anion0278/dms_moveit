@@ -24,12 +24,11 @@ def get_color_range(color_base):
     lower = (color_base - sensitivity, 60, 60)
     return (lower, upper)
 
-# hue is in range 0..179
-right_color_range = get_color_range(60)  #green
-left_color_range = get_color_range(15)  #red
-
-right_border_color = (0, 255, 0)
-left_border_color = (0, 0, 255)
+# hue is in range 0..179 # TODO from config
+right_color_range = get_color_range(15)  #red
+left_color_range = get_color_range(60)  #green
+right_border_color = (0, 0, 255) 
+left_border_color = (0, 255, 0)
 
 blob_min_size = 50
 
@@ -59,7 +58,7 @@ def overlay_circle_on_img(image, pos, color):
                lineType=8,
                shift=0)
 
-def on_data(depth_msg, img_msg, left_pose_msg, right_pose_msg):
+def on_data(depth_msg, img_msg): #, left_pose_msg, right_pose_msg
     img = bridge.imgmsg_to_cv2(img_msg, "bgr8")
     final_size = (img.shape[1] / dwn_smpl, img.shape[0] / dwn_smpl)
     img = cv2.resize(img, final_size)
@@ -78,18 +77,17 @@ def on_data(depth_msg, img_msg, left_pose_msg, right_pose_msg):
 
     if (right_hand is not None):
         publish_hand(depth_img, depth_msg.header, right_hand, right_hmi,
-                     right_pc_pub, right_pose_msg)
+                     right_pc_pub, None) #right_pose_msg
     else:
         driver.remove_hmi_obj(right_hmi)
         publish_emtpy_pc(right_pc_pub, depth_msg.header)
         
     if (left_hand is not None):
         publish_hand(depth_img, depth_msg.header, left_hand, left_hmi,
-                     left_pc_pub, left_pose_msg)
+                     left_pc_pub, None) #left_pose_msg
     else:
         driver.remove_hmi_obj(left_hmi)
         publish_emtpy_pc(left_pc_pub, depth_msg.header)
-
 
     # the topic is not published unless anyone is subcribed
     if (cam_img_pub.get_num_connections() > 0):
@@ -103,7 +101,7 @@ def get_hand_pose(orient_msg, frame_id, center_pos):
     p.pose.position.x = center_pos[0]
     p.pose.position.y = center_pos[1]
     p.pose.position.z = center_pos[2]
-    p.pose.orientation = orient_msg.pose.orientation
+    p.pose.orientation = Quaternion(0, 0, 0, 1)
     return p
 
 
@@ -202,16 +200,16 @@ if __name__ == "__main__":
                                             Image,
                                             queue_size=1)
 
-    left_hmi_sub = message_filters.Subscriber("/hmi_glove_left_orientation",
-                                            PoseStamped,
-                                            queue_size=1)
+    # left_hmi_sub = message_filters.Subscriber("/hmi_glove_left_orientation",
+    #                                         PoseStamped,
+    #                                         queue_size=1)
 
-    right_hmi_sub = message_filters.Subscriber("/hmi_glove_right_orientation",
-                                            PoseStamped,
-                                            queue_size=1)
+    # right_hmi_sub = message_filters.Subscriber("/hmi_glove_right_orientation",
+    #                                         PoseStamped,
+    #                                         queue_size=1)
 
-    sync = message_filters.ApproximateTimeSynchronizer([depth_sub, camera_sub, left_hmi_sub, right_hmi_sub],
-                                                       queue_size=10, # CHECK IF NO MESSAGES ARE CAUGHT
+    sync = message_filters.ApproximateTimeSynchronizer([depth_sub, camera_sub], #, left_hmi_sub, right_hmi_sub
+                                                       queue_size=1, # CHECK IF NO MESSAGES ARE CAUGHT
                                                        slop=0.05)
     sync.registerCallback(on_data)
 

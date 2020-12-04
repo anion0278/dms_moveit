@@ -144,4 +144,8 @@
     <disable_collisions link1="camera2_link" link2="back_wall_link" reason="Never" />
     <disable_collisions link1="camera2_link" link2="left_wall_link" reason="Never" />
 
+
+    <disable_collisions link1="hmi_right" link2="hmi_left" reason="Never" />
+    <disable_collisions link1="hmi_left" link2="hmi_right" reason="Never" />
+
 </robot>
