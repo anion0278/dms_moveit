@@ -13,7 +13,7 @@
   <arg name="spawn_obstacle_4" default="false"/>
   <arg name="sim_paused" default="true"/>
 
-  <arg name="enable_both_hmi" default="true"/>
+  <arg name="enable_both_hmi" default="false"/>
 
   <arg name="xacro_file_name" default="ur3_multicam.xacro"/>
   <arg name="xacro_path" default="$(find ur3_description)/urdf/$(arg xacro_file_name)"/>
@@ -38,7 +38,7 @@
   <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
   <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load joint_group_position_controller" />
   
-   <group if="$(arg enable_both_hmi)">
+  <group if="$(arg enable_both_hmi)">
     <node name="hmi_starter" pkg="ur3_moveit" type="hmi_starter.py" respawn="false" output="screen"/>
   </group>
   <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen" />
@@ -53,10 +53,10 @@
   <group if="$(arg spawn_left_hand)">
     <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
       <arg name="model_name" value="left_hand" />
-      <arg name="x" value="1.56" />
-      <arg name="y" value="0.1" />
-      <arg name="z" value="1.2" />
-      <arg name="yaw" value="0.32" />
+      <arg name="x" value="1.11" />
+      <arg name="y" value="0.61" />
+      <arg name="z" value="1.22" />
+      <arg name="yaw" value="-3.0" />
       <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/hand_left/model.sdf" />
     </include>
   </group>
@@ -64,10 +64,10 @@
   <group if="$(arg spawn_right_hand)">
     <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
       <arg name="model_name" value="right_hand" />
-      <arg name="x" value="1.27" />
-      <arg name="y" value="0.63" />
-      <arg name="z" value="1.2" />
-      <arg name="yaw" value="0.785398" />
+      <arg name="x" value="1.01" />
+      <arg name="y" value="0.88" />
+      <arg name="z" value="1.17" />
+      <arg name="yaw" value="-2.49" />
       <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/hand_right/model.sdf" />
     </include>
   </group>
