@@ -20,6 +20,7 @@ from std_srvs.srv import Trigger, TriggerResponse
 import ros_numpy
 import pickle # replace by json if more readable data format is needed
 import tf, tf2_ros
+import threading
 
 import config
 import hmi_visualisation as vis
@@ -94,14 +95,15 @@ class HmiController():
             color = config.color_right
         color.append(0.7) # alpha
         self.__visualizer = vis.RVizVisualiser(color, self.node_name + "_markers", self.__calibr_frame_id, 1.0)
+        self.__semaphore = threading.Semaphore()
 
     def __get_speed_components(self, speed = 100):
         speed_comps=[0,0,0,0,0,0]
         if self.current_orientation is not None: 
 
             vs = Vector3Stamped(vector = Vector3(x = 1, y = 0, z = 0))
-            # needed an inverse matrix!  
             
+            # needed an inverse matrix!  
             qa = quaternion_inverse(ros_numpy.numpify(self.current_orientation))
             trs = TransformStamped(transform = Transform(rotation = Quaternion(*qa)))
             v = tf2.do_transform_vector3(vs, trs).vector
@@ -123,7 +125,6 @@ class HmiController():
         speeds = self.__format_speed_msg(self.__get_speed_components())
         msg ="X{0}Y{1}Z{2}-X{3}-Y{4}-Z{5}".format(*speeds) 
         self.send_text(msg)
-        rospy.sleep(rospy.Duration(secs=0, nsecs=5000))
 
     def __format_speed_msg(self, speed_comps):
         for i in range(len(speed_comps)):
@@ -142,10 +143,11 @@ class HmiController():
     def send_text(self, text, newline = True):
         if newline:
             text += "\r\n" 
+        self.__semaphore.acquire()
         self.__uart.write(text)
+        self.__semaphore.release()
         if debug:
             print(self.__get_time() + " Sent:" + text)
-
 
     def start(self):
         self.ble = Adafruit_BluefruitLE.get_provider()
@@ -309,6 +311,7 @@ class HmiController():
 
             else:
                 self.send_speed_command(command)
+                rospy.sleep(rospy.Duration(secs=0, nsecs=5000))
 
     def calc_intensity(self):
         # TODO VIBRATION should be proportional to the distance to the future trajectory AND !
@@ -375,14 +378,14 @@ class HmiController():
 
 if __name__ == "__main__":
     
-    #### causes problems TODO solve
+    ### causes problems TODO solve
     if not "node" in sys.argv:
         print("DEBUGGER MODE !!! Will cause error in roslaunch!")
         os.system("rfkill block bluetooth")
         time.sleep(0.5)
         os.system("rfkill unblock bluetooth")
-        sys.argv.append("hmi-glove-left")
-        sys.argv.append("_left")
+        sys.argv.append("hmi-glove-right")
+        sys.argv.append("_right")
 
     for arg, i in zip(sys.argv, range(len(sys.argv))):
         print("Arg [%s]: %s" % (i, arg))
