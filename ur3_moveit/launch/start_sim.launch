@@ -15,7 +15,7 @@
 
   <arg name="enable_both_hmi" default="false"/>
 
-  <arg name="xacro_file_name" default="ur3_multicam.xacro"/>
+  <arg name="xacro_file_name" default="ur3e_workspace.xacro"/>
   <arg name="xacro_path" default="$(find ur3_description)/urdf/$(arg xacro_file_name)"/>
 
   <!-- startup simulated world -->
@@ -77,7 +77,7 @@
       <arg name="model_name" value="obstacle" />
       <arg name="x" value="0.22" />
       <arg name="y" value="0.26" />
-      <arg name="z" value="0.63" />
+      <arg name="z" value="1.2" />
       <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/cylinder/model.sdf" />
     </include>
   </group>

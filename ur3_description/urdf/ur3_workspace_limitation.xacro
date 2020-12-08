@@ -2,7 +2,7 @@
 <robot name="ur3_workplace" 
   xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find ur3_description)/urdf/ur3.xacro" />
+  <xacro:include filename="$(find ur3_description)/urdf/ur3e_workspace.xacro" />
 
   <xacro:property name="top_wall_z" value="0.75" />
   <xacro:property name="limit_wall_height" value="${top_wall_z + 0.45}" />

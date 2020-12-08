@@ -5,12 +5,27 @@
   <xacro:include filename="$(find ur3_description)/urdf/ur3_robot_custom.urdf.xacro" />
   <xacro:include filename="$(find ur3_description)/urdf/depth_camera.xacro" />
 
-  <depth_camera name="camera" />
-  <joint name="table_to_camera" type="fixed">
+  <depth_camera name="camera_right" />
+  <joint name="table_to_camera_right" type="fixed">
     <parent link="table"/>
-    <child link="base_link_camera"/>
-    <origin xyz="-0.4 1.4 1.6" rpy="0 ${pi/6} -${pi/2}"/>
+    <child link="base_link_camera_right"/>
+    <origin xyz="-0.6 1.2 1.6" rpy="0 ${pi/6} -${pi/4}"/>
   </joint>
+
+  <depth_camera name="camera_left" />
+  <joint name="table_to_camera_left" type="fixed">
+    <parent link="table"/>
+    <child link="base_link_camera_left"/>
+    <origin xyz="-0.6 -0.2 1.6"  rpy="0 ${pi/6} ${pi/4}"/>
+  </joint>
+
+  <depth_camera name="camera_top" />
+  <joint name="table_to_camera_top" type="fixed">
+    <parent link="table"/>
+    <child link="base_link_camera_top"/>
+    <origin xyz="-0.2 0.5 2.1"  rpy="0 ${pi/2} -${pi}"/>
+  </joint>
+
 
   <link name="world" />
 
