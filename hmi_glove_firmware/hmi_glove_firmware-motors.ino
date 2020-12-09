@@ -23,7 +23,7 @@ void SetupMotors()
   if (String(deviceName).indexOf("left") != -1)
   {
     // motors X, Y, Z, -X, -Y, -Z
-    int motorPins[NUM_MOTORS] = {PIN_A3,PIN_A5,PIN_A1,PIN_A4,PIN_A2,PIN_A0};
+    int motorPins[NUM_MOTORS] = {PIN_A1,PIN_A5,PIN_A4,PIN_A3,PIN_A0,PIN_A2};
   }
   // exception on incorrect name is by design
   for (byte i = 0; i < NUM_MOTORS; i++) 

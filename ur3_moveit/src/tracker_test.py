@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+
+#roslaunch realsense2_camera rs_camera.launch filters:=pointcloud
+
 import rospy
 from sensor_msgs import point_cloud2 as pc2
 from sensor_msgs.msg import PointCloud2, PointField, Image
@@ -11,13 +14,14 @@ import message_filters
 import numpy as np
 from scipy.spatial import distance
 import sys
-from geometry_msgs.msg import Quaternion, PoseStamped, TransformStamped, Transform
+from geometry_msgs.msg import Quaternion, PoseStamped
 import tf2_ros
+from geometry_msgs.msg import *
 
 import task_commander as com
 import robot_driver
 
-debug = False
+debug = True
 
 def get_color_range(color_base):
     sensitivity = 15
@@ -36,7 +40,7 @@ blob_min_size = 50
 left_hmi = "hmi_left"
 right_hmi = "hmi_right"
 
-camera_name = "camera_top"
+camera_name = "camera"
 
 dwn_smpl = 8
 if debug:
@@ -73,22 +77,23 @@ def on_data(depth_msg, img_msg): #, left_pose_msg, right_pose_msg
     if left_hand is not None:
         display_hand_on_img(img, left_hand, left_border_color)
 
-    if left_hand is not None or right_hand is not None:
-        depth_img = ros_numpy.numpify(depth_msg)
+    # if left_hand is not None or right_hand is not None:
+    #     depth_img = ros_numpy.numpify(depth_msg)
 
-    if (right_hand is not None):
-        publish_hand(depth_img, depth_msg.header, right_hand, right_hmi,
-                     right_pc_pub, None) #right_pose_msg
-    else:
-        driver.remove_hmi_obj(right_hmi)
-        publish_emtpy_pc(right_pc_pub, depth_msg.header)
+    # if (right_hand is not None):
+    #     publish_hand(depth_img, depth_msg.header, right_hand, right_hmi,
+    #                  right_pc_pub, None) #right_pose_msg
+
+    # else:
+    #     driver.remove_hmi_obj(right_hmi)
+    #     publish_emtpy_pc(right_pc_pub, depth_msg.header)
         
-    if (left_hand is not None):
-        publish_hand(depth_img, depth_msg.header, left_hand, left_hmi,
-                     left_pc_pub, None) #left_pose_msg
-    else:
-        driver.remove_hmi_obj(left_hmi)
-        publish_emtpy_pc(left_pc_pub, depth_msg.header)
+    # if (left_hand is not None):
+    #     publish_hand(depth_img, depth_msg.header, left_hand, left_hmi,
+    #                  left_pc_pub, None) #left_pose_msg
+    # else:
+    #     driver.remove_hmi_obj(left_hmi)
+    #     publish_emtpy_pc(left_pc_pub, depth_msg.header)
 
     # the topic is not published unless anyone is subcribed
     if (cam_img_pub.get_num_connections() > 0):
@@ -140,16 +145,17 @@ def publish_hand(depth_img,
         pc_pub.publish(cloud_modified)
 
     cloud_center = get_img_coords(depth_img, hand_tuple[0], np.mean(heights))
-    poseStamp = get_hand_pose(orient_msg, header.frame_id, cloud_center)    
-    driver.update_hmi_obj(poseStamp, obj_name, radius)
+    pose = get_hand_pose(orient_msg, header.frame_id, cloud_center)    
+    #driver.update_hmi_obj(pose, obj_name, radius)
 
-    # TODO into Transfomration_manager?
-    t = TransformStamped(transform = Transform(translation = poseStamp.pose.position, rotation = poseStamp.pose.orientation))
-    t.header.stamp = rospy.Time.now()
-    t.header.frame_id = header.frame_id
-    t.child_frame_id = obj_name
-    tf_pub.sendTransform(t)
-    pass
+    tfs = TransformStamped(transform = Transform(rotation = Quaternion(0,0,0,1)))
+    tfs.transform.translation.x = pose.pose.position.x
+    tfs.transform.translation.y = pose.pose.position.y
+    tfs.transform.translation.z = pose.pose.position.z
+    tfs.header.stamp = rospy.Time.now()
+    tfs.header.frame_id = header.frame_id
+    tfs.child_frame_id = obj_name + "_frame"
+    tf_pub.sendTransform(tfs)
 
 def is_center_within_contour(center, blob):
     return cv2.pointPolygonTest(blob, (center[0], center[1]), True) >= 0
@@ -178,7 +184,7 @@ def publish_emtpy_pc(pub, header):
 def display_hand_on_img(img, bound_box, color):
     overlay_circle_on_img(img, bound_box[0], color)
     box = cv2.boxPoints(bound_box[1])
-    box = np.int0(box) 
+    box = np.int0(box)  # what it does?
     cv2.drawContours(img, [box], 0, color, 2)
 
 
@@ -198,17 +204,29 @@ def get_img_coords(depth_img, point, override_height = None):
 
 
 if __name__ == "__main__":
-    driver = robot_driver.RobotDriver(total_speed=0.2)
+
+    rospy.init_node("balla")
+    #driver = robot_driver.RobotDriver(total_speed=0.2)
 
     bridge = CvBridge()
+    # rospy.init_node('top_cam_handler')
     depth_sub = message_filters.Subscriber("/"+camera_name+"/depth/color/points",
                                            PointCloud2,
                                            queue_size=1)
     camera_sub = message_filters.Subscriber("/"+camera_name+"/color/image_raw",
                                             Image,
                                             queue_size=1)
-    sync = message_filters.ApproximateTimeSynchronizer([depth_sub, camera_sub],
-                                                       queue_size=1,
+
+    # left_hmi_sub = message_filters.Subscriber("/hmi_glove_left_orientation",
+    #                                         PoseStamped,
+    #                                         queue_size=1)
+
+    # right_hmi_sub = message_filters.Subscriber("/hmi_glove_right_orientation",
+    #                                         PoseStamped,
+    #                                         queue_size=1)
+
+    sync = message_filters.ApproximateTimeSynchronizer([depth_sub, camera_sub], #, left_hmi_sub, right_hmi_sub
+                                                       queue_size=1, # CHECK IF NO MESSAGES ARE CAUGHT
                                                        slop=0.05)
     sync.registerCallback(on_data)
 

@@ -66,17 +66,8 @@ joint_pose_B = NamedJointPose([1.012419230110138,
                               "Pose B")
 
 
-def set_dynamic_params(params):
-    rospy.set_param("/move_group/octomap_resolution", float(params[0]))
-    rospy.set_param("/point_subsample", int(params[1]))
-    rospy.set_param("/move_group/manipulator/longest_valid_segment_fraction", float(params[2]))
-
-
 class RobotDriver:
     def __init__(self, total_speed = 1.0, total_acc = 1.0):
-        # self._base_pub = rospy.Publisher('/cartpole_v0/foot_joint_velocity_controller/command', Float64, queue_size=1)
-        print(moveit_commander.__file__)
-
         rospy.wait_for_service(clear_octomap_service)
         time.sleep(1)
 
@@ -89,7 +80,7 @@ class RobotDriver:
 
         self.move_group.allow_replanning(False)
         self.move_group.set_num_planning_attempts(0)
-        self.move_group.set_planner_id("BiTRRT")
+        self.move_group.set_planner_id("RRTConnect")
 
         # this is needed in melodic(for some reason), otherwise the robot moves superslowly
         self.move_group.set_max_velocity_scaling_factor(total_speed)
@@ -98,7 +89,7 @@ class RobotDriver:
         self.__clear_octomap_service = rospy.ServiceProxy(clear_octomap_service, Empty)
         self.clear_octomap()
 
-    def update_hmi_obj(self, pose, name, size = 0.1):
+    def update_hmi_obj(self, pose, name, size = 0.1): #TODO into visualizator
         self.scene.add_sphere(name, pose, size * 2)
         #  self.scene.add_box(name, pose, (size * 4, size * 3, size * 2))
 

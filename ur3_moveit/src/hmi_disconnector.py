@@ -7,24 +7,31 @@ from Adafruit_BluefruitLE.services import UART
 import time
 import os
 
-def __mainloop():
-
+def restart_adapter():
         print("Restarting adapter...")
         os.system("rfkill block bluetooth")
         time.sleep(0.5)
         os.system("rfkill unblock bluetooth")
         time.sleep(0.5)
-        
+        print("Adapter restarted")
+
+def disconnect_all_devices():
         print("Disconnecting all BLE devices...")
         ble.clear_cached_data()
-        # Get the first available BLE network adapter and make sure it"s powered on.
         adapter = ble.get_default_adapter()
         adapter.power_on()
         UART.disconnect_devices()
         adapter.start_scan()
         adapter.stop_scan()
-        print("All BLE devices desconnected")
+        print("All BLE devices disconnected")
 
-ble = Adafruit_BluefruitLE.get_provider()
-ble.initialize()
-ble.run_mainloop_with(__mainloop)
+def __mainloop():
+        restart_adapter()
+        disconnect_all_devices()
+
+
+
+if __name__ == "__main__":
+        ble = Adafruit_BluefruitLE.get_provider()
+        ble.initialize()
+        ble.run_mainloop_with(__mainloop)

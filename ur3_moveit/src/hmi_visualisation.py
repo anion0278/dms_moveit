@@ -10,22 +10,12 @@ i_quat = Quaternion(0,0,0,1) # identity quaternion
 class RVizVisualiser:
     def __init__(self, color, topic, parent_frame_id,  marker_scale):
         self.pub = rospy.Publisher(topic, MarkerArray, queue_size=1) 
-        self.__k = marker_scale # marker scale
-        self.__marker_scale = Vector3(self.__k* 0.05, self.__k * 0.1, 0.05) # z - for text size
+        self.__k = marker_scale # scale modifier
+        self.__marker_scale = Vector3(self.__k* 0.07, self.__k * 0.15, 0)
+        self.__text_scale = Vector3(0, 0, 0.05)
         self.__marker_color = ColorRGBA(*color)
         self.__text_color = ColorRGBA(0,0,1,1)
         self.__frame = parent_frame_id
-        
-    def __get_calibration_marker(self, calib):
-        m = Marker(type = Marker.TEXT_VIEW_FACING, 
-                        pose = Pose(orientation = i_quat), 
-                        action = Marker.ADD, 
-                        scale = self.__marker_scale, 
-                        color = self.__text_color, 
-                        text = calib.short_format(),
-                        ns = "calibration", id = 1) 
-        m.header.frame_id = self.__frame
-        return m
 
     def publish_data_if_required(self, v, calib):
         if (self.pub.get_num_connections() > 0):
@@ -39,6 +29,17 @@ class RVizVisualiser:
                     color = self.__marker_color, 
                     points = [Point(), end_point], 
                     ns = ns, id = id)
+        m.header.frame_id = self.__frame
+        return m
+
+    def __get_calibration_marker(self, calib):
+        m = Marker(type = Marker.TEXT_VIEW_FACING, 
+                        pose = Pose(orientation = i_quat), 
+                        action = Marker.ADD, 
+                        scale = self.__text_scale, 
+                        color = self.__text_color, 
+                        text = calib.short_format(),
+                        ns = "calibration", id = 1) 
         m.header.frame_id = self.__frame
         return m
 

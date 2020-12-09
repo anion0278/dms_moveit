@@ -977,3 +977,8 @@ ur3_moveit/src/measurements MAIN/Planner/STRIDE_short_successful_attempts_measur
 ur3_moveit/src/measurements MAIN/Planner/TRRT_measurement.txt
 ur3_moveit/src/measurements MAIN/Planner/TRRT_short_successful_attempts_measurement.txt
 ur3_moveit/src/hmi_visualisation.pyc
+ur3_moveit/src/util_common.pyc
+ur3_moveit/src/util_timeout.pyc
+ur3_moveit/src/util_ros_process.pyc
+ur3_moveit/src/hmi_disconnector.pyc
+ur3_moveit/src/hmi_calibration_manager.pyc

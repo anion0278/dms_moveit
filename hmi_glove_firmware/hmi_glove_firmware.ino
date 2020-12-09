@@ -7,14 +7,14 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
-//const char* deviceName = "hmi-glove-right";
-const char* deviceName = "hmi-glove-left";
+const char* deviceName = "hmi_right";
+//const char* deviceName = "hmi_left";
 
 bool hasHandshake = false;
 
 unsigned long prevRecTime, prevSendTime, currentTime;
 int sendIntervalMs = 30;
-int disconnectionTimeoutMs = 1000;
+int disconnectionTimeoutMs = 2000;
 
 void setup()
 {

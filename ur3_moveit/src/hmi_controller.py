@@ -6,7 +6,7 @@ from datetime import datetime
 import rospy
 import numpy as np
 import sys
-import signal
+#import signal # USELESS works only in the main thread
 import atexit
 from geometry_msgs.msg import *
 import tf2_geometry_msgs as tf2
@@ -24,37 +24,16 @@ import threading
 
 import config
 import hmi_visualisation as vis
-
+import hmi_calibration_manager as cal
+import util_common as util
+import hmi_disconnector
 
 debug = False  
 obj_clearance_param = "/move_group/collision/min_clearance"
-regex_imu_pattern = "Q(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(\d)(\d)(\d)(\d)"
-regex_offsets_pattern = "(\d)(\d)(\d)(\d)-(.{22})"
 
-class SensorCalibration():
-    def __init__(self, sys, gyro, acc, mag):
-        self.sys = int(sys)
-        self.gyro = int(gyro)
-        self.acc = int(acc)
-        self.mag = int(mag)
-    
-    @property
-    def is_ready_for_use(self):
-        #Therefore we recommend that as long as Magnetometer is 3/3, and Gyroscope is 3/3, the data can be trusted
-        if self.gyro == 3 and self.mag == 3:
-            return True
-        return False
-    
-    def is_fully_calibrated(self):
-        if self.sys == 3 and self.gyro == 3 and self.acc == 3 and self.mag == 3:
-            return True
-        return False
-
-    def short_format(self):
-        return "S{0}; G{1}; A{2}; M{3}".format(self.sys, self.gyro, self.acc, self.mag)
-
-    def __str__(self):
-        return "Sys: {0}; Gyro: {1}; Acc: {2}; Mag: {3}".format(self.sys, self.gyro, self.acc, self.mag)
+regex_calibration_pattern =  "(\d)(\d)(\d)(\d)"
+regex_imu_pattern = "Q(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})" + regex_calibration_pattern
+regex_offsets_pattern = regex_calibration_pattern + "-(.{22})"
 
 class TimedCommand():
     def __init__(self, intensity, time):
@@ -65,9 +44,8 @@ class HmiController():
     def __init__(self,
                  device_name,
                  clearance_hand_suffix, 
-                 is_calib_enabled,
                  rosparam_name="hmi_value"): # TODO PUT INTO CONFIG EVERYWHERE!!!
-        self.node_name = device_name.replace("-", "_")
+        self.node_name = device_name
         rospy.init_node(self.node_name)
         self.orient_pub = rospy.Publisher(self.node_name + "_orientation", PoseStamped, queue_size=1)
         self.device = None
@@ -85,7 +63,6 @@ class HmiController():
         self.current_orientation = None
         self.__calib_quality_counter = 0
         self.__imu_offsets = None
-        self.is_calib_enabled = True
         self.zero_frame_clib = None
         self.tf_pub = tf2_ros.TransformBroadcaster() # tf2_ros pubs are more effective
         self.__real_frame_id = self.device_name+"_real"
@@ -97,7 +74,7 @@ class HmiController():
         if "right" in self.device_name:
             color = config.color_right
         color.append(0.7) # alpha
-        self.__visualizer = vis.RVizVisualiser(color, self.node_name + "_markers", self.__calibr_frame_id, 1.0)
+        self.__visualizer = vis.RVizVisualiser(color, self.node_name + "_markers", self.__calibr_frame_id, 0.2)
         self.__semaphore = threading.Semaphore()
         self.current_calib = None
 
@@ -163,7 +140,7 @@ class HmiController():
         match = re.search(regex_offsets_pattern, bytearray(data), re.IGNORECASE)
         if match:
             da = np.array(match.groups())
-            status = SensorCalibration(da[0], da[1], da[2], da[3])
+            status = cal.SensorCalibration(da[0], da[1], da[2], da[3])
             if status.is_fully_calibrated():
                 offsets = da[4]
                 print(len(offsets))
@@ -175,9 +152,8 @@ class HmiController():
         if match: 
             da = np.array(match.groups())
 
-            print(self.node_name +"->"+data)
+            # print(self.node_name +"->"+data)
             p = PoseStamped()
-            #p.header.seq = 1 # just ID
             p.header.stamp = rospy.Time.now()
             p.header.frame_id = "world"
 
@@ -189,12 +165,10 @@ class HmiController():
 
                 tfs = TransformStamped(transform = Transform(rotation = Quaternion(*q_real)))
                 tfs.header.stamp = rospy.Time.now()
-                tfs.header.frame_id = "world"
+                tfs.header.frame_id = self.device_name
                 tfs.child_frame_id = self.device_name+"_real"
                 self.tf_pub.sendTransform(tfs)
 
-                # both options work correctly, however this one is correct structure
-                # publish only if Debug? need it for Markers
                 tfs.transform.rotation = Quaternion(*self.__calibration)
                 tfs.header.frame_id = self.device_name+"_real"
                 tfs.child_frame_id = self.device_name+"_offset"
@@ -203,7 +177,7 @@ class HmiController():
                 if (self.orient_pub.get_num_connections() > 0):
                     self.orient_pub.publish(p)
 
-                self.current_calib = SensorCalibration(da[8], da[9], da[10], da[11])
+                self.current_calib = cal.SensorCalibration(da[8], da[9], da[10], da[11])
                 pass 
 
     def __restore_imu_offsets(self):
@@ -218,7 +192,8 @@ class HmiController():
 
     def __restore_calibration(self): 
         try:
-            quat = pickle.load(open(config.get_file_full_path(config.calibr_file.format(self.node_name)), "rb"))
+            path = config.get_frame_calibration_file_path(self.node_name)
+            quat = pickle.load(open(path, "rb"))
             if len(quat) != 4:
                 raise EnvironmentError("Error during deserializaion, check data!")
         except Exception as e:
@@ -227,12 +202,12 @@ class HmiController():
         return quat
 
     def __store_imu_offsets(self, offsets):
-        path = config.get_file_full_path(config.offsets_file.format(self.node_name)) # TODO config.get_offsets_file_path(self) -> predavame self a ziskavame path
+        path = config.get_offsets_file_path(self.node_name)
         pickle.dump(offsets, open(path, "w"))
         print("IMU offsets were stored in %s" % path)
 
     def __store_frame_calibration(self):
-        path = config.get_file_full_path(config.calibr_file.format(self.node_name))
+        path = config.get_frame_calibration_file_path(self.node_name)
         pickle.dump(self.__calibration.tolist(), open(path, "w"))
         print("Frame calibration was stored in %s" % path)
 
@@ -265,7 +240,6 @@ class HmiController():
         atexit.register(self.__on_exit)
 
         self.ble.clear_cached_data()
-        # Get the first available BLE  adapter 
         adapter = self.ble.get_default_adapter()
         print("Using adapter: {0}".format(adapter.name))
         adapter.power_on()
@@ -273,16 +247,16 @@ class HmiController():
         success = False
         while not success:
             try:
-                print("Searching for BLE UART device...")
+                print("Searching for BLE UART device (%s)..." % self.device_name)
                 adapter.start_scan(timeout_sec=self.timeouts)
                 time.sleep(1)
                 devs = UART.find_devices()
                 device = next((d for d in devs if d.name == self.device_name))
-                print("Connecting to device...")
+                print("Connecting to device (%s)..." % self.device_name)
                 device.connect(timeout_sec=self.timeouts)
                 success = True
             except Exception as ex:
-                print("Failed to connect to UART device! %s" % ex)
+                print("Failed to connect to %s, reason: %s" % (self.device_name, ex))
                 UART.disconnect_devices()
             finally:
                 adapter.stop_scan()
@@ -353,8 +327,8 @@ class HmiController():
         else:
             self.send_handshake()
         # service notifying that HMI is ready
-        self.calibr_service = rospy.Service(self.node_name + config.calibr_service, Trigger, self.__calibrate)
         self.send_speed_command(0)
+        self.calibr_service = rospy.Service(self.node_name + config.calibr_service, Trigger, self.__calibrate)
         print("Device %s is ready." % self.device_name)
 
     def __get_second_hand_name(self, first_hand_name):
@@ -365,8 +339,8 @@ class HmiController():
             return first_hand_name.replace("right", "left")
         raise AttributeError("Check hand name!")
 
-    def __on_exit(self): # TODO investigate
-        print("Disconnecting... *It is possible to set lower timeout in uart.py*")
+    def __on_exit(self):
+        print("Exit-handler...")
         try:
             from Adafruit_BluefruitLE.services import UART
             UART.disconnect_devices()
@@ -381,16 +355,14 @@ if __name__ == "__main__":
     
     ### causes problems TODO solve
     if not "node" in sys.argv:
-        print("DEBUGGER MODE !!! Will cause error in roslaunch!")
-        os.system("rfkill block bluetooth")
-        time.sleep(0.5)
-        os.system("rfkill unblock bluetooth")
-        sys.argv.append("hmi-glove-right")
-        sys.argv.append("_right")
+        print("VS CODE MODE !")
+        hmi_disconnector.restart_adapter()
+        sys.argv.append("hmi_left")
+        sys.argv.append("_left")
 
-    for arg, i in zip(sys.argv, range(len(sys.argv))):
-        print("Arg [%s]: %s" % (i, arg))
-    hmi = HmiController(sys.argv[1], sys.argv[2], is_calib_enabled = True)
+    if debug: util.print_all_args()
+        
+    hmi = HmiController(sys.argv[1], sys.argv[2])
     hmi.start()
 
     
