@@ -50,6 +50,9 @@ class SensorCalibration():
             return True
         return False
 
+    def short_format(self):
+        return "S{0}; G{1}; A{2}; M{3}".format(self.sys, self.gyro, self.acc, self.mag)
+
     def __str__(self):
         return "Sys: {0}; Gyro: {1}; Acc: {2}; Mag: {3}".format(self.sys, self.gyro, self.acc, self.mag)
 
@@ -96,6 +99,7 @@ class HmiController():
         color.append(0.7) # alpha
         self.__visualizer = vis.RVizVisualiser(color, self.node_name + "_markers", self.__calibr_frame_id, 1.0)
         self.__semaphore = threading.Semaphore()
+        self.current_calib = None
 
     def __get_speed_components(self, speed = 100):
         speed_comps=[0,0,0,0,0,0]
@@ -109,7 +113,7 @@ class HmiController():
             v = tf2.do_transform_vector3(vs, trs).vector
             va = speed * ros_numpy.numpify(v)
 
-            self.__visualizer.publish_if_required(v)
+            self.__visualizer.publish_data_if_required(v, self.current_calib)
 
             # components x, y, z, -x, -y, -z
             for i in range(len(speed_comps) / 2):
@@ -155,8 +159,6 @@ class HmiController():
         self.ble.run_mainloop_with(self.__mainloop)
 
     def __recieved_callback(self, data):
-        print(data)
-
         # it is really important to process string as bytearray
         match = re.search(regex_offsets_pattern, bytearray(data), re.IGNORECASE)
         if match:
@@ -201,8 +203,7 @@ class HmiController():
                 if (self.orient_pub.get_num_connections() > 0):
                     self.orient_pub.publish(p)
 
-                calibration = SensorCalibration(da[8], da[9], da[10], da[11])
-                print(str(calibration))
+                self.current_calib = SensorCalibration(da[8], da[9], da[10], da[11])
                 pass 
 
     def __restore_imu_offsets(self):
