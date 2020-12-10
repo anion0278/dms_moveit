@@ -49,6 +49,7 @@ pc_fields = [
     PointField('rgb', 12, PointField.UINT32, 1)
 ]
 
+cam_trf = None 
 
 def overlay_circle_on_img(image, pos, color):
     cv2.circle(image,
@@ -59,7 +60,7 @@ def overlay_circle_on_img(image, pos, color):
                lineType=8,
                shift=0)
 
-def on_data(depth_msg, img_msg): #, left_pose_msg, right_pose_msg
+def on_data(depth_msg, img_msg):
     img = bridge.imgmsg_to_cv2(img_msg, "bgr8")
     final_size = (img.shape[1] / dwn_smpl, img.shape[0] / dwn_smpl)
     img = cv2.resize(img, final_size)
@@ -143,8 +144,8 @@ def publish_hand(depth_img,
     poseStamp = get_hand_pose(orient_msg, header.frame_id, cloud_center)    
     driver.update_hmi_obj(poseStamp, obj_name, radius)
 
-    # TODO into Transfomration_manager?
-    t = TransformStamped(transform = Transform(translation = poseStamp.pose.position, rotation = poseStamp.pose.orientation))
+    # TODO into transform_manager?
+    t = TransformStamped(transform = Transform(translation = poseStamp.pose.position, rotation = cam_trf.rotation))
     t.header.stamp = rospy.Time.now()
     t.header.frame_id = header.frame_id
     t.child_frame_id = obj_name
@@ -200,29 +201,25 @@ def get_img_coords(depth_img, point, override_height = None):
 if __name__ == "__main__":
     driver = robot_driver.RobotDriver(total_speed=0.2)
 
-    bridge = CvBridge()
-    depth_sub = message_filters.Subscriber("/"+camera_name+"/depth/color/points",
-                                           PointCloud2,
-                                           queue_size=1)
-    camera_sub = message_filters.Subscriber("/"+camera_name+"/color/image_raw",
-                                            Image,
-                                            queue_size=1)
-    sync = message_filters.ApproximateTimeSynchronizer([depth_sub, camera_sub],
-                                                       queue_size=1,
-                                                       slop=0.05)
-    sync.registerCallback(on_data)
-
-    right_pc_pub = rospy.Publisher(right_hmi + "_points",
-                                   PointCloud2,
-                                   queue_size=1)
-    left_pc_pub = rospy.Publisher(left_hmi + "_points",
-                                  PointCloud2,
-                                  queue_size=1)
-
-    cam_img_pub = rospy.Publisher("tracker_image",
-                                   Image,
-                                   queue_size=1)
+    pc_topic = "/"+camera_name+"/depth/color/points"
+    img_topic = "/"+camera_name+"/color/image_raw"
 
     tf_pub = tf2_ros.TransformBroadcaster()
+
+    tf_buf = tf2_ros.Buffer()
+    listener = tf2_ros.TransformListener(tf_buf)
+    cam_frame_id = rospy.wait_for_message(pc_topic, PointCloud2).header.frame_id
+    cam_trf = tf_buf.lookup_transform(cam_frame_id, "world", rospy.Time(), timeout=rospy.Duration(0.1)).transform
+
+    bridge = CvBridge()
+    depth_sub = message_filters.Subscriber(pc_topic, PointCloud2, queue_size=1)
+    camera_sub = message_filters.Subscriber(img_topic, Image, queue_size=1)
+    sync = message_filters.ApproximateTimeSynchronizer([depth_sub, camera_sub], queue_size=1, slop=0.05)
+    sync.registerCallback(on_data)
+
+    right_pc_pub = rospy.Publisher(right_hmi + "_points", PointCloud2, queue_size=1)
+    left_pc_pub = rospy.Publisher(left_hmi + "_points", PointCloud2, queue_size=1)
+
+    cam_img_pub = rospy.Publisher("tracker_image", Image, queue_size=1)
 
     rospy.spin()

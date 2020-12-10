@@ -39,9 +39,9 @@ class Commander():
 
     def wait_for_hmi(self):
         print("Task Commander: Waiting for Left HMI")
-        rospy.wait_for_service("hmi_glove_left_service" + config.calibr_service)
+        rospy.wait_for_service(config.hmi_left + config.calibr_service)
         print("Task Commander: Waiting for Right HMI")
-        rospy.wait_for_service("hmi_glove_right" + config.calibr_service)
+        rospy.wait_for_service(config.hmi_right + config.calibr_service)
 
     def move_to(self, pose, retreat_on_fail=True):
         if isinstance(pose, str):
