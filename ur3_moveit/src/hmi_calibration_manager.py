@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 import sys
 import rospy
@@ -27,17 +26,16 @@ class SensorCalibration():
         return False
 
     def short_format(self):
-        return "S{0}; G{1}; A{2}; M{3}".format(self.sys, self.gyro, self.acc, self.mag)
+        return "S{0};G{1};A{2};M{3}".format(self.sys, self.gyro, self.acc, self.mag)
 
     def __str__(self):
         return "Sys: {0}; Gyro: {1}; Acc: {2}; Mag: {3}".format(self.sys, self.gyro, self.acc, self.mag)
 
 
-
 if __name__ == "__main__":
     print("Requesting calibration...")
     
-    service_ids = ["/hmi_glove_left" + config.calibr_service, "/hmi_glove_right" + config.calibr_service]
+    service_ids = [config.hmi_left + config.calibr_service, config.hmi_right + config.calibr_service]
     services = []
     for ser in service_ids:
         try:

@@ -21,6 +21,7 @@ import ros_numpy
 import pickle # replace by json if more readable data format is needed
 import tf, tf2_ros
 import threading
+from visualization_msgs.msg import MarkerArray
 
 import config
 import hmi_visualisation as vis
@@ -74,15 +75,25 @@ class HmiController():
         if "right" in self.device_name:
             color = config.color_right
         color.append(0.7) # alpha
-        self.__visualizer = vis.RVizVisualiser(color, self.node_name + "_markers", self.__calibr_frame_id, 0.2)
+        self.__visualizer = vis.RVizVisualiser(color, self.node_name + "_markers", self.__calibr_frame_id, 1)
         self.__semaphore = threading.Semaphore()
         self.current_calib = None
+        self.currect_collision_vec = [0,0,0]
+        self.__collision_vec_sub = rospy.Subscriber("/move_group/collision_vectors", MarkerArray, self.__recieved_collsion_vector)
 
-    def __get_speed_components(self, speed = 100):
+    def __recieved_collsion_vector(self, marker_array_msg):
+        if any(self.device_name+"_vector" == m.ns for m in marker_array_msg.markers):
+            points = (m.points for m in marker_array_msg.markers if self.device_name+"_vector" == m.ns).next()
+            v = ros_numpy.numpify(points[1]) - ros_numpy.numpify(points[0])
+            # vector should be normalized !
+            self.currect_collision_vec = v / np.linalg.norm(v)
+            print("New vector: %s" % self.currect_collision_vec)
+
+    def __get_speed_components(self, speed):
         speed_comps=[0,0,0,0,0,0]
         if self.current_orientation is not None: 
 
-            vs = Vector3Stamped(vector = Vector3(x = 1, y = 0, z = 0))
+            vs = Vector3Stamped(vector = Vector3(*self.currect_collision_vec))
             
             # needed an inverse matrix!  
             qa = quaternion_inverse(ros_numpy.numpify(self.current_orientation))
@@ -102,8 +113,9 @@ class HmiController():
         return speed_comps
 
     def send_speed_command(self, speed):
+        #speed = 100
         rospy.set_param("debug_"+self.node_name, speed)
-        speeds = self.__format_speed_msg(self.__get_speed_components())
+        speeds = self.__format_speed_msg(self.__get_speed_components(speed))
         msg ="X{0}Y{1}Z{2}-X{3}-Y{4}-Z{5}".format(*speeds) 
         self.send_text(msg)
 
@@ -119,7 +131,7 @@ class HmiController():
         self.send_text("request-offsets")
 
     def send_offsets(self, offsets):
-        self.send_text("offsets:"+offsets)
+        self.send_text("offsets:" + offsets)
 
     def send_text(self, text, newline = True):
         if newline:
@@ -135,7 +147,7 @@ class HmiController():
         self.ble.initialize()
         self.ble.run_mainloop_with(self.__mainloop)
 
-    def __recieved_callback(self, data):
+    def __recieved_ble_data_callback(self, data):
         # it is really important to process string as bytearray
         match = re.search(regex_offsets_pattern, bytearray(data), re.IGNORECASE)
         if match:
@@ -261,9 +273,10 @@ class HmiController():
             finally:
                 adapter.stop_scan()
             
+        # TODO solve - sometimes fails, repeat process?
         print("Discovering services...")
         UART.discover(device, timeout_sec=self.timeouts)
-        self.__uart = UART(device, self.__recieved_callback)
+        self.__uart = UART(device, self.__recieved_ble_data_callback)
 
         self.__notify_ready()
 
@@ -352,8 +365,6 @@ class HmiController():
 
 
 if __name__ == "__main__":
-    
-    ### causes problems TODO solve
     if not "node" in sys.argv:
         print("VS CODE MODE !")
         hmi_disconnector.restart_adapter()
