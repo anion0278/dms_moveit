@@ -21,7 +21,9 @@
                     </image>
                     <clip>
                         <near>0.05</near>
-                        <far>1.4</far>
+                        <!-- SHOULD BE EDITED ALONG WITH pointCloudCutoffMax !!! Otherwise Rviz wont start -->
+                        <!-- SHOULD BE MORE THAN far_clipping_plane_distance in sensors_3d.yaml of Moveit -->
+                        <far>1.8</far>
                     </clip>
                 </camera>
                 <plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
@@ -37,7 +39,8 @@
                     <pointCloudTopicName>/${name}/depth/color/points</pointCloudTopicName>
                     <frameName>${name}_color_optical_frame</frameName>
                     <pointCloudCutoff>0.001</pointCloudCutoff>
-                    <pointCloudCutoffMax>1.4</pointCloudCutoffMax>
+                    <!-- SHOULD BE EDITED ALONG WITH clip.far !!! Otherwise Rviz wont start -->
+                    <pointCloudCutoffMax>1.8</pointCloudCutoffMax>
                     <distortionK1>0</distortionK1>
                     <distortionK2>0</distortionK2>
                     <distortionK3>0</distortionK3>

@@ -26,8 +26,10 @@ sensors:
     image_topic: /camera_top/depth/image_raw
     queue_size: 1
     near_clipping_plane_distance: 0.1
-    far_clipping_plane_distance: 1.0
+    far_clipping_plane_distance: 1.7
     shadow_threshold: 0.2
     padding_scale: 1.0
-    padding_offset: 0.06
-    max_update_rate: 0
+    padding_offset: 0.06 # should be in cm (tutorial), but seems like mm when tested
+    skip_vertical_pixels: 0 # skipping the edge of the image which can contain artifacts (from code)
+    skip_horizontal_pixels: 0 
+    max_update_rate: 0 #unlimited
