@@ -1,4 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-  <node name="hmi_controller_right" pkg="ur3_moveit" type="hmi_controller.py" required="true" respawn="false" output="screen" args="hmi_right _right node" />
-</launch>

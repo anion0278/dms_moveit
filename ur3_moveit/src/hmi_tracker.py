@@ -42,6 +42,7 @@ dwn_smpl = 8
 if debug:
     dwn_smpl = 1
 
+# it is possible to utilize only Depth msg, because it contains RGB data
 pc_fields = [
     PointField('x', 0, PointField.FLOAT32, 1),
     PointField('y', 4, PointField.FLOAT32, 1),
@@ -61,6 +62,10 @@ def overlay_circle_on_img(image, pos, color):
                shift=0)
 
 def on_data(depth_msg, img_msg):
+    if debug:
+        start = rospy.get_time()
+        print("Tracker - start time: %s" % start)
+
     img = bridge.imgmsg_to_cv2(img_msg, "bgr8")
     final_size = (img.shape[1] / dwn_smpl, img.shape[0] / dwn_smpl)
     img = cv2.resize(img, final_size)
@@ -79,14 +84,14 @@ def on_data(depth_msg, img_msg):
 
     if (right_hand is not None):
         publish_hand(depth_img, depth_msg.header, right_hand, right_hmi,
-                     right_pc_pub, None) #right_pose_msg
+                     right_pc_pub, None)
     else:
         driver.remove_hmi_obj(right_hmi)
         publish_emtpy_pc(right_pc_pub, depth_msg.header)
         
     if (left_hand is not None):
         publish_hand(depth_img, depth_msg.header, left_hand, left_hmi,
-                     left_pc_pub, None) #left_pose_msg
+                     left_pc_pub, None)
     else:
         driver.remove_hmi_obj(left_hmi)
         publish_emtpy_pc(left_pc_pub, depth_msg.header)
@@ -96,6 +101,10 @@ def on_data(depth_msg, img_msg):
         img_msg = bridge.cv2_to_imgmsg(img)
         cam_img_pub.publish(img_msg)
     pass
+
+    if debug:
+        cycle_time = (rospy.get_time() - start) / 1000.0
+        print ("Tracker - time spent: %s" % cycle_time)
 
 def get_hand_pose(orient_msg, frame_id, center_pos):
     p = PoseStamped()

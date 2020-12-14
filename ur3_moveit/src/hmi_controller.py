@@ -84,10 +84,10 @@ class HmiController():
     def __recieved_collsion_vector(self, marker_array_msg):
         if any(self.device_name+"_vector" == m.ns for m in marker_array_msg.markers):
             points = (m.points for m in marker_array_msg.markers if self.device_name+"_vector" == m.ns).next()
-            v = ros_numpy.numpify(points[1]) - ros_numpy.numpify(points[0])
+            v = ros_numpy.numpify(points[0]) - ros_numpy.numpify(points[1])
             # vector should be normalized !
             self.currect_collision_vec = v / np.linalg.norm(v)
-            print("New vector: %s" % self.currect_collision_vec)
+            #print("New vector: %s" % self.currect_collision_vec)
 
     def __get_speed_components(self, speed):
         speed_comps=[0,0,0,0,0,0]
@@ -109,11 +109,10 @@ class HmiController():
                     speed_comps[i] = va[i]
                 else: # negative number
                     speed_comps[i + 3] = abs(va[i])
-            #print(speed_comps)
+            #print("Device %s : %s" % (self.device_name, speed_comps))
         return speed_comps
 
     def send_speed_command(self, speed):
-        #speed = 100
         rospy.set_param("debug_"+self.node_name, speed)
         speeds = self.__format_speed_msg(self.__get_speed_components(speed))
         msg ="X{0}Y{1}Z{2}-X{3}-Y{4}-Z{5}".format(*speeds) 
@@ -140,7 +139,7 @@ class HmiController():
         self.__uart.write(text)
         self.__semaphore.release()
         if debug:
-            print(self.__get_time() + " Sent:" + text)
+            print("Device: %s Time: %s Sent: %s" % (self.device_name, self.__get_time(), text))
 
     def start(self):
         self.ble = Adafruit_BluefruitLE.get_provider()
@@ -284,6 +283,7 @@ class HmiController():
 
         while True:
             command = self.calc_intensity()
+            
             if isinstance(command, TimedCommand):
                 while command.time > 0:
                     self.send_speed_command(command.intensity)
@@ -307,7 +307,7 @@ class HmiController():
         # then he still has time to react, no need to vibrate intesivelly. Requires changes in MoveIt!
 
         # Possible way to implement - counting how far from current position is the collision
-        hmi_status_command =  rospy.get_param(self.hmi_status_param)
+        hmi_status_command = rospy.get_param(self.hmi_status_param)
         if hmi_status_command != 0:
             if hmi_status_command == config.status_invalid:
                 return config.invalid_goal_intensity

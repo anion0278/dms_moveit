@@ -28,7 +28,7 @@ class RVizVisualiser:
                     action = Marker.ADD, 
                     scale = self.__marker_scale, 
                     color = self.__marker_color, 
-                    points = [Point(), end_point], 
+                    points = [end_point, Point()], 
                     ns = ns, id = id)
         m.header.frame_id = self.__frame
         return m
