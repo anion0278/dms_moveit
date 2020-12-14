@@ -7,8 +7,8 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
-const char* deviceName = "hmi_right";
-//const char* deviceName = "hmi_left";
+//const char* deviceName = "hmi_right";
+const char* deviceName = "hmi_left";
 
 bool hasHandshake = false;
 
@@ -21,8 +21,8 @@ void setup()
   Serial.begin(115200);
   Print("-------------- START -------------\n");
 
-  SetupImu();
   SetupMotors();
+  SetupImu();
   SetupBle();
 
   Print("Connect using Python app");

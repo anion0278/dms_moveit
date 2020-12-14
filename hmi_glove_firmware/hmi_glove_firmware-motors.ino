@@ -17,15 +17,27 @@ void SetupMotors()
   
   if (String(deviceName).indexOf("right") != -1)
   {
-    // motors X, Y, Z, -X, -Y, -Z
-    int motorPins[NUM_MOTORS] = {PIN_A3,PIN_A5,PIN_A1,PIN_A4,PIN_A2,PIN_A0};
+    Print("Right Configuration");
+    // it is not possible to re-assign array
+    motorPins[0] = PIN_A3; // X
+    motorPins[1] = PIN_A5; // Y
+    motorPins[2] = PIN_A1; // Z
+    motorPins[3] = PIN_A4; // -X
+    motorPins[4] = PIN_A2; // -Y
+    motorPins[5] = PIN_A0; // -Z
   }
   if (String(deviceName).indexOf("left") != -1)
   {
-    // motors X, Y, Z, -X, -Y, -Z
-    int motorPins[NUM_MOTORS] = {PIN_A1,PIN_A5,PIN_A4,PIN_A3,PIN_A0,PIN_A2};
+    Print("Left Configuration");
+    motorPins[0] = PIN_A1; // X
+    motorPins[1] = PIN_A5; // Y
+    motorPins[2] = PIN_A4; // Z
+    motorPins[3] = PIN_A3; // -X
+    motorPins[4] = PIN_A0; // -Y
+    motorPins[5] = PIN_A2; // -Z
   }
-  // exception on incorrect name is by design
+  
+  // exception on incorrect name is intensional
   for (byte i = 0; i < NUM_MOTORS; i++) 
   {
     SetupPwmPin(motorPins[i]);
@@ -52,6 +64,8 @@ void SetAllMotorsSpeed(int *speedComps)
   for (byte i = 0; i < NUM_MOTORS; i++) 
   {
     analogWrite(motorPins[i], speedComps[i]);
+    //PrintParameter("Pin:", motorPins[i]);
+    //PrintParameter("Value:", speedComps[i]);
   }
 }
 
