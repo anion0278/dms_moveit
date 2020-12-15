@@ -4,8 +4,9 @@ from geometry_msgs.msg import *
 import rospy
 
 import config
+import util_ros_msgs 
 
-i_quat = Quaternion(0,0,0,1) # identity quaternion
+i_quat = util_ros_msgs.get_identity_quat()
 
 class RVizVisualiser:
     def __init__(self, color, topic, parent_frame_id,  marker_scale):
@@ -18,9 +19,9 @@ class RVizVisualiser:
         self.__text_color = ColorRGBA(0,0,1,1)
         self.__frame = parent_frame_id
 
-    def publish_data_if_required(self, v, calib):
+    def publish_data_if_required(self, speed_vector, imu_status):
         if (self.pub.get_num_connections() > 0):
-            self.__publish_speed_markers(v, calib)
+            self.__publish_speed_markers(speed_vector, imu_status)
 
     def __get_arrow(self, end_point, ns, id):
         m = Marker(type = Marker.ARROW, 
@@ -33,25 +34,25 @@ class RVizVisualiser:
         m.header.frame_id = self.__frame
         return m
 
-    def __get_calibration_marker(self, calib):
+    def __get_calibration_marker(self, imu_status):
         m = Marker(type = Marker.TEXT_VIEW_FACING, 
                         pose = Pose(orientation = i_quat), 
                         action = Marker.ADD, 
                         scale = self.__text_scale, 
                         color = self.__text_color, 
-                        text = calib.short_format(),
+                        text = imu_status.short_format(),
                         ns = "calibration", id = 1) 
         m.header.frame_id = self.__frame
         return m
 
-    def __publish_speed_markers(self, speed_vec, calib):
+    def __publish_speed_markers(self, speed_vec, imu_status):
         ma = MarkerArray(markers = [ 
             self.__get_arrow(Point(x = self.__get_component(speed_vec.x)), "x", 1),
             self.__get_arrow(Point(y = self.__get_component(speed_vec.y)), "y", 2),
             self.__get_arrow(Point(z = self.__get_component(speed_vec.z)), "z", 3)])
 
-        if calib is not None:
-            ma.markers.append(self.__get_calibration_marker(calib))
+        if imu_status is not None:
+            ma.markers.append(self.__get_calibration_marker(imu_status))
         self.pub.publish(ma)
     
     def __get_component(self, value):

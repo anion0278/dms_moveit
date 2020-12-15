@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="ur3_moveit" type="hmi_controlelr_calibration_manager.py" name="calibrator"  respawn="false" output="screen" args="calibrate" />
+</launch>
