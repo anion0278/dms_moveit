@@ -987,3 +987,6 @@ ur3_moveit/src/hmi_controller_calibration_manager.pyc
 ur3_moveit/src/hmi_controller_notificator.pyc
 ur3_moveit/src/hmi_controller_processor.pyc
 ur3_moveit/src/util_ros_msgs.pyc
+ur3_moveit/src/hmi_tracker_cloud_processor.pyc
+ur3_moveit/src/hmi_tracker_image_processor.pyc
+ur3_moveit/src/hmi_tracker_transform_manager.pyc
