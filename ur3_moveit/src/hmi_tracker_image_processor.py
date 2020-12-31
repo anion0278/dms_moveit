@@ -14,7 +14,7 @@ class HmiTrackerImageProcessor:
         self.left_color_range = self.get_hue_color_range(60)  #green
         self.right_border_color = (0, 0, 255) # utilize same HUE value
         self.left_border_color = (0, 255, 0)
-        self.blob_min_size = 50
+        self.contour_min_size = 50
         self.dwn_smpl = dwn_smpl
         self.cam_img_pub = rospy.Publisher("hmi_tracker_image", Image, queue_size=1)
         self.__cv_bridge = CvBridge()
@@ -26,16 +26,17 @@ class HmiTrackerImageProcessor:
         lower = (color_base - sensitivity, 60, 60)
         return (lower, upper)
 
-    def get_bounding_radius(self,hand_tuple):
-        cv2.drawContours(hand_tuple[3], [hand_tuple[2]], # mask, blob
-                            0,
-                            color=255,
-                            thickness=-1)
+    def __fill_contours(self, img, contour_pts):
+        cv2.drawContours(img, [contour_pts], 0, color=255, thickness=-1)
+        self.__remove_contour(img, contour_pts)
 
-        return self.__get_bounding_radius(hand_tuple[0], hand_tuple[2])
+    def __remove_contour(self, img, contour_pts):
+        # contour has invalid pixels, which do not belong to the hand
+        for x, y in np.squeeze(contour_pts):
+            img[y][x] = 0
 
-    def is_center_within_contour(self, center, blob):
-        return cv2.pointPolygonTest(blob, (center[0], center[1]), True) >= 0
+    def is_center_within_contour(self, center, contour):
+        return cv2.pointPolygonTest(contour, (center[0], center[1]), True) >= 0
 
     def publish_img_if_required(self, img):
         # the topic is not published unless anyone is subcribed
@@ -60,11 +61,10 @@ class HmiTrackerImageProcessor:
 
         if (self.debug):
             if left_hand is not None:
-                img = self.stack_mask(img, left_hand[3], "Left", self.left_border_color)
+                img = self.stack_mask(img, left_hand[3], "Left mask", self.left_border_color)
             if right_hand is not None:
-                img = self.stack_mask(img, right_hand[3], "Right", self.right_border_color)
+                img = self.stack_mask(img, right_hand[3], "Right mask", self.right_border_color)
         self.publish_img_if_required(img)
-
         return left_hand, right_hand
 
     def stack_mask(self, img, mask, text, color):
@@ -79,11 +79,6 @@ class HmiTrackerImageProcessor:
     def __display_hand_on_img(self, img, hand_data, color):
         self.__overlay_circle_on_img(img, hand_data[0], color)
         self.__overlay_box_on_img(hand_data[1], img, color)
-
-    def __get_bounding_radius(self, center, blob):
-        most_distant_point = max(blob, key=lambda p: distance.euclidean(p, center))
-        scale2d = 1250  # magic const
-        return distance.euclidean(most_distant_point, center) / scale2d * self.dwn_smpl
 
     def __overlay_circle_on_img(self, image, pos, color):
         cv2.circle(image,
@@ -102,15 +97,16 @@ class HmiTrackerImageProcessor:
     def __find_hand(self, hsv_img, color_range):
         result = None
         mask = cv2.inRange(hsv_img, color_range[0], color_range[1])
-        _, contours, _ = cv2.findContours(mask.astype("uint8"), cv2.RETR_EXTERNAL,
-                                        cv2.CHAIN_APPROX_SIMPLE)
+        _, contours, _ = cv2.findContours(mask.astype("uint8"), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if contours:
-            blob = max(contours, key=lambda cont: cont.size)
-            if blob.size > self.blob_min_size / self.dwn_smpl:
-                rect = cv2.minAreaRect(blob)
+            contour_pts = max(contours, key=lambda cont: cont.size)
+            if contour_pts.size > self.contour_min_size / self.dwn_smpl:
+                rect = cv2.minAreaRect(contour_pts)
                 center = np.array(rect[0]).astype("int")
-                if not self.is_center_within_contour(center, blob):
-                    # the closest point, otherwise the center's height can be incorreclty calculated
-                    center = np.squeeze(min(blob, key=lambda p: distance.euclidean(p, center)))
-                result = (center, rect, blob, mask)
+                if not self.is_center_within_contour(center, contour_pts):
+                    # the closest point INSIDE contour, otherwise the center's height can be incorreclty calculated
+                    center = np.squeeze(min(contour_pts, key=lambda p: distance.euclidean(p, center)))
+                single_hand_img = np.zeros(mask.shape)
+                self.__fill_contours(single_hand_img, contour_pts)
+                result = (center, rect, contour_pts, mask, single_hand_img)
         return result

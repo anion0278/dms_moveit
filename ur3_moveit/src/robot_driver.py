@@ -89,9 +89,8 @@ class RobotDriver:
         self.__clear_octomap_service = rospy.ServiceProxy(clear_octomap_service, Empty)
         self.clear_octomap()
 
-    def update_hmi_obj(self, pose, name, size = 0.1): #TODO into visualizator
-        self.scene.add_sphere(name, pose, size * 2)
-        #  self.scene.add_box(name, pose, (size * 4, size * 3, size * 2))
+    def update_hmi_obj(self, pose, name, size): #TODO into visualizator
+        self.scene.add_sphere(name, pose, size)
 
     def remove_hmi_obj(self, name):
         self.scene.remove_world_object(name)

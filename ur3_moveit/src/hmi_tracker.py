@@ -18,7 +18,7 @@ class HmiTracker:
     def __init__(self, camera_name):
         self.__driver = robot_driver.RobotDriver(total_speed=0.2)
 
-        dwn_smpl = 8
+        dwn_smpl = 4
         if debug:
             dwn_smpl = 1
         
@@ -37,6 +37,7 @@ class HmiTracker:
     def __init_cam_subs(self, pc_topic, img_topic):
         depth_sub = message_filters.Subscriber(pc_topic, PointCloud2, queue_size=1)
         camera_sub = message_filters.Subscriber(img_topic, Image, queue_size=1)
+        # TODO it is possible to utilize only Depth msg, because it contains RGB data
         sync = message_filters.ApproximateTimeSynchronizer([depth_sub, camera_sub], queue_size=1, slop=0.05)
         sync.registerCallback(self.on_data)
 
@@ -49,7 +50,6 @@ class HmiTracker:
             print("Tracker - start time: %s" % start)
 
         img = self.img_proc.preprocess_img(img_msg)
-
         left_hand, right_hand = self.img_proc.find_hands(img)
         if left_hand is not None or right_hand is not None:
             depth_img = ros_numpy.numpify(depth_msg)
@@ -58,7 +58,7 @@ class HmiTracker:
 
         if debug:
             cycle_time = (rospy.get_time() - start) / 1000.0
-            print ("Tracker - time spent: %s" % cycle_time)
+            print ("Tracker - time spent: %s ms" % cycle_time)
 
     def __process_hand_data(self, hand_data, hmi_name, pc_pub, depth_img, depth_msg):
         if (hand_data is not None):
@@ -71,8 +71,7 @@ class HmiTracker:
         self.pc_proc.publish_emtpy_pc(pc_pub, header)
 
     def publish_hand(self, depth_img,header,hand_tuple,obj_name,pc_pub):
-        radius = self.img_proc.get_bounding_radius(hand_tuple)
-        cloud_center = self.pc_proc.get_center_and_publish(pc_pub, hand_tuple, depth_img, header)
+        cloud_center, radius = self.pc_proc.get_center_and_publish(pc_pub, hand_tuple, depth_img, header)
         stamped_pose = self.tf_proc.get_hand_pose(header.frame_id, cloud_center)    
         self.__driver.update_hmi_obj(stamped_pose, obj_name, radius)
         self.tf_proc.publish_hmi_tf(stamped_pose, header.frame_id, obj_name)
