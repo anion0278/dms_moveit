@@ -15,11 +15,25 @@ class HmiImageData:
         self.full_color_mask = full_color_mask
         self.single_hand_mask = single_hand_mask
 
+class ColorRange:
+    def __init__(self, lower, upper):
+        self.upper = upper
+        self.lower = lower
+    
+    # + value ranges = 0-180, 0-255, 0-255
+
+    def is_split(self): # does not handle range overflow
+        return self.lower[0] < 0
+
+    def get_split_ranges(self): 
+        return [ColorRange((0, self.lower[1], self.lower[2]), self.upper), 
+                ColorRange((180+self.lower[0], self.lower[1], self.lower[2]), (180, self.upper[1], self.upper[2]))]
+
 class HmiTrackerImageProcessor:
     def __init__(self, dwn_smpl, debug):
-        self.right_border_color = config.color_right * 255 # utilize same HUE value
-        self.left_border_color = config.color_left * 255
-        self.right_color_range = self.get_hsv_color_range(15)  #red
+        self.right_border_color = config.color_right[::-1] * 255 
+        self.left_border_color = config.color_left[::-1] * 255 # rgb to bgr
+        self.right_color_range = self.get_hsv_color_range(0)  #red
         self.left_color_range = self.get_hsv_color_range(60)  #green
         
         self.contour_min_size = 50
@@ -32,7 +46,7 @@ class HmiTrackerImageProcessor:
         sensitivity = 15
         upper = (color_base + sensitivity, 255, 255)
         lower = (color_base - sensitivity, 50, 60)
-        return (lower, upper)
+        return ColorRange(lower, upper)
 
     def __fill_contours(self, img, contour_pts):
         cv2.drawContours(img, [contour_pts], 0, color=255, thickness=-1)
@@ -106,7 +120,7 @@ class HmiTrackerImageProcessor:
     
     def __find_hand(self, hsv_img, color_range):
         result = None
-        color_mask = cv2.inRange(hsv_img, color_range[0], color_range[1])
+        color_mask = self.get_color_mask(hsv_img, color_range)
         _, contours, _ = cv2.findContours(color_mask.astype("uint8"), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if contours:
             contour_pts = max(contours, key=lambda cont: cont.size)
@@ -121,3 +135,12 @@ class HmiTrackerImageProcessor:
 
                 result = HmiImageData(center, rect, contour_pts, color_mask, single_hand_mask)
         return result
+
+    def get_color_mask(self, hsv_img, color_range):
+        mask = None
+        if color_range.is_split():# correctly handles RED color in HSV
+            comp_ranges = color_range.get_split_ranges()
+            mask = self.get_color_mask(hsv_img, comp_ranges[0]) + self.get_color_mask(hsv_img, comp_ranges[1])
+        else:
+            mask = cv2.inRange(hsv_img, color_range.lower, color_range.upper)
+        return mask
