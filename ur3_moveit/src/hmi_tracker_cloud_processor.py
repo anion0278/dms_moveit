@@ -30,13 +30,13 @@ class HmiTrackerCloudProcessor:
             # unused for now
         return (x, y, z)
 
-    def get_center_and_publish(self,pc_pub,hand_data, depth_img, header):
+    def get_center_and_publish(self,pc_pub, hand_data, depth_img, header):
          # the topic is not published unless anyone is subcribed
         publish_pointcloud = pc_pub.get_num_connections() > 0
 
-        blob_pts = np.where(hand_data[4] > 0)
+        blob_pts = np.where(hand_data.single_hand_mask > 0)
 
-        cloud_center = self.get_img_coords(depth_img, hand_data[0])
+        cloud_center = self.get_img_coords(depth_img, hand_data.center)
         r_max = 0
 
         heights = []

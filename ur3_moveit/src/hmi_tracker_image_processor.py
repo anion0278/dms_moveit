@@ -7,6 +7,14 @@ from cv_bridge import CvBridge, CvBridgeError
 
 import config
 
+class HmiImageData:
+    def __init__(self, center, bounding_box, contour_pts, full_color_mask, single_hand_mask):
+        self.center = center
+        self.bounding_box = bounding_box
+        self.contour_pts = contour_pts
+        self.full_color_mask = full_color_mask
+        self.single_hand_mask = single_hand_mask
+
 class HmiTrackerImageProcessor:
     def __init__(self, dwn_smpl, debug):
         # hue is in range 0..179 # TODO from config
@@ -61,9 +69,9 @@ class HmiTrackerImageProcessor:
 
         if (self.debug):
             if left_hand is not None:
-                img = self.stack_mask(img, left_hand[3], "Left mask", self.left_border_color)
+                img = self.stack_mask(img, left_hand.full_color_mask, "Left mask", self.left_border_color)
             if right_hand is not None:
-                img = self.stack_mask(img, right_hand[3], "Right mask", self.right_border_color)
+                img = self.stack_mask(img, right_hand.full_color_mask, "Right mask", self.right_border_color)
         self.publish_img_if_required(img)
         return left_hand, right_hand
 
@@ -74,11 +82,12 @@ class HmiTrackerImageProcessor:
         return stacked_img
 
     def __overlay_text(self, img, text, stacked_img, pos_x, color):
-        cv2.putText(stacked_img, text, (pos_x, img.shape[0] - 10), cv2.FONT_ITALIC, 2.0 / self.dwn_smpl, thickness = 8 / self.dwn_smpl, color = color)
+        # scale & thickness should be calculated relative to the size of the image !
+        cv2.putText(stacked_img, text, (pos_x, img.shape[0] - 10), cv2.FONT_ITALIC, 1.0 / self.dwn_smpl, thickness = 2 / self.dwn_smpl, color = color)
 
     def __display_hand_on_img(self, img, hand_data, color):
-        self.__overlay_circle_on_img(img, hand_data[0], color)
-        self.__overlay_box_on_img(hand_data[1], img, color)
+        self.__overlay_circle_on_img(img, hand_data.center, color)
+        self.__overlay_box_on_img(hand_data.bounding_box, img, color)
 
     def __overlay_circle_on_img(self, image, pos, color):
         cv2.circle(image,
@@ -89,15 +98,14 @@ class HmiTrackerImageProcessor:
                lineType=8,
                shift=0)
   
-    def __overlay_box_on_img(self, bound_box, img, color):
-        box = cv2.boxPoints(bound_box)
-        box = np.int0(box) 
-        cv2.drawContours(img, [box], 0, color, 2)
+    def __overlay_box_on_img(self, bounding_box, img, color):
+        box = cv2.boxPoints(bounding_box)
+        cv2.drawContours(img, [np.int0(box)], 0, color, 2)
     
     def __find_hand(self, hsv_img, color_range):
         result = None
-        mask = cv2.inRange(hsv_img, color_range[0], color_range[1])
-        _, contours, _ = cv2.findContours(mask.astype("uint8"), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        color_mask = cv2.inRange(hsv_img, color_range[0], color_range[1])
+        _, contours, _ = cv2.findContours(color_mask.astype("uint8"), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if contours:
             contour_pts = max(contours, key=lambda cont: cont.size)
             if contour_pts.size > self.contour_min_size / self.dwn_smpl:
@@ -106,7 +114,8 @@ class HmiTrackerImageProcessor:
                 if not self.is_center_within_contour(center, contour_pts):
                     # the closest point INSIDE contour, otherwise the center's height can be incorreclty calculated
                     center = np.squeeze(min(contour_pts, key=lambda p: distance.euclidean(p, center)))
-                single_hand_img = np.zeros(mask.shape)
-                self.__fill_contours(single_hand_img, contour_pts)
-                result = (center, rect, contour_pts, mask, single_hand_img)
+                single_hand_mask = np.zeros(color_mask.shape)
+                self.__fill_contours(single_hand_mask, contour_pts)
+
+                result = HmiImageData(center, rect, contour_pts, color_mask, single_hand_mask)
         return result

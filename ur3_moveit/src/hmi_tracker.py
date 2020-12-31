@@ -70,8 +70,8 @@ class HmiTracker:
         self.__driver.remove_hmi_obj(hmi_name)
         self.pc_proc.publish_emtpy_pc(pc_pub, header)
 
-    def publish_hand(self, depth_img,header,hand_tuple,obj_name,pc_pub):
-        cloud_center, radius = self.pc_proc.get_center_and_publish(pc_pub, hand_tuple, depth_img, header)
+    def publish_hand(self, depth_img,header,hand_data,obj_name,pc_pub):
+        cloud_center, radius = self.pc_proc.get_center_and_publish(pc_pub, hand_data, depth_img, header)
         stamped_pose = self.tf_proc.get_hand_pose(header.frame_id, cloud_center)    
         self.__driver.update_hmi_obj(stamped_pose, obj_name, radius)
         self.tf_proc.publish_hmi_tf(stamped_pose, header.frame_id, obj_name)
