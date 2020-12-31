@@ -17,21 +17,21 @@ class HmiImageData:
 
 class HmiTrackerImageProcessor:
     def __init__(self, dwn_smpl, debug):
-        # hue is in range 0..179 # TODO from config
-        self.right_color_range = self.get_hue_color_range(15)  #red
-        self.left_color_range = self.get_hue_color_range(60)  #green
-        self.right_border_color = (0, 0, 255) # utilize same HUE value
-        self.left_border_color = (0, 255, 0)
+        self.right_border_color = config.color_right * 255 # utilize same HUE value
+        self.left_border_color = config.color_left * 255
+        self.right_color_range = self.get_hsv_color_range(15)  #red
+        self.left_color_range = self.get_hsv_color_range(60)  #green
+        
         self.contour_min_size = 50
         self.dwn_smpl = dwn_smpl
         self.cam_img_pub = rospy.Publisher("hmi_tracker_image", Image, queue_size=1)
         self.__cv_bridge = CvBridge()
         self.debug = debug
 
-    def get_hue_color_range(self, color_base):
+    def get_hsv_color_range(self, color_base):
         sensitivity = 15
         upper = (color_base + sensitivity, 255, 255)
-        lower = (color_base - sensitivity, 60, 60)
+        lower = (color_base - sensitivity, 50, 60)
         return (lower, upper)
 
     def __fill_contours(self, img, contour_pts):
@@ -69,6 +69,8 @@ class HmiTrackerImageProcessor:
 
         if (self.debug):
             if left_hand is not None:
+                # img * np.dstack((im_red_ball_mask, im_red_ball_mask, im_red_ball_mask))
+                # http://hanzratech.in/2015/02/07/caveat-thresholding-hue-component.html#:~:text=The%20HSV%20values%20for%20true,we%20will%20use%20the%20cv2.
                 img = self.stack_mask(img, left_hand.full_color_mask, "Left mask", self.left_border_color)
             if right_hand is not None:
                 img = self.stack_mask(img, right_hand.full_color_mask, "Right mask", self.right_border_color)
