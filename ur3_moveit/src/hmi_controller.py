@@ -18,12 +18,12 @@ import util_common as util
 debug = False  
 
 class HmiController():
-    def __init__(self, device_name, use_world_frame = False):
+    def __init__(self, device_name, directed_vibration, use_world_frame = False):
         self.node_name = device_name
         self.device_name = device_name
 
         self.__ble = ble.BleManager(self.device_name, debug, self.__main_loop, self.__process_hmi_data)
-        self.notificator = nt.VibroNotificator(self.device_name)
+        self.notificator = nt.VibroNotificator(self.device_name, directed_vibration)
         self.calibrator = cb.CalibrationManager(self, self.node_name, use_world_frame)
         self.visualizer = vis.RVizVisualiser(config.get_rviz_color(self.device_name), self.node_name + "_markers", self.calibrator.calibr_frame_id, 1)
         self.processor = pr.DataProcessor(self.device_name, self, self.calibrator, self.visualizer, self.notificator)
@@ -48,31 +48,34 @@ class HmiController():
 
     def set_hmi_notification(self):
         __time_step_s = 0.05
-        command = self.notificator.calc_intensity()
+        command = self.notificator.get_notification()
         
-        if isinstance(command, nt.TimedCommand):
+        if isinstance(command, nt.ProlongedNotification): # RUN Prolonged notification
             while command.time > 0:
                 self.send_speed_command(command.intensity)
                 rospy.sleep(__time_step_s)
                 command.time = command.time - __time_step_s
-                new_command = self.notificator.calc_intensity()
-                if (isinstance(new_command, nt.TimedCommand) and new_command.intensity > command.intensity)  or new_command > command.intensity:
-                    if isinstance(new_command, nt.TimedCommand):
-                        self.send_speed_command(new_command.intensity)
+                new_notification = self.notificator.get_notification()
+                
+                # Forget old notification if the new one is prolonged and stronger 
+                if (isinstance(new_notification, nt.ProlongedNotification) and new_notification.intensity > command.intensity)  or new_notification > command.intensity:
+                    if isinstance(new_notification, nt.ProlongedNotification):
+                        self.send_speed_command(new_notification.intensity)
                     else:
-                        self.send_speed_command(new_command)
+                        self.send_speed_command(new_notification)
                     break
 
-        else:
+        else: # RUN usual immediate notification
             self.send_speed_command(command) 
             rospy.sleep(rospy.Duration(secs=0, nsecs=5000))
 
     def send_speed_command(self, speed):
         # !!!!!!!!!!!!!!!!!!!!!!!!! debug speeed publish
+        #rospy.set_param("debug_"+self.node_name, speed)
         if self.processor.current_orientation is not None:
             ros_vec = self.processor.get_speed_vector(speed)
-            speed_vec = speed * ros_numpy.numpify(ros_vec)
-            motor_speeds = self.notificator.get_motor_speeds(speed_vec)
+            # speed_vec = speed * ros_numpy.numpify(ros_vec)
+            motor_speeds = self.notificator.get_motor_speeds(speed, ros_vec)
             self.send_speed(motor_speeds)
 
     def __notify_ready(self):
@@ -115,7 +118,7 @@ if __name__ == "__main__":
 
     if debug: util.print_all_args()
         
-    hmi = HmiController(sys.argv[1], use_world)
+    hmi = HmiController(sys.argv[1], True, use_world)
     hmi.run()
 
     

@@ -1,18 +1,20 @@
-
 import rospy
+import ros_numpy
 
 import config
 
+
 obj_clearance_param = "/move_group/collision/min_clearance"
 
-class TimedCommand():
+# for notificaitons that last for time period
+class ProlongedNotification(): 
     def __init__(self, intensity, time):
         self.time = time
         self.intensity = intensity
 
 
 class VibroNotificator():
-    def __init__(self, device_name):
+    def __init__(self, device_name, directed_activation):
         # self.__time_step_s = 0.05
         self.clearance_min = 0.15 
         self.hmi_status_param = "hmi_value"
@@ -20,20 +22,21 @@ class VibroNotificator():
         self.__max_vib = config.dist_intensity_max
         self.this_hmi_clearance_param = obj_clearance_param + "_" + config.get_side(device_name)
         self.second_hmi_clearance_param = config.get_second_hmi_name(self.this_hmi_clearance_param)
+        self.directed_activation = directed_activation
 
     # self.send_speed_command(self, speed):
     # !!!!!!!!!!!!!! super important
     #     if speed_comps[i] < config.vibr_min and speed_comps[i] > config.vibr_min / 2:
     #     val = config.vibr_min
 
-    def calc_intensity(self):
+    def get_notification(self):
         hmi_status_command = rospy.get_param(self.hmi_status_param)
         if hmi_status_command != 0:
             if hmi_status_command == config.status_invalid:
                 return config.invalid_goal_intensity
 
             if hmi_status_command == config.status_replan:
-                return TimedCommand(config.replan_intensity, 0.3)    
+                return ProlongedNotification(config.replan_intensity, 0.3)    
         else:
             this_hmi_clearance_level = rospy.get_param(self.this_hmi_clearance_param)
             second_hmi_clearance_level = rospy.get_param(self.second_hmi_clearance_param)
@@ -50,16 +53,25 @@ class VibroNotificator():
             else:
                 return 0
 
-    def get_motor_speeds(self, speed_vector): # TODO decide here whether activate all motors simulateneously or use pattern activation
-        speed_comps = [0,0,0,0,0,0]
-        # components x, y, z, -x, -y, -z
+    def get_motor_speeds(self, speed, ros_vec): 
+        speed_vector = speed * ros_numpy.numpify(ros_vec)
+        if self.directed_activation:
+            speed_comps = self.__directed_vibration(speed_vector)
+        else:
+            speed_comps = self.__simulateneous_vibration(speed)
+        #print("Device %s : %s" % (self.device_name, speed_comps))
+        return speed_comps
+
+    def __simulateneous_vibration(self, s):
+        return [s,s,s,s,s,s]
+
+    def __directed_vibration(self, speed_vector):
+        speed_comps = [0,0,0,0,0,0] # components x, y, z, -x, -y, -z
         for i in range(len(speed_comps) / 2):
             if speed_vector[i] > 0: # positive
                 speed_comps[i] = speed_vector[i]
             else: # negative number
                 speed_comps[i + 3] = abs(speed_vector[i])
-
-        #print("Device %s : %s" % (self.device_name, speed_comps))
         return speed_comps
 
     def init_params(self):
@@ -83,9 +95,7 @@ class VibroNotificator():
     def __set_param(self, param_name, value):
         rospy.set_param(param_name, value)
 
-
-        # TODO VIBRATION should be proportional to the distance to the future trajectory AND !
+        # TODO Vibration may be proportional to the distance to the future trajectory 
         # AND proportional to the distance to the robot - if the user is in the path of trajectory,
         # then he still has time to react, no need to vibrate intesivelly. Requires changes in MoveIt!
-
         # Possible way to implement - counting how far from current position is the collision

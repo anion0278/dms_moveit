@@ -20,8 +20,7 @@ class ColorRange:
         self.upper = upper
         self.lower = lower
     
-    # + value ranges = 0-180, 0-255, 0-255
-
+    # HSV value ranges = 0-180, 0-255, 0-255
     def is_split(self): # does not handle range overflow
         return self.lower[0] < 0
 
