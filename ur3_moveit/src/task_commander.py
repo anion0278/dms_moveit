@@ -34,7 +34,7 @@ class Commander():
     def __init_status(self):
         self.__set_status(TaskStatus.OK)
         self.__set_debug_goal_validity(True)
-        self.__set_debug_env_change(False)
+        self.__set_debug_plan_interrupted(False)
         self.__set_debug_goal_name("None")
 
     def demo_task(self):
@@ -87,9 +87,9 @@ class Commander():
         return r.NamedJointPose(self.robot_driver.get_pose(),"Retreat pose")
 
     def replan(self):
-        #set_env_change(True) # Depends on whether usual Planning should treated as a change of plan
+        #self.__set_debug_plan_interrupted(True) # Depends on whether usual Planning should treated as a change of plan
         result = self.robot_driver.perform_planning()
-        #set_env_change(False)
+        #self.__set_debug_plan_interrupted(False)
         return result
 
     def retreat_to_previous_pose(self, retreat_pose):
@@ -121,17 +121,17 @@ class Commander():
     def __set_debug_goal_validity(self, validity):
         utils.set_param(config.goal_validity_param, validity)
 
-    def __set_debug_env_change(self, state):
-        utils.set_param(config.replan_param, state)
+    def __set_debug_plan_interrupted(self, state):
+        utils.set_param(config.plan_interrupted_param, state)
 
     def __set_status_unable_to_plan(self):
         self.__set_status(TaskStatus.INVALID_GOAL)
 
     def __set_status_interrupted(self):
-        utils.set_param(config.replan_param, True)
-        utils.set_param(config.replan_impulse_param, True)
+        self.__set_debug_plan_interrupted(True)
+        utils.set_param(config.replan_impulse_param, True) # to make sure that event was recorded
         self.__set_status(TaskStatus.INTERRUPTED)
-        utils.set_param(config.replan_param, False)
+        self.__set_debug_plan_interrupted(False)
 
 
 if __name__ == "__main__":

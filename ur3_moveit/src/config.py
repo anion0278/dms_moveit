@@ -17,7 +17,7 @@ hmi_left = "hmi_left"
 # Param Server Names
 task_status_param = "task_status"
 clearance_param = "/move_group/collision/min_clearance"
-replan_param = "/replan"
+plan_interrupted_param = "/replan"
 replan_impulse_param = "/env_change_impulse"
 goal_name_param = "/goal_name"
 goal_validity_param = "/goal_validity"
