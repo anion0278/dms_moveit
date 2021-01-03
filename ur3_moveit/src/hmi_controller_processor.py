@@ -28,7 +28,7 @@ class DataProcessor():
         self.current_orientation = None
         self.current_imu_status = None
 
-    def get_speed_vector(self, speed):
+    def get_speed_vector(self):
         vs = Vector3Stamped(vector = Vector3(*self.currect_collision_vec))
         qa = quaternion_inverse(ros_numpy.numpify(self.current_orientation))
         trs = TransformStamped(transform = Transform(rotation = Quaternion(*qa)))
@@ -53,8 +53,10 @@ class DataProcessor():
         if any(data_namespace == m.ns for m in marker_array_msg.markers):
             points = (m.points for m in marker_array_msg.markers if data_namespace == m.ns).next()
             v = ros_numpy.numpify(points[0]) - ros_numpy.numpify(points[1])
-            self.currect_collision_vec = v / np.linalg.norm(v) # vector should be normalized !
+            vec_len = np.linalg.norm(v)
+            self.currect_collision_vec = v / vec_len # vector should be normalized !
             #print("New vector: %s" % self.currect_collision_vec)
+            print("New vector length [m]: %s" % vec_len)
 
     def __get_compressed_quarternion(self, data): 
         floats = np.zeros(4)

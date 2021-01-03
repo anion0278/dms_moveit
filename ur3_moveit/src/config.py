@@ -6,11 +6,21 @@ class Side(Enum):
     LEFT = 1
     RIGHT = 2
 
+class TaskStatus(Enum):
+    OK = 0
+    REPLANNING = 1
+    INVALID_GOAL = 2
+
 hmi_right = "hmi_right"
 hmi_left = "hmi_left"
 
 status_replan = "replan"
 status_invalid = "invalid"
+
+task_status_param_name = "task_status"
+clearance_param_name = "/move_group/collision/min_clearance"
+
+collision_vec_topic = "/move_group/collision_vectors"
 
 invalid_goal_intensity = 220 # replan stronger than invalid goal, because is more frequents
 replan_intensity = 250
@@ -24,8 +34,6 @@ color_right = np.array([1, 0, 0])
 calibr_service = "_frame_calibration"
 offsets_file = "{0}_imu_offsets.p"
 calibr_file = "{0}_frame_calibration.p"
-
-collision_vec_topic = "/move_group/collision_vectors"
 
 current_script_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -49,8 +57,7 @@ def get_visual_color(device_name):
 
 def get_rviz_color(device_name):
     c = get_visual_color(device_name)
-    c.append(0.7) # alpha
-    return c
+    return np.append(c, 0.7) # alpha
 
 def get_second_hmi_name(first_hmi_name):
     left = "left"
@@ -63,3 +70,4 @@ def get_second_hmi_name(first_hmi_name):
 
 def get_side(hmi_name):
     return hmi_name.replace("hmi_", "")
+    

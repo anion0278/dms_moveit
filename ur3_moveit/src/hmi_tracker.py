@@ -12,7 +12,7 @@ import hmi_tracker_image_processor as ip
 import hmi_tracker_cloud_processor as cp
 import hmi_tracker_transform_manager as tp
 
-debug = True
+debug = False
 
 class HmiTracker:
     def __init__(self, camera_name):

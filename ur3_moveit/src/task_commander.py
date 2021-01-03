@@ -5,8 +5,10 @@ import sys
 
 import robot_driver as r
 import config
+from config import TaskStatus
+import util_common as utils
 
-hmi_status_param = "hmi_value"
+task_status_param = config.task_status_param_name
 env_changed_param = "/replan"
 goal_name_param = "/goal_name"
 
@@ -66,7 +68,7 @@ class Commander():
                 continue
 
             self.set_goal_validity(True)
-            rospy.set_param(hmi_status_param, 0)
+            self.status_ok()
             move_attempts += 1
             if not self.robot_driver.execute_planned_sync():
                 self.status_movement_interrupted()
@@ -77,6 +79,12 @@ class Commander():
             self.retreat_to_previous_pose(retreat_pose)
 
         return success
+
+    def status_ok(self):
+        self.__set_status(TaskStatus.OK)
+
+    def __set_status(self, status_enum_val):
+        utils.set_param(config.task_status_param_name, status_enum_val.value)
 
     def replan(self):
         #set_env_change(True) # Depends on whether usual Planning is also change of plan
@@ -96,25 +104,22 @@ class Commander():
             print("Unsucessfull retreat !")
 
     def set_goal_validity(self, validity):
-        rospy.set_param("/goal_validity", validity)
+        utils.set_param("/goal_validity", validity)
 
     def set_goal_name(self, name):
-        rospy.set_param(goal_name_param, name)
+        utils.set_param(goal_name_param, name)
 
     def set_env_change(self, state):
-        rospy.set_param(env_changed_param, state)
+        utils.set_param(env_changed_param, state)
 
     def status_unable_to_plan(self):
-        rospy.set_param(hmi_status_param, config.status_invalid)
+        self.__set_status(TaskStatus.INVALID_GOAL)
 
     def status_movement_interrupted(self):
         rospy.set_param("/replan", True)
         rospy.set_param("/env_change_impulse", True)
-        rospy.set_param(hmi_status_param, config.status_replan)
+        self.__set_status(TaskStatus.REPLANNING)
         rospy.set_param("/replan", False)
-
-    def status_ok(self):
-        rospy.set_param(hmi_status_param, 0)
 
     def demo_task(self):
         while True:

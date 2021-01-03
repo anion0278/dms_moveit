@@ -42,7 +42,7 @@ class HmiTrackerCloudProcessor:
         heights = []
         pc_hand = []
         for x, y in zip(blob_pts[0], blob_pts[1]):
-            depth_img_point = self.get_img_coords(depth_img, (y * self.dwn_smpl, x * self.dwn_smpl))
+            depth_img_point = self.get_img_coords(depth_img, (y, x))
             heights.append(depth_img_point)
             if publish_pointcloud:
                 try:

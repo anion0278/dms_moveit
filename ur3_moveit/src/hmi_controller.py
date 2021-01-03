@@ -11,7 +11,7 @@ import hmi_controller_processor as pr
 import hmi_controller_calibration_manager as cb
 import hmi_visualisation as vis
 import hmi_controller_ble as ble
-import hmi_disconnector
+import hmi_controller_disconnector
 import util_common as util
 
 
@@ -47,35 +47,36 @@ class HmiController():
             self.set_hmi_notification()
 
     def set_hmi_notification(self):
-        __time_step_s = 0.05
-        command = self.notificator.get_notification()
+        time_step_s = 0.02
+        notification = self.notificator.get_notification()
         
-        if isinstance(command, nt.ProlongedNotification): # RUN Prolonged notification
-            while command.time > 0:
-                self.send_speed_command(command.intensity)
-                rospy.sleep(__time_step_s)
-                command.time = command.time - __time_step_s
+        if isinstance(notification, nt.ProlongedNotification):
+            while notification.time > 0:
+                self.send_speed_command(notification) # same
+                rospy.sleep(time_step_s)
+
+                notification.time = notification.time - time_step_s
                 new_notification = self.notificator.get_notification()
                 
-                # Forget old notification if the new one is prolonged and stronger 
-                if (isinstance(new_notification, nt.ProlongedNotification) and new_notification.intensity > command.intensity)  or new_notification > command.intensity:
+                # Forget old notification if the new one is stronger 
+                if new_notification.intensity > notification.intensity:
                     if isinstance(new_notification, nt.ProlongedNotification):
-                        self.send_speed_command(new_notification.intensity)
+                        self.send_speed_command(new_notification) # same
                     else:
-                        self.send_speed_command(new_notification)
-                    break
+                        self.send_speed_command(new_notification) # same
+                    break  # does it actually cause exit from loop ??
 
-        else: # RUN usual immediate notification
-            self.send_speed_command(command) 
-            rospy.sleep(rospy.Duration(secs=0, nsecs=5000))
+        if isinstance(notification, nt.PromptNotification):
+            self.send_speed_command(notification) # same 
+            rospy.sleep(time_step_s)
+        
+        # raise AttributeError("Unrecognized type of notification")
 
-    def send_speed_command(self, speed):
-        # !!!!!!!!!!!!!!!!!!!!!!!!! debug speeed publish
-        #rospy.set_param("debug_"+self.node_name, speed)
+    def send_speed_command(self, notification):
+        #rospy.set_param("debug_"+self.node_name, speed)  # !!!!!!!!!!!!!!!!!!!!!!!!! debug speeed publish
         if self.processor.current_orientation is not None:
-            ros_vec = self.processor.get_speed_vector(speed)
-            # speed_vec = speed * ros_numpy.numpify(ros_vec)
-            motor_speeds = self.notificator.get_motor_speeds(speed, ros_vec)
+            ros_vec = self.processor.get_speed_vector()
+            motor_speeds = self.notificator.get_motor_speeds(notification, ros_vec)
             self.send_speed(motor_speeds)
 
     def __notify_ready(self):
@@ -112,7 +113,7 @@ if __name__ == "__main__":
     if not "node" in sys.argv:
         print("STANDALONE MODE !")
         use_world = True
-        hmi_disconnector.restart_adapter()
+        hmi_controller_disconnector.restart_adapter()
         sys.argv.append(config.hmi_right)
         # sys.argv.append(config.hmi_left)
 
