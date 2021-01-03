@@ -47,58 +47,59 @@ class HmiController():
             self.set_hmi_notification()
 
     def set_hmi_notification(self):
-        time_step_s = 0.02
         notification = self.notificator.get_notification()
         
         if isinstance(notification, nt.ProlongedNotification):
-            while notification.time > 0:
-                self.send_speed_command(notification) # same
-                rospy.sleep(time_step_s)
+            start_time = rospy.get_time()
+            while notification.time > (rospy.get_time() - start_time):
+                self.send_speed_command(notification) 
 
-                notification.time = notification.time - time_step_s
                 new_notification = self.notificator.get_notification()
-                
-                # Forget old notification if the new one is stronger 
                 if new_notification.intensity > notification.intensity:
                     if isinstance(new_notification, nt.ProlongedNotification):
-                        self.send_speed_command(new_notification) # same
+                        self.send_speed_command(new_notification) 
                     else:
-                        self.send_speed_command(new_notification) # same
-                    break  # does it actually cause exit from loop ??
+                        self.send_speed_command(new_notification) 
+                    break 
+                print("Exited loop")
+            return
 
         if isinstance(notification, nt.PromptNotification):
-            self.send_speed_command(notification) # same 
-            rospy.sleep(time_step_s)
+            self.send_speed_command(notification)
+            return
         
-        # raise AttributeError("Unrecognized type of notification")
+        raise AttributeError("Unrecognized type of notification")
 
     def send_speed_command(self, notification):
-        #rospy.set_param("debug_"+self.node_name, speed)  # !!!!!!!!!!!!!!!!!!!!!!!!! debug speeed publish
+        util.set_param(config.notification_val_param+self.node_name, notification.intensity) # timeline data
         if self.processor.current_orientation is not None:
             ros_vec = self.processor.get_speed_vector()
             motor_speeds = self.notificator.get_motor_speeds(notification, ros_vec)
-            self.send_speed(motor_speeds)
+            #print("Motor speeds: %s" % motor_speeds)
+            self.send_speed_msg(motor_speeds)
 
     def __notify_ready(self):
         offsets = self.calibrator.restore_imu_offsets()
         if offsets is None:
-            self.send_handshake()
+            self.send_handshake_msg()
         else:
-            self.send_offsets(offsets)
+            self.send_offsets_msg(offsets)
         self.calibrator.start_calibration_service()
         print("Device %s is ready." % self.device_name)
 
-    def request_offsets(self):
+    def send_offsets_request_msg(self):
         self.__ble.send_text("request-offsets")
 
-    def send_speed(self, speed_comps):
+    def send_speed_msg(self, speed_comps):
         msg = self.__format_speed_msg(speed_comps)
         self.__ble.send_text(msg)
+        delay_time_s = 0.02
+        rospy.sleep(delay_time_s)
 
-    def send_offsets(self, offsets):
+    def send_offsets_msg(self, offsets):
         self.__ble.send_text("offsets:" + offsets)
 
-    def send_handshake(self):
+    def send_handshake_msg(self):
         self.__ble.send_text("handshake")
 
     def __format_speed_msg(self, speed_comps):
@@ -116,6 +117,7 @@ if __name__ == "__main__":
         hmi_controller_disconnector.restart_adapter()
         sys.argv.append(config.hmi_right)
         # sys.argv.append(config.hmi_left)
+        debug = True
 
     if debug: util.print_all_args()
         

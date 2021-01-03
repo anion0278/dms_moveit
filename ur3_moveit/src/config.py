@@ -8,24 +8,28 @@ class Side(Enum):
 
 class TaskStatus(Enum):
     OK = 0
-    REPLANNING = 1
+    INTERRUPTED = 1
     INVALID_GOAL = 2
 
 hmi_right = "hmi_right"
 hmi_left = "hmi_left"
 
-status_replan = "replan"
-status_invalid = "invalid"
+# Param Server Names
+task_status_param = "task_status"
+clearance_param = "/move_group/collision/min_clearance"
+replan_param = "/replan"
+replan_impulse_param = "/env_change_impulse"
+goal_name_param = "/goal_name"
+goal_validity_param = "/goal_validity"
+notification_val_param =  "/debug_"
 
-task_status_param_name = "task_status"
-clearance_param_name = "/move_group/collision/min_clearance"
 
 collision_vec_topic = "/move_group/collision_vectors"
 
-invalid_goal_intensity = 220 # replan stronger than invalid goal, because is more frequents
-replan_intensity = 250
-dist_intensity_max = 200
-dist_intensity_min = 150
+invalid_goal_intensity = 180 # replan stronger than invalid goal, because is more frequents
+replan_intensity = 200
+dist_intensity_max = 160
+dist_intensity_min = 120
 vibr_min = 60
 
 color_left = np.array([0, 1, 0]) 
@@ -59,15 +63,4 @@ def get_rviz_color(device_name):
     c = get_visual_color(device_name)
     return np.append(c, 0.7) # alpha
 
-def get_second_hmi_name(first_hmi_name):
-    left = "left"
-    right = "right"
-    if left in first_hmi_name:
-        return first_hmi_name.replace(left, right)
-    if right in first_hmi_name:
-        return first_hmi_name.replace(right, left)
-    raise AttributeError("Check hand name!")
-
-def get_side(hmi_name):
-    return hmi_name.replace("hmi_", "")
     

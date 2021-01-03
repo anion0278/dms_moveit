@@ -2,6 +2,7 @@ import rospy
 import ros_numpy
 
 import config
+from config import TaskStatus
 import util_common as utils
 
 
@@ -11,10 +12,13 @@ class PromptNotification():
         self.directed_vibration = directed_vibration
 
 # for notificaitons that last for time period
-class ProlongedNotification(PromptNotification): 
+class ProlongedNotification(): 
     def __init__(self, intensity, time_s, directed_vibration = True):
         self.time = time_s
-        super().__init__(intensity, directed_vibration)
+        # this is way better than Python's inheritance
+        self.intensity = intensity 
+        self.directed_vibration = directed_vibration
+
 
 class VibroNotificator():
     def __init__(self, device_name, directed_vibration):
@@ -22,29 +26,39 @@ class VibroNotificator():
         self.reaction_dist_m = 0.15  # distance on which HMIs start to react (proportionally)
         self.__min_vib = config.dist_intensity_min
         self.__max_vib = config.dist_intensity_max
-        self.hmi_clearance_param = config.clearance_param_name + "_" + config.get_side(device_name)
+        self.hmi_clearance_param = config.clearance_param + "_" + device_name
 
     def get_notification(self):
         task_status = self.get_task_status()
-        if task_status == config.TaskStatus.REPLANNING:
+        # print("Task status: %s" % task_status)
+        if task_status == TaskStatus.INTERRUPTED:
             return ProlongedNotification(config.replan_intensity, 0.3, False)    
             
-        if task_status == config.TaskStatus.INVALID_GOAL:
+        if task_status == TaskStatus.INVALID_GOAL:
             return PromptNotification(config.invalid_goal_intensity, False)
 
-        if task_status == config.TaskStatus.OK:
-            this_hmi_clearance = self.get_hmi_clearance()
-            obstacle_clearance = self.get_obstacle_clearance()
-            # obstacle is closer than HMI
-            # TODO decide if react on this event. Maybe the reaction dist should be lower?
-            if obstacle_clearance < this_hmi_clearance:   
-                this_hmi_clearance = obstacle_clearance
-            if this_hmi_clearance < self.reaction_dist_m:
-                return PromptNotification(self.__get_proportional_vibration(this_hmi_clearance))
-        return PromptNotification(0, directed_vibration=False)
+        if task_status == TaskStatus.OK:
+            clearance = self.__get_clearance()
+            # print("Clearance [m]: %s" % clearance)
+            pv = self.__get_proportional_vibration(clearance)
+            # print("Vibration: %s" % pv)
+            return PromptNotification(pv)
+
+        raise AttributeError("Unrecognized task status")
+
+    def __get_clearance(self):
+        hmi_clearance = self.get_hmi_clearance()
+        obstacle_clearance = self.get_obstacle_clearance()
+        # obstacle is closer than HMI
+        # TODO decide if react on this event. Maybe the reaction dist should be lower?
+        if obstacle_clearance < hmi_clearance:   
+            hmi_clearance = obstacle_clearance
+        return hmi_clearance
 
     def __get_proportional_vibration(self, clearance):
-        return  (self.__max_vib - self.__min_vib) * (self.reaction_dist_m - clearance) / self.reaction_dist_m + self.__min_vib
+        if clearance < self.reaction_dist_m:
+            return  (self.__max_vib - self.__min_vib) * (self.reaction_dist_m - clearance) / self.reaction_dist_m + self.__min_vib
+        return 0
 
     def get_motor_speeds(self, notification, ros_vec): 
         speed_vector = notification.intensity * ros_numpy.numpify(ros_vec)
@@ -55,6 +69,7 @@ class VibroNotificator():
         #print("Device %s : %s" % (self.device_name, speed_comps))
         return speed_comps
 
+    # TODO
     #     if speed_comps[i] < config.vibr_min and speed_comps[i] > config.vibr_min / 2:
     #     val = config.vibr_min
 
@@ -72,18 +87,18 @@ class VibroNotificator():
         return speed_comps
 
     def init_params(self):
-        utils.set_param(config.task_status_param_name, 0)
-        utils.set_param(config.clearance_param_name, self.reaction_dist_m)
+        utils.set_param(config.task_status_param, 0)
+        utils.set_param(config.clearance_param, self.reaction_dist_m)
         utils.set_param(self.hmi_clearance_param, self.reaction_dist_m)
 
     def get_hmi_clearance(self):
         return utils.get_param(self.hmi_clearance_param)
 
     def get_obstacle_clearance(self): # min distance from robot to unknown object
-        return utils.get_param(config.clearance_param_name)
+        return utils.get_param(config.clearance_param)
 
     def get_task_status(self): 
-        return utils.get_param(config.task_status_param_name)
+        return TaskStatus(utils.get_param(config.task_status_param))
 
     # TODO Vibration may be proportional to the distance to the future trajectory 
     # AND proportional to the distance to the robot - if the user is in the path of trajectory,

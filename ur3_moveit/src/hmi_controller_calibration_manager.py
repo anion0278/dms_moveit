@@ -17,8 +17,8 @@ class CalibrationManager():
 
         self.controller = controller
         self.calibr_service_name = node_name + config.calibr_service
-        self.offsets_file = config.get_file_full_path(config.offsets_file.format(node_name))
-        self.frame_calib_file = config.get_file_full_path(config.calibr_file.format(node_name))
+        self.offsets_file = config.get_offsets_file_path(node_name)
+        self.frame_calib_file = config.get_frame_calibration_file_path(node_name)
 
         self.tf_pub = tf2_ros.TransformBroadcaster()
         self.__tracked_frame_id = controller.device_name

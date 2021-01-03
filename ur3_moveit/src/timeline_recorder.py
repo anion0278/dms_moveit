@@ -8,14 +8,15 @@ import numpy as np
 
 import config
 import util_ros_process as ros_process
+import util_common as utils
 
 rospy.init_node('timeline_recorder', anonymous=True)
 
-rospy.set_param("/env_change_impulse", False)
+utils.set_param(config.replan_impulse_param, False)
 end = False
 
-max_dist = 0.2
-
+max_dist = 0.2 # max distance to be displayed in graph
+ 
 current_script_path = os.path.dirname(os.path.realpath(__file__))
 
 time_step = 0.2
@@ -38,19 +39,19 @@ with open(os.path.join(current_script_path,'timeline.csv'), mode='w') as tl_file
         time = 0
         while not end:
             # TODO param names from config
-            dist_right = get_rel_distance("/move_group/collision/min_clearance_right") 
-            dist_left = get_rel_distance("/move_group/collision/min_clearance_left")
-            dist_obj = get_rel_distance("/move_group/collision/min_clearance")
+            dist_right = get_rel_distance(config.clearance_param + "_" + config.hmi_right) 
+            dist_left = get_rel_distance(config.clearance_param + "_" +  config.hmi_left)
+            dist_obj = get_rel_distance(config.clearance_param)
             
-            hmi_val_right = get_rel_intensivity("/debug_hmi_glove_right") 
-            hmi_val_left = get_rel_intensivity("/debug_hmi_glove_left") 
+            hmi_val_right = get_rel_intensivity(config.notification_val_param + config.hmi_right) 
+            hmi_val_left = get_rel_intensivity(config.notification_val_param + config.hmi_left) 
 
-            validity = get_bool("/goal_validity") 
+            validity = get_bool(config.goal_validity_param) 
 
-            replan = get_bool("/replan") or get_bool("/env_change_impulse")
-            rospy.set_param("/env_change_impulse", False)
+            replan = get_bool(config.replan_param) or get_bool(config.replan_impulse_param)
+            utils.set_param(config.replan_impulse_param, False)
 
-            goal_name = rospy.get_param("/goal_name")
+            goal_name = utils.get_param(config.goal_name_param)
 
             writer.writerow([time, dist_right, dist_left, dist_obj, hmi_val_right, hmi_val_left, validity, replan, goal_name])
             rospy.sleep(duration=rospy.Duration(secs=time_step))
