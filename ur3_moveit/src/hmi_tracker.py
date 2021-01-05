@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
+import sys
 from sensor_msgs.msg import PointCloud2, Image
 import ros_numpy  #sudo apt-get install ros-melodic-ros-numpy
 import message_filters
@@ -8,15 +9,27 @@ import message_filters
 import task_commander as com
 import robot_driver
 import config
+import util_common as util
 import hmi_tracker_image_processor as ip
 import hmi_tracker_cloud_processor as cp
 import hmi_tracker_transform_manager as tp
 
 debug = False
 
+
+class EmptyMoveitInterface():
+    def __init__(self):
+        rospy.init_node('robot_python_driver', anonymous=True)
+    
+    def update_hmi_obj(self, pose, name, size): 
+        pass
+
+    def remove_hmi_obj(self, name):
+        pass
+
 class HmiTracker:
-    def __init__(self, camera_name):
-        self.__driver = robot_driver.RobotDriver(total_speed=0.2)
+    def __init__(self, camera_name, moveit_interface):
+        self.__driver = moveit_interface
 
         dwn_smpl = 4
         if debug:
@@ -78,5 +91,15 @@ class HmiTracker:
 
 
 if __name__ == "__main__":
-    t = HmiTracker(camera_name = "camera_top")
+    
+    # sys.argv.append("demo")
+    if "demo" in sys.argv: 
+        print("DEMO MODE!")
+        moveit_interface = EmptyMoveitInterface()
+    else:
+        moveit_interface = robot_driver.RobotDriver(total_speed=0.2)
+
+    if debug: util.print_all_args()
+
+    t = HmiTracker("camera_top", moveit_interface)
     t.run()

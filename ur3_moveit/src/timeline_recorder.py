@@ -48,7 +48,7 @@ with open(os.path.join(current_script_path,'timeline.csv'), mode='w') as tl_file
 
             validity = get_bool(config.goal_validity_param) 
 
-            replan = get_bool(config.replan_param) or get_bool(config.replan_impulse_param)
+            replan = get_bool(config.plan_interrupted_param) or get_bool(config.replan_impulse_param)
             utils.set_param(config.replan_impulse_param, False)
 
             goal_name = utils.get_param(config.goal_name_param)
