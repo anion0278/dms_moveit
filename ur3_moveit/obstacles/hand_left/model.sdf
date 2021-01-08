@@ -42,7 +42,10 @@
           </mesh>
         </geometry>
         <material>
-          <emissive>0.0 1.0 0.0 1.0</emissive>
+          <ambient>56 170 136</ambient>
+          <diffuse>56 170 136</diffuse>
+          <specular>56 170 136</specular>
+          <emissive>56 170 136</emissive>
         </material>
       </visual>
       <visual name="visual_forearm">

@@ -19,21 +19,25 @@ class ColorRange:
     def __init__(self, lower, upper):
         self.upper = upper
         self.lower = lower
+        self.h_lim = 179
     
     # HSV value ranges = 0-180, 0-255, 0-255
     def is_split(self): # does not handle range overflow
-        return self.lower[0] < 0
+        return self.lower[0] < 0 or self.upper[0] > self.h_lim
 
     def get_split_ranges(self): 
+        # if self.lower[0] < 0:
         return [ColorRange((0, self.lower[1], self.lower[2]), self.upper), 
-                ColorRange((180+self.lower[0], self.lower[1], self.lower[2]), (180, self.upper[1], self.upper[2]))]
+            ColorRange((self.h_lim+self.lower[0], self.lower[1], self.lower[2]), (self.h_lim, self.upper[1], self.upper[2]))]
+        # if self.upper[0] > self.h_lim:
+        #     return []
 
 class HmiTrackerImageProcessor:
     def __init__(self, dwn_smpl, debug):
         self.right_border_color = config.color_right[::-1] * 255 
         self.left_border_color = config.color_left[::-1] * 255 # rgb to bgr
-        self.right_color_range = self.get_hsv_color_range(0)  #red
-        self.left_color_range = self.get_hsv_color_range(60)  #green
+        self.right_color_range = self.get_hsv_red_range()  
+        self.left_color_range = self.get_hsv_green_range() 
         
         self.contour_min_size = 50
         self.dwn_smpl = dwn_smpl
@@ -41,10 +45,20 @@ class HmiTrackerImageProcessor:
         self.__cv_bridge = CvBridge()
         self.debug = debug
 
+    def get_hsv_green_range(self):
+        lower = (60, 100, 100)
+        upper = (95, 255, 250)
+        return ColorRange(lower, upper)
+
+    def get_hsv_red_range(self):
+        lower = (-20, 180, 210)
+        upper = (9, 255, 255)
+        return ColorRange(lower, upper)
+
     def get_hsv_color_range(self, color_base):
-        sensitivity = 15
-        upper = (color_base + sensitivity, 255, 255)
-        lower = (color_base - sensitivity, 50, 60)
+        sensitivity = 10
+        upper = (color_base + sensitivity, 255, 220)
+        lower = (color_base - sensitivity, 100, 100)
         return ColorRange(lower, upper)
 
     def __fill_contours(self, img, contour_pts):

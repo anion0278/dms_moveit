@@ -14,7 +14,7 @@ import hmi_tracker_image_processor as ip
 import hmi_tracker_cloud_processor as cp
 import hmi_tracker_transform_manager as tp
 
-debug = False
+debug = True
 
 
 class EmptyMoveitInterface():
@@ -31,15 +31,15 @@ class HmiTracker:
     def __init__(self, camera_name, moveit_interface):
         self.__driver = moveit_interface
 
-        dwn_smpl = 4
+        dwn_smpl = 2
         if debug:
-            dwn_smpl = 1
+            dwn_smpl = 4
         
         self.img_proc = ip.HmiTrackerImageProcessor(dwn_smpl, debug)
         self.pc_proc = cp.HmiTrackerCloudProcessor(dwn_smpl)
         self.tf_proc = tp.HmiTrackerTransformManager()
 
-        pc_topic = "/"+camera_name+"/depth/color/points"
+        pc_topic = "/"+camera_name+"/depth_registered/points"
         self.tf_proc.init_hmi_orientation(pc_topic)
         self.__init_cam_subs(pc_topic, "/"+camera_name+"/color/image_raw")
 

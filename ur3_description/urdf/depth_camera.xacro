@@ -36,7 +36,7 @@
                     <cameraInfoTopicName>/${name}/color/camera_info</cameraInfoTopicName> 
                     <depthImageTopicName>/${name}/depth/image_raw</depthImageTopicName>
                     <depthImageCameraInfoTopicName>/${name}/depth/camera_info</depthImageCameraInfoTopicName>
-                    <pointCloudTopicName>/${name}/depth/color/points</pointCloudTopicName>
+                    <pointCloudTopicName>/${name}/depth_registered/points</pointCloudTopicName>
                     <frameName>${name}_color_optical_frame</frameName>
                     <pointCloudCutoff>0.001</pointCloudCutoff>
                     <!-- SHOULD BE EDITED ALONG WITH clip.far !!! Otherwise Rviz wont start -->

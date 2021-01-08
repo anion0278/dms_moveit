@@ -1,14 +1,23 @@
 <?xml version="1.0"?>
 <launch>
 
+    <!-- 848x480 for optimal(?) depth accuracy -->
     <arg name="width" default="424"/>
     <arg name="height" default="240"/>
     <arg name="fps" default="15"/>
 
-    <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen" args="demo" />
+
+    <!-- <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen" args="demo" /> -->
     
-    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-        <arg name="filters" value="pointcloud" />
+    <!-- <include file="$(find realsense2_camera)/launch/rs_camera.launch"> for UNORGANIZED PointCloud (height=1, width = all points)-->
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+        <arg name="json_file_path" value="$(find ur3_moveit)/config/d435_camera_settings.json" />
+
+        <!-- this is currect recomended API for PointCloud -->
+        <arg name="filters" value="pointcloud" /> 
+
+        <!-- <arg name="enable_pointcloud" value="true" /> THIS IS A DEPRECATED API !!!--> 
+
         <arg name="camera" value="camera_top" />
         <arg name="depth_width" value="$(arg width)" /> 
         <arg name="depth_height" value="$(arg height)" />
@@ -18,6 +27,13 @@
         <arg name="color_height" value="$(arg height)" />
         <arg name="color_fps" value="$(arg fps)" />
 
+        <arg name="serial_no" value="902512070480" />
+        <arg name="device_type" value="d435" />
+        
+        <arg name="enable_gyro" value="false" />
+        <arg name="enable_accel" value="false" />
+        <arg name="enable_sync" value="true" />
+        <!-- /sys/devices/pci0000:00/0000:00:14.0/usb2/2-2/2-2:1.0/video4linux/video2 -->
     </include>
 
     <node pkg="tf2_ros" type="static_transform_publisher" name="camera_link_broadcaster" args="0 0 0.5 0.707 0 -0.707 0 world camera_top_link" />

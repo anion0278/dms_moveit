@@ -4,6 +4,7 @@ import ros_numpy as rp
 from sensor_msgs import point_cloud2 as pc2
 from sensor_msgs.msg import PointCloud2, PointField, Image
 from scipy.spatial import distance
+import math
 
 
 pc_fields = [
@@ -49,10 +50,13 @@ class HmiTrackerCloudProcessor:
                     pc_hand.append(depth_img_point)
                 except:
                     pass # when point is on the edge of image
-
-            r = distance.euclidean(depth_img_point, cloud_center)
-            if r > r_max:
-                r_max = r
+            try:
+                if not math.isnan(depth_img_point[0]):
+                    r = distance.euclidean(depth_img_point, cloud_center)
+                    if r > r_max:
+                        r_max = r
+            except Exception as identifier:
+                pass # TODO CHECK IF STILL NEEDED!!!
 
         if publish_pointcloud:
             cloud_modified = pc2.create_cloud(header, pc_fields, pc_hand)
