@@ -4,7 +4,6 @@ import ros_numpy as rp
 from sensor_msgs import point_cloud2 as pc2
 from sensor_msgs.msg import PointCloud2, PointField, Image
 from scipy.spatial import distance
-import math
 
 
 pc_fields = [
@@ -16,7 +15,7 @@ pc_fields = [
 class HmiTrackerCloudProcessor:
     def __init__(self, dwn_smpl):
         self.dwn_smpl = dwn_smpl
-        self.max_radius_m = 0.12
+        self.max_radius_m = 0.11
 
     def publish_emtpy_pc(self, pub, header):
         cloud_empty = pc2.create_cloud(header, pc_fields, [])
@@ -32,7 +31,7 @@ class HmiTrackerCloudProcessor:
         return (x, y, z)
 
     def get_center_and_publish(self,pc_pub, hand_data, depth_img, header):
-         # the topic is not published unless anyone is subcribed
+        # the topic is not published unless anyone is subcribed
         publish_pointcloud = pc_pub.get_num_connections() > 0
 
         blob_pts = np.where(hand_data.single_hand_mask > 0)
@@ -51,12 +50,15 @@ class HmiTrackerCloudProcessor:
                 except:
                     pass # when point is on the edge of image
             try:
-                if not math.isnan(depth_img_point[0]):
-                    r = distance.euclidean(depth_img_point, cloud_center)
-                    if r > r_max:
-                        r_max = r
-            except Exception as identifier:
-                pass # TODO CHECK IF STILL NEEDED!!!
+                # if not np.isnan(depth_img_point[0]):
+                r = distance.euclidean(depth_img_point, cloud_center)
+                if r > r_max:
+                    r_max = r
+            except Exception as ex:
+                pass # TODO this can be avioded if other center point is taken,
+                # for depth_img_point the situation is handled by Catch, because it just wont take this value and will take any other closest point 
+                # SO NO NEED TO SOLVE NAN in depth_img_point !!!
+                # handle CENTER: center = np.squeeze(min(contour_pts, key=lambda p: distance.euclidean(p, center))) + check for nan
 
         if publish_pointcloud:
             cloud_modified = pc2.create_cloud(header, pc_fields, pc_hand)

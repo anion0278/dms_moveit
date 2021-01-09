@@ -66,7 +66,7 @@ joint_pose_B = NamedJointPose([1.012419230110138,
                               "Pose B")
 
 
-class RobotDriver:
+class RobotDriver: # TODO rename more appropriatelly?
     def __init__(self, total_speed = 1.0, total_acc = 1.0):
         rospy.wait_for_service(clear_octomap_service)
         time.sleep(1)
@@ -88,9 +88,13 @@ class RobotDriver:
 
         self.__clear_octomap_service = rospy.ServiceProxy(clear_octomap_service, Empty)
         self.clear_octomap()
+        self.objs = []
 
-    def update_hmi_obj(self, pose, name, size): #TODO into visualizator
-        self.scene.add_sphere(name, pose, size)
+    def update_hmi_obj(self, pose, name, radius): #TODO into visualizer ? 
+        self.scene.add_sphere(name, pose, radius)  
+
+    def move_hmi_obj(self, pose, name):
+        self.scene.move_object(name, pose)
 
     def remove_hmi_obj(self, name):
         self.scene.remove_world_object(name)

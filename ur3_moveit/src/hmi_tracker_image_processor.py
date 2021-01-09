@@ -39,7 +39,7 @@ class HmiTrackerImageProcessor:
         self.right_color_range = self.get_hsv_red_range()  
         self.left_color_range = self.get_hsv_green_range() 
         
-        self.contour_min_size = 50
+        self.contour_min_size = 50.0 / dwn_smpl
         self.dwn_smpl = dwn_smpl
         self.cam_img_pub = rospy.Publisher("hmi_tracker_image", Image, queue_size=1)
         self.__cv_bridge = CvBridge()

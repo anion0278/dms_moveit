@@ -5,6 +5,7 @@ import sys
 from sensor_msgs.msg import PointCloud2, Image
 import ros_numpy  #sudo apt-get install ros-melodic-ros-numpy
 import message_filters
+from scipy.spatial import distance
 
 import task_commander as com
 import robot_driver
@@ -27,13 +28,18 @@ class EmptyMoveitInterface():
     def remove_hmi_obj(self, name):
         pass
 
+center_suf = "_center"
+
+
 class HmiTracker:
     def __init__(self, camera_name, moveit_interface):
         self.__driver = moveit_interface
+        self.epsilon_min_dist_change_m = 0.1
+        self.__hmi_cache = {config.hmi_left:0, config.hmi_right:0, config.hmi_left+center_suf:0, config.hmi_right+center_suf:0}
 
-        dwn_smpl = 2
+        dwn_smpl = 4
         if debug:
-            dwn_smpl = 4
+            dwn_smpl = 2
         
         self.img_proc = ip.HmiTrackerImageProcessor(dwn_smpl, debug)
         self.pc_proc = cp.HmiTrackerCloudProcessor(dwn_smpl)
@@ -62,6 +68,7 @@ class HmiTracker:
             start = rospy.get_time()
             print("Tracker - start time: %s" % start)
 
+        # its possible to rewrite hands processing into hand-array-processing, but this way its easier to read and debug
         img = self.img_proc.preprocess_img(img_msg)
         left_hand, right_hand = self.img_proc.find_hands(img)
         if left_hand is not None or right_hand is not None:
@@ -85,13 +92,26 @@ class HmiTracker:
 
     def publish_hand(self, depth_img,header,hand_data,obj_name,pc_pub):
         cloud_center, radius = self.pc_proc.get_center_and_publish(pc_pub, hand_data, depth_img, header)
-        stamped_pose = self.tf_proc.get_hand_pose(header.frame_id, cloud_center)    
-        self.__driver.update_hmi_obj(stamped_pose, obj_name, radius)
-        self.tf_proc.publish_hmi_tf(stamped_pose, header.frame_id, obj_name)
+        
+        publish_obj_anyway = False
+        if distance.euclidean(self.__hmi_cache[obj_name+center_suf], cloud_center) > self.epsilon_min_dist_change_m: 
+            # the change of the pos was large enough to be noticable
+            stamped_pose = self.tf_proc.get_hand_pose(header.frame_id, cloud_center)   
+            self.tf_proc.publish_hmi_tf(stamped_pose, header.frame_id, obj_name)
+            self.__hmi_cache[obj_name+center_suf] = cloud_center
+            publish_obj_anyway = True
+            
+        if abs(self.__hmi_cache[obj_name] - radius) > self.epsilon_min_dist_change_m or publish_obj_anyway: 
+            # the change of the radius was large enough to be noticable
+            obj_rel_pose = self.tf_proc.get_zero_pose(obj_name) # MoveIt Collision obj is placed relativelly to published TF
+            self.__driver.update_hmi_obj(obj_rel_pose, obj_name, radius)
+            self.__hmi_cache[obj_name] = radius
+            # self.__driver.move_hmi_obj(obj_rel_pose, obj_name) # does not work for now
 
 
 if __name__ == "__main__":
     
+    sys.argv.append("moveit")
     if "moveit" in sys.argv: 
         print("Tracker: MOVEIT MODE")
         moveit_interface = robot_driver.RobotDriver(total_speed=0.2)
