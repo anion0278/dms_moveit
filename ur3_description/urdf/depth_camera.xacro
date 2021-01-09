@@ -32,9 +32,9 @@
                     <!-- Keep this zero, update_rate in the parent <sensor> tag will control the frame rate. -->
                     <updateRate>0.0</updateRate>
                     <cameraName>${name}_ir</cameraName>
-                    <imageTopicName>/${name}/color/image_raw</imageTopicName>
+                    <imageTopicName>/${name}/color/image_rect_color</imageTopicName>
                     <cameraInfoTopicName>/${name}/color/camera_info</cameraInfoTopicName> 
-                    <depthImageTopicName>/${name}/depth/image_raw</depthImageTopicName>
+                    <depthImageTopicName>/${name}/depth/image_rect_raw</depthImageTopicName>
                     <depthImageCameraInfoTopicName>/${name}/depth/camera_info</depthImageCameraInfoTopicName>
                     <pointCloudTopicName>/${name}/depth_registered/points</pointCloudTopicName>
                     <frameName>${name}_color_optical_frame</frameName>

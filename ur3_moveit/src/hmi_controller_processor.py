@@ -54,9 +54,10 @@ class DataProcessor():
             points = (m.points for m in marker_array_msg.markers if data_namespace == m.ns).next()
             v = ros_numpy.numpify(points[0]) - ros_numpy.numpify(points[1])
             vec_len = np.linalg.norm(v)
-            self.currect_collision_vec = v / vec_len # vector should be normalized !
-            #print("New vector: %s" % self.currect_collision_vec)
-            print("New vector length [m]: %s" % vec_len)
+            if vec_len != 0:
+                self.currect_collision_vec = v / vec_len # vector should be normalized !
+                #print("New vector: %s" % self.currect_collision_vec)
+                print("New vector length [m]: %s" % vec_len)
 
     def __get_compressed_quarternion(self, data): 
         floats = np.zeros(4)

@@ -7,7 +7,7 @@
     <arg name="fps" default="15"/>
 
 
-    <!-- <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen" args="demo" /> -->
+    <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen" />
     
     <!-- <include file="$(find realsense2_camera)/launch/rs_camera.launch"> for UNORGANIZED PointCloud (height=1, width = all points)-->
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">

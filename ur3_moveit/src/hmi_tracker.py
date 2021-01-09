@@ -14,7 +14,7 @@ import hmi_tracker_image_processor as ip
 import hmi_tracker_cloud_processor as cp
 import hmi_tracker_transform_manager as tp
 
-debug = True
+debug = False
 
 
 class EmptyMoveitInterface():
@@ -41,7 +41,7 @@ class HmiTracker:
 
         pc_topic = "/"+camera_name+"/depth_registered/points"
         self.tf_proc.init_hmi_orientation(pc_topic)
-        self.__init_cam_subs(pc_topic, "/"+camera_name+"/color/image_raw")
+        self.__init_cam_subs(pc_topic, "/"+camera_name+"/color/image_rect_color") # rect -> rectified image (real camera)
 
         tracked_topic_suffix = "_tracked_points"
         self.right_pc_pub = rospy.Publisher(config.hmi_right + tracked_topic_suffix, PointCloud2, queue_size=1)
@@ -92,12 +92,12 @@ class HmiTracker:
 
 if __name__ == "__main__":
     
-    # sys.argv.append("demo")
-    if "demo" in sys.argv: 
-        print("DEMO MODE!")
-        moveit_interface = EmptyMoveitInterface()
-    else:
+    if "moveit" in sys.argv: 
+        print("Tracker: MOVEIT MODE")
         moveit_interface = robot_driver.RobotDriver(total_speed=0.2)
+    else:
+        print("Tracker: HMI DEMO MODE!")
+        moveit_interface = EmptyMoveitInterface()
 
     if debug: util.print_all_args()
 
