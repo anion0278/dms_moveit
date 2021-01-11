@@ -106,8 +106,7 @@ class HmiTracker:
             self.__driver.update_hmi_obj(obj_rel_pose, obj_name, radius)
             self.__hmi_cache[obj_name] = radius
             # self.__driver.move_hmi_obj(obj_rel_pose, obj_name) # does not work for now
-
-        self.__hmi_cache[obj_name+center_suf] = cloud_center
+            self.__hmi_cache[obj_name+center_suf] = cloud_center
 
 
 if __name__ == "__main__":
