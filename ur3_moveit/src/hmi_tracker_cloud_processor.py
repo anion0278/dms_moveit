@@ -40,19 +40,15 @@ class HmiTrackerCloudProcessor:
         cloud_center = self.__get_valid_cloud_center(depth_img, hand_data.center, blob_pts)
             
         r_max = 0
-        heights = []
         pc_hand = [] # pointCloud points
         for x, y in blob_pts:
             depth_img_point = self.get_img_coords(depth_img, (x, y))
-            heights.append(depth_img_point)
-            if publish_pointcloud:
-                try:
-                    pc_hand.append(depth_img_point)
-                except:
-                    pass # when point is on the edge of image
             r = distance.euclidean(depth_img_point, cloud_center)
             if r > r_max:
                 r_max = r
+
+            if publish_pointcloud:
+                pc_hand.append(depth_img_point)
 
         if publish_pointcloud:
             cloud_modified = pc2.create_cloud(header, pc_fields, pc_hand)
