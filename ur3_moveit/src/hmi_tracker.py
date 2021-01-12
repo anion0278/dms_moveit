@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import rospy
 import sys
 from sensor_msgs.msg import PointCloud2, Image
@@ -15,8 +14,7 @@ import hmi_tracker_image_processor as ip
 import hmi_tracker_cloud_processor as cp
 import hmi_tracker_transform_manager as tp
 
-debug = False
-
+debug = True
 
 class EmptyMoveitInterface():
     def __init__(self):
@@ -95,23 +93,24 @@ class HmiTracker:
     def publish_hand(self, depth_img,header,hand_data,obj_name,pc_pub):
         cloud_center, radius = self.pc_proc.get_center_and_publish(pc_pub, hand_data, depth_img, header)
         
-        # TF should be published anyway, because it decays fast !!!
-        stamped_pose = self.tf_proc.get_hand_pose(header.frame_id, cloud_center)   
-        self.tf_proc.publish_hmi_tf(stamped_pose, header.frame_id, obj_name)
-        
-        if abs(self.__hmi_cache[obj_name] - radius) > self.epsilon_min_dist_change_m or \
-            distance.euclidean(self.__hmi_cache[obj_name+center_suf], cloud_center) > self.epsilon_min_dist_change_m: 
-            # the change of the radius was large enough to be noticable
-            obj_rel_pose = self.tf_proc.get_zero_pose(obj_name) # MoveIt Collision obj is placed relativelly to published TF
-            self.__driver.update_hmi_obj(obj_rel_pose, obj_name, radius)
-            self.__hmi_cache[obj_name] = radius
-            # self.__driver.move_hmi_obj(obj_rel_pose, obj_name) # does not work for now
-            self.__hmi_cache[obj_name+center_suf] = cloud_center
+        if cloud_center is not None:
+            # TF should be published anyway, because it decays fast !!!
+            stamped_pose = self.tf_proc.get_hand_pose(header.frame_id, cloud_center)   
+            self.tf_proc.publish_hmi_tf(stamped_pose, header.frame_id, obj_name)
+            
+            if abs(self.__hmi_cache[obj_name] - radius) > self.epsilon_min_dist_change_m or \
+                distance.euclidean(self.__hmi_cache[obj_name+center_suf], cloud_center) > self.epsilon_min_dist_change_m: 
+                # the change of the radius was large enough to be noticable
+                obj_rel_pose = self.tf_proc.get_zero_pose(obj_name) # MoveIt Collision obj is placed relativelly to published TF
+                self.__driver.update_hmi_obj(obj_rel_pose, obj_name, radius)
+                self.__hmi_cache[obj_name] = radius
+                # self.__driver.move_hmi_obj(obj_rel_pose, obj_name) # does not work for now
+                self.__hmi_cache[obj_name+center_suf] = cloud_center
 
 
 if __name__ == "__main__":
     
-    sys.argv.append("moveit")
+    # sys.argv.append("moveit")
     if "moveit" in sys.argv: 
         print("Tracker: MOVEIT MODE")
         moveit_interface = robot_driver.RobotDriver(total_speed=0.2)

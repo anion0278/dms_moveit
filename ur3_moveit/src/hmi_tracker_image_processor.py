@@ -134,17 +134,24 @@ class HmiTrackerImageProcessor:
     def __find_hand(self, hsv_img, color_range):
         result = None
         color_mask = self.get_color_mask(hsv_img, color_range)
+
+        # requires outliers filter for PointCloud
+        # color_mask = cv2.dilate(color_mask, None, iterations=8 / self.dwn_smpl)
+        # color_mask = cv2.erode(color_mask, None, iterations=4 / self.dwn_smpl)
+
         _, contours, _ = cv2.findContours(color_mask.astype("uint8"), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if contours:
             contour_pts = max(contours, key=lambda cont: cont.size)
             if contour_pts.size > self.contour_min_size / self.dwn_smpl:
                 rect = cv2.minAreaRect(contour_pts)
                 center = np.array(rect[0]).astype("int")
-                if not self.is_center_within_contour(center, contour_pts):
-                    # the closest point INSIDE contour, otherwise the center's height can be incorreclty calculated
-                    center = np.squeeze(min(contour_pts, key=lambda p: distance.euclidean(p, center)))
+
                 single_hand_mask = np.zeros(color_mask.shape)
                 self.__fill_contours(single_hand_mask, contour_pts)
+
+                if not self.is_center_within_contour(center, contour_pts): # ZERO meaning the point is on the contour!!!
+                    # the closest point INSIDE contour, otherwise the center's height can be incorreclty calculated
+                    center = np.squeeze(min(contour_pts, key=lambda p: distance.euclidean(p, center))) # TODO takes point from contour, which sometimes out of shape (especially when on the edge of image)
 
                 result = HmiImageData(center, rect, contour_pts, color_mask, single_hand_mask)
         return result

@@ -5,6 +5,7 @@ from sensor_msgs import point_cloud2 as pc2
 from sensor_msgs.msg import PointCloud2, PointField, Image
 from scipy.spatial import distance
 
+import util_common as utils
 
 pc_fields = [
     PointField('x', 0, PointField.FLOAT32, 1),
@@ -25,40 +26,33 @@ class HmiTrackerCloudProcessor:
         x = depth_img[point[1] * self.dwn_smpl, point[0] * self.dwn_smpl]["x"]
         y = depth_img[point[1] * self.dwn_smpl, point[0] * self.dwn_smpl]["y"]
         z = depth_img[point[1] * self.dwn_smpl, point[0] * self.dwn_smpl]["z"] 
-        if copy_rgb:
+        if copy_rgb:# unused for now
             rgb = depth_img[point[1] * self.dwn_smpl, point[0] * self.dwn_smpl]["rgb"] 
-            # unused for now
         return (x, y, z)
 
     def get_center_and_publish(self,pc_pub, hand_data, depth_img, header):
         # the topic is not published unless anyone is subcribed
         publish_pointcloud = pc_pub.get_num_connections() > 0
 
-        blob_pts = np.where(hand_data.single_hand_mask > 0)
+        blob_pts = self.__get_valid_points(hand_data.single_hand_mask, depth_img)
+        if len(blob_pts) == 0: return None, None
 
-        cloud_center = self.get_img_coords(depth_img, hand_data.center)
+        cloud_center = self.__get_valid_cloud_center(depth_img, hand_data.center, blob_pts)
+            
         r_max = 0
-
         heights = []
-        pc_hand = []
-        for x, y in zip(blob_pts[0], blob_pts[1]):
-            depth_img_point = self.get_img_coords(depth_img, (y, x))
+        pc_hand = [] # pointCloud points
+        for x, y in blob_pts:
+            depth_img_point = self.get_img_coords(depth_img, (x, y))
             heights.append(depth_img_point)
             if publish_pointcloud:
                 try:
                     pc_hand.append(depth_img_point)
                 except:
                     pass # when point is on the edge of image
-            try:
-                # if not np.isnan(depth_img_point[0]):
-                r = distance.euclidean(depth_img_point, cloud_center)
-                if r > r_max:
-                    r_max = r
-            except Exception as ex:
-                pass # TODO this can be avioded if other center point is taken,
-                # for depth_img_point the situation is handled by Catch, because it just wont take this value and will take any other closest point 
-                # SO NO NEED TO SOLVE NAN in depth_img_point !!!
-                # handle CENTER: center = np.squeeze(min(contour_pts, key=lambda p: distance.euclidean(p, center))) + check for nan
+            r = distance.euclidean(depth_img_point, cloud_center)
+            if r > r_max:
+                r_max = r
 
         if publish_pointcloud:
             cloud_modified = pc2.create_cloud(header, pc_fields, pc_hand)
@@ -68,3 +62,18 @@ class HmiTrackerCloudProcessor:
             r_max = self.max_radius_m
 
         return cloud_center, r_max 
+
+    def __get_valid_cloud_center(self, depth_img, img_center, blob_pts):
+        cloud_center = self.get_img_coords(depth_img, img_center) # first try the actual center
+        if utils.has_nan_values(cloud_center):
+            not_nan_center_img = min(blob_pts, key=lambda p: distance.euclidean(p, img_center))
+            cloud_center = self.get_img_coords(depth_img, not_nan_center_img)
+        return cloud_center
+
+    def __get_valid_points(self, single_hand_mask, depth_img): # valid hmi points on 2D img
+        blob_pts_all = np.where(single_hand_mask > 0)
+        blob_pts = [] # array of X, Y where each pixel is WHITE and is not NAN
+        for y, x in zip(blob_pts_all[0], blob_pts_all[1]): # x , y must be exchanged (open CV stuff)
+            if not utils.has_nan_values(self.get_img_coords(depth_img, (x,y))):
+                blob_pts.append((x,y))
+        return blob_pts
