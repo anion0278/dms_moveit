@@ -98,7 +98,7 @@
   <joint name="table_to_robot" type="fixed">
     <parent link="table"/>
     <child link="base_link"/>
-    <origin xyz="-0.58 0.49 0.972" rpy="0 0 0"/>
+    <origin xyz="-0.58 0.49 0.972" rpy="0 0 -1.57"/>
   </joint>
 
   <link name="force_sensor">

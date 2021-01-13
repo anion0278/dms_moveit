@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="robot_ip" default="192.168.1.101"/>
+  <arg name="robot_ip" default="192.168.1.111"/>
+
+  <include file="$(find ur_robot_driver)/launch/ur3e_bringup.launch">
+	<arg name="robot_ip" value="$(arg robot_ip)" />
+	<arg name="kinematics_config" value="$(find ur3_moveit)/config/ucr_ur3e_calibration.yaml" />
+  </include>
 
   <!-- Octomap and sensors settings -->
   <param name="move_group/octomap_resolution" type="double" value="0.02" />
@@ -12,7 +17,7 @@
   <!-- <param name="move_group/ompl/simplify_solutions" value="true" /> -->
 
   <!-- duplication !!! See start_sim  -->
-  <arg name="xacro_file_name" default="ur3.xacro"/>
+  <arg name="xacro_file_name" default="ur3e_workspace.xacro"/>
   <arg name="xacro_path" default="$(find ur3_description)/urdf/$(arg xacro_file_name)"/>
   <param name="robot_description" command="xacro --inorder '$(arg xacro_path)'" />
 
@@ -23,16 +28,6 @@
   <include file="$(find ur3_moveit)/launch/move_group.launch">
     <arg name="publish_monitored_planning_scene" value="true" />
     <arg name="controllers_definition" value="real_controllers.yaml" />
-  </include>
-
-  <arg name="min_payload" default="0.0"/>
-  <arg name="max_payload" default="3.0"/>
-  <arg name="prefix" default="" />
-  <include file="$(find ur_modern_driver)/launch/ur_common.launch">
-    <arg name="robot_ip" value="$(arg robot_ip)"/>
-    <arg name="min_payload" value="$(arg min_payload)"/>
-    <arg name="max_payload" value="$(arg max_payload)"/>
-    <arg name="prefix" value="$(arg prefix)" />
   </include>
 
 </launch>

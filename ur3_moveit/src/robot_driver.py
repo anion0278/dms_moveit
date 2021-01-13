@@ -49,7 +49,7 @@ point_pose_B = NamedPointPose(
     "Point pose B")
 
 
-joint_pose_A = NamedJointPose([-0.45161887833653935,
+joint_pose_A = NamedJointPose([1.12161887833653935,
                                -0.8200713084170896,
                                0.9261690554869411,
                                -1.6652095580852606,
@@ -57,7 +57,7 @@ joint_pose_A = NamedJointPose([-0.45161887833653935,
                                1.0543118993180052],
                               "Pose A")
 
-joint_pose_B = NamedJointPose([1.012419230110138,
+joint_pose_B = NamedJointPose([2.582419230110138,
                                -0.8036786161659402,
                                0.8430760165715983,
                                -1.6316082500996831,
