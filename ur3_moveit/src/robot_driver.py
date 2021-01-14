@@ -90,7 +90,7 @@ class RobotDriver: # TODO rename more appropriatelly?
         self.clear_octomap()
         self.objs = []
 
-    def update_hmi_obj(self, pose, name, radius): #TODO into visualizer ? 
+    def add_hmi_obj(self, pose, name, radius): #TODO into visualizer ? 
         self.scene.add_sphere(name, pose, radius)  
 
     def move_hmi_obj(self, pose, name):

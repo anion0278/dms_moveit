@@ -19,6 +19,7 @@ class HmiTrackerCloudProcessor:
         self.max_radius_m = 0.11
 
     def publish_emtpy_pc(self, pub, header):
+        # publish always
         cloud_empty = pc2.create_cloud(header, pc_fields, [])
         pub.publish(cloud_empty)
     

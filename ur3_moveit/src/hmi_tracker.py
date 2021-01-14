@@ -20,14 +20,13 @@ class EmptyMoveitInterface():
     def __init__(self):
         rospy.init_node('robot_python_driver', anonymous=True)
     
-    def update_hmi_obj(self, pose, name, size): 
+    def add_hmi_obj(self, pose, name, size): 
         pass
 
     def remove_hmi_obj(self, name):
         pass
 
 center_suf = "_center"
-
 
 class HmiTracker:
     def __init__(self, camera_name, moveit_interface):
@@ -69,10 +68,9 @@ class HmiTracker:
         # its possible to rewrite hands processing into hand-array-processing, but this way its easier to read and debug
         img = self.img_proc.preprocess_img(img_msg)
         left_hand, right_hand = self.img_proc.find_hands(img)
-        if left_hand is not None or right_hand is not None:
-            depth_img = ros_numpy.numpify(depth_msg)
-            self.__process_hand_data(right_hand, config.hmi_right, self.right_pc_pub, depth_img, depth_msg)
-            self.__process_hand_data(left_hand, config.hmi_left, self.left_pc_pub, depth_img, depth_msg)
+        depth_img = ros_numpy.numpify(depth_msg)
+        self.__process_hand_data(right_hand, config.hmi_right, self.right_pc_pub, depth_img, depth_msg)
+        self.__process_hand_data(left_hand, config.hmi_left, self.left_pc_pub, depth_img, depth_msg)
 
         if debug:
             cycle_time = (rospy.get_time() - start) / 1000.0
@@ -102,7 +100,7 @@ class HmiTracker:
                 distance.euclidean(self.__hmi_cache[obj_name+center_suf], cloud_center) > self.epsilon_min_dist_change_m: 
                 # the change of the radius was large enough to be noticable
                 obj_rel_pose = self.tf_proc.get_zero_pose(obj_name) # MoveIt Collision obj is placed relativelly to published TF
-                self.__driver.update_hmi_obj(obj_rel_pose, obj_name, radius)
+                self.__driver.add_hmi_obj(obj_rel_pose, obj_name, radius)
                 self.__hmi_cache[obj_name] = radius
                 # self.__driver.move_hmi_obj(obj_rel_pose, obj_name) # does not work for now
                 self.__hmi_cache[obj_name+center_suf] = cloud_center
@@ -110,7 +108,7 @@ class HmiTracker:
 
 if __name__ == "__main__":
     
-    # sys.argv.append("moveit")
+    sys.argv.append("moveit")
     if "moveit" in sys.argv: 
         print("Tracker: MOVEIT MODE")
         moveit_interface = robot_driver.RobotDriver(total_speed=0.2)
