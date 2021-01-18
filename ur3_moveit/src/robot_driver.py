@@ -93,7 +93,7 @@ class RobotDriver: # TODO rename more appropriatelly?
     def add_hmi_obj(self, pose, name, radius): #TODO into visualizer ? 
         self.scene.add_sphere(name, pose, radius)  
 
-    def move_hmi_obj(self, pose, name):
+    def move_hmi_obj(self, pose, name, radius):
         self.scene.move_object(name, pose)
 
     def remove_hmi_obj(self, name):

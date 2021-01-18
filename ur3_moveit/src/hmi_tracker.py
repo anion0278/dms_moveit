@@ -14,7 +14,7 @@ import hmi_tracker_image_processor as ip
 import hmi_tracker_cloud_processor as cp
 import hmi_tracker_transform_manager as tp
 
-debug = True
+debug = False
 
 class EmptyMoveitInterface():
     def __init__(self):
@@ -98,11 +98,16 @@ class HmiTracker:
             
             if abs(self.__hmi_cache[obj_name] - radius) > self.epsilon_min_dist_change_m or \
                 distance.euclidean(self.__hmi_cache[obj_name+center_suf], cloud_center) > self.epsilon_min_dist_change_m: 
-                # the change of the radius was large enough to be noticable
-                obj_rel_pose = self.tf_proc.get_zero_pose(obj_name) # MoveIt Collision obj is placed relativelly to published TF
-                self.__driver.add_hmi_obj(obj_rel_pose, obj_name, radius)
+                # the change of the radius or position was large enough to be noticable
+
+                # objs = self.__driver.scene.get_known_object_names()
+                # if  obj_name in objs:
+                #     self.__driver.move_hmi_obj(stamped_pose, obj_name, radius)
+                # else:
+                #     self.__driver.add_hmi_obj(stamped_pose, obj_name, radius)
+                
+                self.__driver.add_hmi_obj(stamped_pose, obj_name, radius)
                 self.__hmi_cache[obj_name] = radius
-                # self.__driver.move_hmi_obj(obj_rel_pose, obj_name) # does not work for now
                 self.__hmi_cache[obj_name+center_suf] = cloud_center
 
 

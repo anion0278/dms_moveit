@@ -7,7 +7,7 @@ from sensor_msgs.msg import PointCloud2, PointField, Image
 class HmiTrackerTransformManager:
     def __init__(self):
         self.cam_trf = None
-        self.tf_pub = tf2_ros.TransformBroadcaster()
+        self.tf_pub = tf2_ros.StaticTransformBroadcaster() #? is it actually better?
 
     def init_hmi_orientation(self, cam_pc_topic):
         tf_buf = tf2_ros.Buffer()
