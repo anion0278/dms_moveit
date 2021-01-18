@@ -23,7 +23,7 @@
   <joint name="table_to_camera_top" type="fixed">
     <parent link="table"/>
     <child link="base_link_camera_top"/>
-    <origin xyz="-0.2 0.5 2.1"  rpy="0 ${pi/2} -${pi}"/>
+    <origin xyz="-0.22 0.47 2.0"  rpy="0 ${pi/2} -${pi}"/>
   </joint>
 
 
@@ -148,7 +148,6 @@
     <collision>
       <geometry>
         <mesh filename="package://ur3_description/meshes/jaw.stl" scale="0.001 0.001 0.001"/>
-        <!-- <box size="0.03 0.03 0.045"/> -->
       </geometry>
       <origin rpy="${pi} 0 ${pi/2}" xyz="0 0 0"/>
     </collision>
@@ -165,7 +164,6 @@
     </visual>
     <collision>
       <geometry>
-        <!-- <box size="0.03 0.03 0.045"/> -->
         <mesh filename="package://ur3_description/meshes/jaw.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="${pi} 0 ${pi/2}" xyz="0 0 0"/>
@@ -184,19 +182,13 @@
     <origin xyz="0 0 0.035" rpy="0 0 0"/>
   </joint>
 
-  <!--<joint name="leftjaw_to_effector" type="prismatic">-->
   <joint name="leftjaw_to_effector" type="fixed">
-    <!--  <axis xyz="0 1 0"/>
-  <limit effort="1000.0" lower="0.01" upper="0" velocity="0.5"/>-->
     <parent link="effector_body"/>
     <child link="left_jaw"/>
     <origin xyz="0 0 0.076" rpy="0 0 0"/>
   </joint>
 
-  <!--<joint name="rightjaw_to_effector" type="prismatic">-->
   <joint name="rightjaw_to_effector" type="fixed">
-    <!--  <axis xyz="0 1 0"/>
-  <limit effort="1000.0" lower="0.01" upper="0" velocity="0.5"/> -->
     <parent link="effector_body"/>
     <child link="right_jaw"/>
     <origin xyz="0 0 0.076" rpy="0 0 ${pi}"/>

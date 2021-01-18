@@ -26,8 +26,9 @@
         <arg name="color_width" value="$(arg width)" /> 
         <arg name="color_height" value="$(arg height)" />
         <arg name="color_fps" value="$(arg fps)" />
+        <arg name="clip_distance" value="1.3" />  
 
-        <arg name="serial_no" value="902512070480" />
+        <!-- <arg name="serial_no" value="902512070480" /> -->
         <arg name="device_type" value="d435" />
         
         <arg name="enable_gyro" value="false" />

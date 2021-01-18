@@ -8,10 +8,9 @@
   </include>
 
   <!-- Octomap and sensors settings -->
-  <param name="move_group/octomap_resolution" type="double" value="0.02" />
+  <param name="move_group/octomap_resolution" type="double" value="0.035" />
   <rosparam ns="/move_group" command="load" file="$(find ur3_moveit)/config/sensors_3d.yaml" />
-  <param name="/point_subsample" type="int" value="1" />
-  <param name="/move_group/manipulator/longest_valid_segment_fraction" type="double" value="0.005" />
+  <param name="/move_group/manipulator/longest_valid_segment_fraction" type="double" value="0.007" />
 
   <!-- Planners -->
   <!-- <param name="move_group/ompl/simplify_solutions" value="true" /> -->
@@ -21,9 +20,38 @@
   <arg name="xacro_path" default="$(find ur3_description)/urdf/$(arg xacro_file_name)"/>
   <param name="robot_description" command="xacro --inorder '$(arg xacro_path)'" />
 
-  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-    <arg name="filters" value="pointcloud" />
-  </include>
+   <arg name="width" default="424"/>
+    <arg name="height" default="240"/>
+    <arg name="fps" default="15"/>
+
+    <!-- <include file="$(find realsense2_camera)/launch/rs_camera.launch">  -->
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+
+        <!-- this is currect recomended API for PointCloud -->
+        <arg name="filters" value="pointcloud" /> 
+
+        <!-- <arg name="enable_pointcloud" value="true" /> THIS IS A DEPRECATED API !!!--> 
+
+        <arg name="camera" value="camera_top" />
+        <arg name="depth_width" value="$(arg width)" /> 
+        <arg name="depth_height" value="$(arg height)" />
+        <arg name="depth_fps" value="$(arg fps)" />
+        <!-- min is 256 x 144 with 90 FPS (!) but for a very small region ! -->
+        <arg name="color_width" value="$(arg width)" /> 
+        <arg name="color_height" value="$(arg height)" />
+        <arg name="color_fps" value="$(arg fps)" />
+
+        <!-- <arg name="serial_no" value="902512070480" /> -->
+        <arg name="device_type" value="d435" />
+        <arg name="clip_distance" value="2.4" />
+        
+        <!-- <arg name="tf_publish_rate" value="500.0" /> -->
+
+        <arg name="enable_gyro" value="false" />
+        <arg name="enable_accel" value="false" />
+        <arg name="enable_sync" value="true" />
+        <!-- /sys/devices/pci0000:00/0000:00:14.0/usb2/2-2/2-2:1.0/video4linux/video2 -->
+    </include>
 
   <include file="$(find ur3_moveit)/launch/move_group.launch">
     <arg name="publish_monitored_planning_scene" value="true" />

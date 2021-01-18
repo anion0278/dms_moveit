@@ -4,6 +4,9 @@
 
   <!-- Load updated joint limits (override information from URDF) -->
   <group ns="robot_description_planning">
+    <!-- transformation sent by RealSense camera isnt always in time. This gives larger timeout -->
+    <param name="shape_transform_cache_lookup_wait_time" value="0.1" /> 
+
     <rosparam command="load" file="$(find ur3_moveit)/config/joint_limits.yaml"/>
     <rosparam command="load" file="$(find ur3_moveit)/config/paddings.yaml"/>
   </group>
