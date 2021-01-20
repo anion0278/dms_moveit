@@ -11,6 +11,7 @@ sensors:
   #   padding_scale: 1.0
   #   padding_offset: 0.06
   #   max_update_rate: 0
+  #   hmi_padding_reduction: 0.07
 
   # - sensor_plugin: occupancy_map_monitor/DepthImageOctomapUpdater
   #   image_topic: /camera_left/depth/image_rect_raw
@@ -21,15 +22,20 @@ sensors:
   #   padding_scale: 1.0
   #   padding_offset: 0.06
   #   max_update_rate: 0
+  #   hmi_padding_reduction: 0.07
 
   - sensor_plugin: occupancy_map_monitor/DepthImageOctomapUpdater
     image_topic: /camera_top/depth/image_rect_raw
     queue_size: 1
     near_clipping_plane_distance: 0.1
-    far_clipping_plane_distance: 1.7
+    far_clipping_plane_distance: 1.3 # should be less then the camera clip distance !!
     shadow_threshold: 0.2
-    padding_scale: 1.0
-    padding_offset: 0.06 # should be in cm (tutorial), but seems like mm when tested
+    padding_scale: 4.0
+    padding_offset: 0.04 # should be in [cm] (tutorial), but actually its [m] 
     skip_vertical_pixels: 0 # skipping the edge of the image which can contain artifacts (from code)
     skip_horizontal_pixels: 0 
     max_update_rate: 0 #unlimited
+    hmi_padding_reduction: 0.0
+
+
+  

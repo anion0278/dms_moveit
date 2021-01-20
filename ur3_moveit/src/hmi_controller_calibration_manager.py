@@ -12,38 +12,42 @@ import config
 import util_ros_msgs as util_ros
 
 class CalibrationManager():
-    def __init__(self, controller, node_name, use_world_frame):
+    def __init__(self, controller, node_name, use_world_frame, debug):
         self.calibr_service = None
+        self.debug = debug
 
         self.controller = controller
         self.calibr_service_name = node_name + config.calibr_service
         self.offsets_file = config.get_offsets_file_path(node_name)
         self.frame_calib_file = config.get_frame_calibration_file_path(node_name)
 
-        self.tf_pub = tf2_ros.TransformBroadcaster()
+        self.tf_pub = tf2_ros.StaticTransformBroadcaster()
         self.__tracked_frame_id = controller.device_name
         if use_world_frame:
             self.__tracked_frame_id = "world"
-        self.__real_frame_id = controller.device_name+"_real"
-        self.calibr_frame_id = controller.device_name+"_offset"
+        self.calibr_frame_id = controller.device_name+"_calibrated"
+
+        self.zero_frame_id = controller.device_name+"_north"
 
         self.frame_calibration = self.restore_frame_calibration()
 
     def get_calibrated_quat(self, quaternion_real):
-        return Quaternion(*quaternion_multiply(quaternion_real, self.frame_calibration))
+        return quaternion_multiply(self.frame_calibration, quaternion_real)
 
-    def publish_tf(self, quaternion_real):
-        tfs_real = util_ros.get_stamped_transform(self.__tracked_frame_id, self.__real_frame_id, Quaternion(*quaternion_real))
-        self.tf_pub.sendTransform(tfs_real)
-        tfs_offset = util_ros.get_stamped_transform(self.__real_frame_id, self.calibr_frame_id, Quaternion(*self.frame_calibration))
-        self.tf_pub.sendTransform(tfs_offset)
+    def publish_tf(self, quaternion_hmi):
+        if self.debug: 
+            tfs_north_direction = util_ros.get_stamped_transform(self.__tracked_frame_id, self.zero_frame_id, Quaternion(*self.frame_calibration))
+            self.tf_pub.sendTransform(tfs_north_direction) # correct only when calibrated
+        
+        tfs_calibrated = util_ros.get_stamped_transform(self.__tracked_frame_id, self.calibr_frame_id, Quaternion(*quaternion_hmi))
+        self.tf_pub.sendTransform(tfs_calibrated)
 
     def start_calibration_service(self):
         self.calibr_service = rospy.Service(self.calibr_service_name, Trigger, self.calibration_procedure)
 
     def calibration_procedure(self, request):
         self.frame_calibration = self.__get_frame_calibration()
-        self.controller.request_offsets()
+        self.controller.send_offsets_request_msg()
         self.__store_frame_calibration()
         return TriggerResponse(success=True,
             message= self.controller.device_name + "was succesfully calibrated.")
@@ -69,7 +73,7 @@ class CalibrationManager():
         return quat
 
     def store_imu_offsets(self, offsets):
-        serializer.dump(self.offsets_file, open(self.offsets_file, "w"))
+        serializer.dump(offsets, open(self.offsets_file, "w"))
         print("IMU offsets were stored in %s" % self.offsets_file)
 
     def __store_frame_calibration(self):
@@ -79,7 +83,7 @@ class CalibrationManager():
     def __get_frame_calibration(self):
         # TODO here we need the "pure" orientation
         original_real_orientation = quaternion_multiply(
-            ros_numpy.numpify(self.controller.processor.current_orientation), 
+            self.controller.processor.current_orientation, 
             quaternion_inverse(self.frame_calibration))
         return quaternion_inverse(original_real_orientation)
 

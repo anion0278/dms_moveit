@@ -39,20 +39,20 @@ class HmiTrackerImageProcessor:
         self.right_color_range = self.get_hsv_red_range()  
         self.left_color_range = self.get_hsv_green_range() 
         
-        self.contour_min_size = 50.0 / dwn_smpl
+        self.contour_min_size = 150.0 # down sampling is applied in code!
         self.dwn_smpl = dwn_smpl
         self.cam_img_pub = rospy.Publisher("hmi_tracker_image", Image, queue_size=1)
         self.__cv_bridge = CvBridge()
         self.debug = debug
 
     def get_hsv_green_range(self):
-        lower = (60, 100, 100)
-        upper = (95, 255, 250)
+        lower = (72, 100, 100)
+        upper = (94, 255, 250)
         return ColorRange(lower, upper)
 
     def get_hsv_red_range(self):
-        lower = (-20, 180, 210)
-        upper = (9, 255, 255)
+        lower = (-30, 80, 90)
+        upper = (10, 255, 255) # 150 - 179
         return ColorRange(lower, upper)
 
     def get_hsv_color_range(self, color_base):
@@ -135,9 +135,9 @@ class HmiTrackerImageProcessor:
         result = None
         color_mask = self.get_color_mask(hsv_img, color_range)
 
-        # requires outliers filter for PointCloud
-        # color_mask = cv2.dilate(color_mask, None, iterations=8 / self.dwn_smpl)
-        # color_mask = cv2.erode(color_mask, None, iterations=4 / self.dwn_smpl)
+        # joins the regions - shows better results
+        color_mask = cv2.dilate(color_mask, None, iterations=8 / self.dwn_smpl)
+        color_mask = cv2.erode(color_mask, None, iterations=6 / self.dwn_smpl)
 
         _, contours, _ = cv2.findContours(color_mask.astype("uint8"), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if contours:

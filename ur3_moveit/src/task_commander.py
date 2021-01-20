@@ -135,7 +135,7 @@ class Commander():
 
 
 if __name__ == "__main__":
-    driver = r.RobotDriver(total_speed=0.2, total_acc=0.9)
+    driver = r.RobotDriver(total_speed=0.1, total_acc=0.3)
     args = rospy.myargv(argv=sys.argv)
     wait_for_hmi = args[1] if len(args) > 1 else False
     commander = Commander(driver, wait_for_hmi, num_attempts=0) # 0 attempts -> infinite

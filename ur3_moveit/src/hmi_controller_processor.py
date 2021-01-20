@@ -17,7 +17,7 @@ regex_imu_pattern = "Q(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})" + re
 regex_offsets_pattern = regex_calibration_pattern + "-(.{22})"
 
 class DataProcessor():
-    def __init__(self, device_name, controller, calibrator, visualizer, notificator):
+    def __init__(self, controller, calibrator, visualizer, notificator):
         self.calibrator = calibrator
         self.notificator = notificator
         self.visualizer = visualizer
@@ -30,7 +30,7 @@ class DataProcessor():
 
     def get_speed_vector(self):
         vs = Vector3Stamped(vector = Vector3(*self.currect_collision_vec))
-        qa = quaternion_inverse(ros_numpy.numpify(self.current_orientation))
+        qa = quaternion_inverse(self.current_orientation)
         trs = TransformStamped(transform = Transform(rotation = Quaternion(*qa)))
         ros_vec = tf2_tr.do_transform_vector3(vs, trs).vector
         self.visualizer.publish_data_if_required(ros_vec, self.current_imu_status)
@@ -78,8 +78,8 @@ class DataProcessor():
     def __process_imu_data(self, data):
             # print(self.node_name +"->"+data)
             q_real = ros_numpy.numpify(self.__get_compressed_quarternion(data))
-            if not np.array_equal(q_real, np.zeros(4)): # check is required!
+            if not np.array_equal(q_real, np.zeros(4)): # this check is required
                 self.current_orientation = self.calibrator.get_calibrated_quat(q_real)
                 self.current_imu_status = cal.ImuStatus(data[8], data[9], data[10], data[11])
 
-                self.calibrator.publish_tf(q_real)
+                self.calibrator.publish_tf(self.current_orientation)

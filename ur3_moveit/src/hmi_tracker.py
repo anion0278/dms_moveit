@@ -20,7 +20,10 @@ class EmptyMoveitInterface():
     def __init__(self):
         rospy.init_node('robot_python_driver', anonymous=True)
     
-    def add_hmi_obj(self, pose, name, size): 
+    def add_hmi_obj(self, pose, name, radius): 
+        pass 
+
+    def move_hmi_obj(self, pose, name, radius):
         pass
 
     def remove_hmi_obj(self, name):
@@ -36,7 +39,7 @@ class HmiTracker:
 
         dwn_smpl = 4
         if debug:
-            dwn_smpl = 2
+            dwn_smpl = 4
         
         self.img_proc = ip.HmiTrackerImageProcessor(dwn_smpl, debug)
         self.pc_proc = cp.HmiTrackerCloudProcessor(dwn_smpl)

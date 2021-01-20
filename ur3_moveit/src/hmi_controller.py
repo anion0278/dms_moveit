@@ -24,9 +24,9 @@ class HmiController():
 
         self.__ble = ble.BleManager(self.device_name, debug, self.__main_loop, self.__process_hmi_data)
         self.notificator = nt.VibroNotificator(self.device_name, directed_vibration)
-        self.calibrator = cb.CalibrationManager(self, self.node_name, use_world_frame)
+        self.calibrator = cb.CalibrationManager(self, self.node_name, use_world_frame, debug)
         self.visualizer = vis.RVizVisualiser(config.get_rviz_color(self.device_name), self.node_name + "_markers", self.calibrator.calibr_frame_id, 1)
-        self.processor = pr.DataProcessor(self.device_name, self, self.calibrator, self.visualizer, self.notificator)
+        self.processor = pr.DataProcessor(self, self.calibrator, self.visualizer, self.notificator)
 
     def run(self):
         rospy.init_node(self.node_name)

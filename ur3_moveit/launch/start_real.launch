@@ -2,6 +2,8 @@
 <launch>
   <arg name="robot_ip" default="192.168.1.111"/>
 
+  <arg name="enable_both_hmi" default="true"/>
+
   <include file="$(find ur_robot_driver)/launch/ur3e_bringup.launch">
 	<arg name="robot_ip" value="$(arg robot_ip)" />
 	<arg name="kinematics_config" value="$(find ur3_moveit)/config/ucr_ur3e_calibration.yaml" />
@@ -12,10 +14,6 @@
   <rosparam ns="/move_group" command="load" file="$(find ur3_moveit)/config/sensors_3d.yaml" />
   <param name="/move_group/manipulator/longest_valid_segment_fraction" type="double" value="0.007" />
 
-  <!-- Planners -->
-  <!-- <param name="move_group/ompl/simplify_solutions" value="true" /> -->
-
-  <!-- duplication !!! See start_sim  -->
   <arg name="xacro_file_name" default="ur3e_workspace.xacro"/>
   <arg name="xacro_path" default="$(find ur3_description)/urdf/$(arg xacro_file_name)"/>
   <param name="robot_description" command="xacro --inorder '$(arg xacro_path)'" />
@@ -24,12 +22,20 @@
     <arg name="height" default="240"/>
     <arg name="fps" default="15"/>
 
-    <!-- <include file="$(find realsense2_camera)/launch/rs_camera.launch">  -->
+    <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen" />
+
+  <group if="$(arg enable_both_hmi)">
+    <node name="hmi_starter" pkg="ur3_moveit" type="hmi_controller_starter.py" respawn="false" output="screen"/>
+  </group>
+  <!-- <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen"  args="moveit" /> -->
+  <!-- <node name="task_commander" pkg="ur3_moveit" type="task_commander.py" respawn="false" output="screen" args="$(arg enable_both_hmi)" /> -->
+
+
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+        <arg name="json_file_path" value="$(find ur3_moveit)/config/d435_camera_settings.json" />
 
         <!-- this is currect recomended API for PointCloud -->
         <arg name="filters" value="pointcloud" /> 
-
         <!-- <arg name="enable_pointcloud" value="true" /> THIS IS A DEPRECATED API !!!--> 
 
         <arg name="camera" value="camera_top" />
@@ -41,16 +47,13 @@
         <arg name="color_height" value="$(arg height)" />
         <arg name="color_fps" value="$(arg fps)" />
 
-        <!-- <arg name="serial_no" value="902512070480" /> -->
+        <arg name="serial_no" value="912112073228" />
         <arg name="device_type" value="d435" />
         <arg name="clip_distance" value="2.4" />
         
-        <!-- <arg name="tf_publish_rate" value="500.0" /> -->
-
         <arg name="enable_gyro" value="false" />
         <arg name="enable_accel" value="false" />
         <arg name="enable_sync" value="true" />
-        <!-- /sys/devices/pci0000:00/0000:00:14.0/usb2/2-2/2-2:1.0/video4linux/video2 -->
     </include>
 
   <include file="$(find ur3_moveit)/launch/move_group.launch">

@@ -44,10 +44,10 @@
         <material>
         <!-- colors can be float (0..1) or int (0..255) -->
         <!-- color of each object is set by MULTIPLE color-behaviour-components, but its possible to use only one of them -->
-          <ambient>206 58 39 255</ambient>
-          <diffuse>206 58 39 255</diffuse>
-          <specular>206 58 39 255</specular>
-          <emissive>206 58 39 255</emissive>
+          <ambient>175 35 35 255</ambient>
+          <diffuse>175 35 35 255</diffuse>
+          <specular>175 35 35 255</specular>
+          <emissive>175 35 35 255</emissive>
         </material>
       </visual>
       <visual name="visual_forearm">

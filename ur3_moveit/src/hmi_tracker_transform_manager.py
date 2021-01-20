@@ -31,6 +31,3 @@ class HmiTrackerTransformManager:
         p.pose.position.z = center_pos[2]
         p.pose.orientation = Quaternion(0, 0, 0, 1)
         return p
-
-    def get_zero_pose(self, hmi_frame):
-        return self.get_hand_pose(hmi_frame, [0,0,0])
