@@ -3,6 +3,7 @@ from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import *
 import rospy
 
+import config
 import util_ros_msgs 
 
 i_quat = util_ros_msgs.get_identity_quat_msg()
@@ -26,6 +27,7 @@ class RVizVisualiser:
         m = Marker(type = Marker.ARROW, 
                     pose = Pose(orientation = i_quat), 
                     action = Marker.ADD, 
+                    lifetime = config.tf_viz_decay_duration_s,
                     scale = self.__marker_scale, 
                     color = self.__marker_color, 
                     points = [end_point, Point()], 
@@ -37,6 +39,7 @@ class RVizVisualiser:
         m = Marker(type = Marker.TEXT_VIEW_FACING, 
                         pose = Pose(orientation = i_quat), 
                         action = Marker.ADD, 
+                        lifetime = config.tf_viz_decay_duration_s,
                         scale = self.__text_scale, 
                         color = self.__text_color, 
                         text = imu_status.short_format(),

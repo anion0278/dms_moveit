@@ -33,7 +33,6 @@ class DataProcessor():
         qa = quaternion_inverse(self.current_orientation)
         trs = TransformStamped(transform = Transform(rotation = Quaternion(*qa)))
         ros_vec = tf2_tr.do_transform_vector3(vs, trs).vector
-        self.visualizer.publish_data_if_required(ros_vec, self.current_imu_status)
         return ros_vec
 
     def process_hmi_data(self, data):

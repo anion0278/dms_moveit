@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import rospy
 
 from enum import Enum
 class Side(Enum):
@@ -31,6 +32,8 @@ replan_intensity = 200
 dist_intensity_max = 160
 dist_intensity_min = 120
 vibr_min = 60
+
+tf_viz_decay_duration_s = rospy.Duration(0.2)
 
 color_left = np.array([0, 1, 0]) 
 color_right = np.array([1, 0, 0])

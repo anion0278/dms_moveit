@@ -34,7 +34,7 @@ center_suf = "_center"
 class HmiTracker:
     def __init__(self, camera_name, moveit_interface):
         self.__driver = moveit_interface
-        self.epsilon_min_dist_change_m = 0.01
+        self.epsilon_min_dist_change_m = 0.02
         self.__hmi_cache = {config.hmi_left:0, config.hmi_right:0, config.hmi_left+center_suf:0, config.hmi_right+center_suf:0}
 
         dwn_smpl = 4
@@ -88,19 +88,21 @@ class HmiTracker:
     def publish_empty_data(self, hmi_name, pc_pub, header):
         self.__driver.remove_hmi_obj(hmi_name)
         self.pc_proc.publish_emtpy_pc(pc_pub, header)
+        zero_pose = self.tf_proc.get_hand_pose(header.frame_id, [0,0,0])  
+        self.tf_proc.publish_hmi_tf(zero_pose, "non_existent_frame", hmi_name)
         self.__hmi_cache[hmi_name] = 0
         self.__hmi_cache[hmi_name+center_suf] = 0
 
-    def publish_hand(self, depth_img,header,hand_data,obj_name,pc_pub):
+    def publish_hand(self, depth_img,header,hand_data,hmi_name,pc_pub):
         cloud_center, radius = self.pc_proc.get_center_and_publish(pc_pub, hand_data, depth_img, header)
         
         if cloud_center is not None:
             # TF should be published anyway, because it decays fast !!!
             stamped_pose = self.tf_proc.get_hand_pose(header.frame_id, cloud_center)   
-            self.tf_proc.publish_hmi_tf(stamped_pose, header.frame_id, obj_name)
+            self.tf_proc.publish_hmi_tf(stamped_pose, header.frame_id, hmi_name)
             
-            if abs(self.__hmi_cache[obj_name] - radius) > self.epsilon_min_dist_change_m or \
-                distance.euclidean(self.__hmi_cache[obj_name+center_suf], cloud_center) > self.epsilon_min_dist_change_m: 
+            if abs(self.__hmi_cache[hmi_name] - radius) > self.epsilon_min_dist_change_m or \
+                distance.euclidean(self.__hmi_cache[hmi_name+center_suf], cloud_center) > self.epsilon_min_dist_change_m: 
                 # the change of the radius or position was large enough to be noticable
 
                 # objs = self.__driver.scene.get_known_object_names()
@@ -109,9 +111,9 @@ class HmiTracker:
                 # else:
                 #     self.__driver.add_hmi_obj(stamped_pose, obj_name, radius)
                 
-                self.__driver.add_hmi_obj(stamped_pose, obj_name, radius)
-                self.__hmi_cache[obj_name] = radius
-                self.__hmi_cache[obj_name+center_suf] = cloud_center
+                self.__driver.add_hmi_obj(stamped_pose, hmi_name, radius)
+                self.__hmi_cache[hmi_name] = radius
+                self.__hmi_cache[hmi_name+center_suf] = cloud_center
 
 
 if __name__ == "__main__":

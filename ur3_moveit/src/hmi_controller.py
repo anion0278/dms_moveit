@@ -22,6 +22,7 @@ class HmiController():
         self.node_name = device_name
         self.device_name = device_name
 
+        rospy.init_node(self.node_name) # should be initialized before Calibration Manager (TFBuffer)
         self.__ble = ble.BleManager(self.device_name, debug, self.__main_loop, self.__process_hmi_data)
         self.notificator = nt.VibroNotificator(self.device_name, directed_vibration)
         self.calibrator = cb.CalibrationManager(self, self.node_name, use_world_frame, debug)
@@ -29,7 +30,6 @@ class HmiController():
         self.processor = pr.DataProcessor(self, self.calibrator, self.visualizer, self.notificator)
 
     def run(self):
-        rospy.init_node(self.node_name)
         self.__ble.start()
 
     def __process_hmi_data(self, data):
@@ -72,11 +72,15 @@ class HmiController():
 
     def send_speed_command(self, notification):
         util.set_param(config.notification_val_param+self.node_name, notification.intensity) # timeline data
-        if self.processor.current_orientation is not None:
+        if self.processor.current_orientation is not None and self.calibrator.is_hmi_recognized():
             ros_vec = self.processor.get_speed_vector()
+            self.visualizer.publish_data_if_required(ros_vec, self.processor.current_imu_status)
             motor_speeds = self.notificator.get_motor_speeds(notification, ros_vec)
             #print("Motor speeds: %s" % motor_speeds)
             self.send_speed_msg(motor_speeds)
+        else:
+            # print("Could not find TF for %s, HMI is not recognized" % self.device_name)
+            self.send_speed_msg([0,0,0, 0,0,0]) # we need to sustain communication even if HMI is not recognized
 
     def __notify_ready(self):
         offsets = self.calibrator.restore_imu_offsets()

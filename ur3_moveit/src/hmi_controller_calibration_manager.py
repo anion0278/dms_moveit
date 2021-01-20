@@ -10,7 +10,7 @@ import tf2_ros
 import config
 import util_ros_msgs as util_ros
 
-class CalibrationManager():
+class CalibrationManager(): # TODO separate into Calibration and Transform managers
     def __init__(self, controller, node_name, use_world_frame, debug):
         self.calibr_service = None
         self.debug = debug
@@ -21,14 +21,18 @@ class CalibrationManager():
         self.frame_calib_file = config.get_frame_calibration_file_path(node_name)
 
         self.tf_pub = tf2_ros.StaticTransformBroadcaster()
+        self.tf_buf = tf2_ros.Buffer(cache_time = config.config.tf_viz_decay_duration_s) 
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buf)
+
         self.__tracked_frame_id = controller.device_name
         if use_world_frame:
             self.__tracked_frame_id = "world"
         self.calibr_frame_id = controller.device_name+"_calibrated"
-
         self.zero_frame_id = controller.device_name+"_north"
-
         self.frame_calibration = self.restore_frame_calibration()
+
+    def is_hmi_recognized(self):
+        return self.tf_buf.can_transform("world", self.__tracked_frame_id, rospy.Time(0)) 
 
     def get_calibrated_quat(self, quaternion_real):
         return quaternion_multiply(self.frame_calibration, quaternion_real)
