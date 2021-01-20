@@ -92,7 +92,7 @@
   <joint name="world_to_table" type="fixed">
     <parent link="world"/>
     <child link="table"/>
-    <origin xyz="1 0 0" rpy="0 0 0"/>
+    <origin xyz="0 1.0 0" rpy="0 0 -${pi}"/>
   </joint>
 
   <joint name="table_to_robot" type="fixed">
