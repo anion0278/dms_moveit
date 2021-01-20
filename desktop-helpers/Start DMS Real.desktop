@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Icon[en_US]=ibus-setup
+Exec=/home/stefan/catkin_ws/src/dms_moveit/real.sh
+Name[en_US]=Start DMS Real
+Name=Start DMS Real
+Icon=ibus-setup

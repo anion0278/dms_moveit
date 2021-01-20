@@ -2,11 +2,11 @@ import rospy
 import numpy as np
 import ros_numpy as rp
 from sensor_msgs import point_cloud2 as pc2
-from sensor_msgs.msg import PointCloud2, PointField, Image
+from sensor_msgs.msg import PointField
 from scipy.spatial import distance
 from icecream import ic # perfect for debuging purposes
 
-import open3d as o3d # pip install pyrsistent==0.16.1 open3d-python 
+import open3d # pip install pyrsistent==0.16.1 open3d-python 
 # because simple installation will fail for Python 2.7 !
 from open3d_ros_helper import open3d_ros_helper as orh
 from open3d.open3d.geometry import statistical_outlier_removal
@@ -50,21 +50,22 @@ class HmiTrackerCloudProcessor:
         pc_hand = [] # pointCloud points
         for x, y in blob_pts:
             depth_img_point = self.get_img_coords(depth_img, (x, y))
-            r = distance.euclidean(depth_img_point, cloud_center)
+            pc_hand.append(depth_img_point)
+ 
+        # TODO optimize
+        cloud_modified = pc2.create_cloud(header, pc_fields, pc_hand)
+        o3dpc = orh.rospc_to_o3dpc(cloud_modified)
+        filtered_cloud, outliers_indices = statistical_outlier_removal(o3dpc, nb_neighbors= len(o3dpc.points) / self.dwn_smpl, std_ratio=0.00001)
+        ros_cl = orh.o3dpc_to_rospc(filtered_cloud)
+        ros_cl.header = cloud_modified.header
+
+        if publish_pointcloud:  
+            pc_pub.publish(ros_cl)
+
+        for point in filtered_cloud.points:
+            r = distance.euclidean(point, cloud_center)
             if r > r_max:
                 r_max = r
-
-            if publish_pointcloud:
-                pc_hand.append(depth_img_point)
-
-        if publish_pointcloud:
-            cloud_modified = pc2.create_cloud(header, pc_fields, pc_hand)
-            o3dpc = orh.rospc_to_o3dpc(cloud_modified)
-            filtered_cloud, outliers_indices = statistical_outlier_removal(o3dpc, nb_neighbors= len(o3dpc.points) / self.dwn_smpl, std_ratio=0.00001)
-            ic("Removed %s outliers", outliers_indices)
-            ros_cl = orh.o3dpc_to_rospc(filtered_cloud)
-            ros_cl.header = cloud_modified.header
-            pc_pub.publish(ros_cl)
 
         if r_max > self.max_radius_m: 
             r_max = self.max_radius_m
