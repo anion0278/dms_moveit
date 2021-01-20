@@ -5,7 +5,6 @@ from std_srvs.srv import TriggerRequest, Trigger, TriggerResponse
 import pickle as serializer # replace by json if more readable data format is needed
 from tf.transformations import *
 from geometry_msgs.msg import Quaternion
-import ros_numpy
 import tf2_ros
 
 import config
@@ -36,10 +35,10 @@ class CalibrationManager():
 
     def publish_tf(self, quaternion_hmi):
         if self.debug: 
-            tfs_north_direction = util_ros.get_stamped_transform(self.__tracked_frame_id, self.zero_frame_id, Quaternion(*self.frame_calibration))
+            tfs_north_direction = util_ros.get_stamped_transform(self.__tracked_frame_id, self.zero_frame_id, util_ros.get_norm_quaternion_msg(self.frame_calibration))
             self.tf_pub.sendTransform(tfs_north_direction) # correct only when calibrated
         
-        tfs_calibrated = util_ros.get_stamped_transform(self.__tracked_frame_id, self.calibr_frame_id, Quaternion(*quaternion_hmi))
+        tfs_calibrated = util_ros.get_stamped_transform(self.__tracked_frame_id, self.calibr_frame_id, util_ros.get_norm_quaternion_msg(quaternion_hmi))
         self.tf_pub.sendTransform(tfs_calibrated)
 
     def start_calibration_service(self):

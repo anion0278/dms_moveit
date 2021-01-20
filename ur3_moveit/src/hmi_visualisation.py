@@ -3,10 +3,9 @@ from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import *
 import rospy
 
-import config
 import util_ros_msgs 
 
-i_quat = util_ros_msgs.get_identity_quat()
+i_quat = util_ros_msgs.get_identity_quat_msg()
 
 class RVizVisualiser:
     def __init__(self, color, topic, parent_frame_id,  marker_scale):

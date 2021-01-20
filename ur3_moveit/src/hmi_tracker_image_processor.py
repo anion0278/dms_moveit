@@ -51,8 +51,8 @@ class HmiTrackerImageProcessor:
         return ColorRange(lower, upper)
 
     def get_hsv_red_range(self):
-        lower = (-30, 80, 90)
-        upper = (10, 255, 255) # 150 - 179
+        lower = (-30, 80, 90) # 150 - 179
+        upper = (10, 255, 255) 
         return ColorRange(lower, upper)
 
     def get_hsv_color_range(self, color_base):
@@ -151,7 +151,8 @@ class HmiTrackerImageProcessor:
 
                 if not self.is_center_within_contour(center, contour_pts): # ZERO meaning the point is on the contour!!!
                     # the closest point INSIDE contour, otherwise the center's height can be incorreclty calculated
-                    center = np.squeeze(min(contour_pts, key=lambda p: distance.euclidean(p, center))) # TODO takes point from contour, which sometimes out of shape (especially when on the edge of image)
+                    # TODO takes point from contour, which sometimes out of shape (especially when on the edge of image)
+                    center = np.squeeze(min(contour_pts, key=lambda p: distance.euclidean(p, center))) 
 
                 result = HmiImageData(center, rect, contour_pts, color_mask, single_hand_mask)
         return result
