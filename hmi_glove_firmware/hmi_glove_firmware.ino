@@ -7,8 +7,8 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
-//const char* deviceName = "hmi_right";
-const char* deviceName = "hmi_left";
+const char* deviceName = "hmi_right";
+//const char* deviceName = "hmi_left";
 
 bool hasHandshake = false;
 

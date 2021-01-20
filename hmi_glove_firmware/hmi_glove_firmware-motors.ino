@@ -31,8 +31,8 @@ void SetupMotors()
     Print("Left Configuration");
     motorPins[0] = PIN_A1; // X
     motorPins[1] = PIN_A5; // Y
-    motorPins[2] = PIN_A4; // Z
-    motorPins[3] = PIN_A3; // -X
+    motorPins[2] = PIN_A3; // Z
+    motorPins[3] = PIN_A4; // -X
     motorPins[4] = PIN_A0; // -Y
     motorPins[5] = PIN_A2; // -Z
   }
