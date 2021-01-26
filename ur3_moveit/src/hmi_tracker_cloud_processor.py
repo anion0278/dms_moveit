@@ -22,7 +22,7 @@ pc_fields = [
 class HmiTrackerCloudProcessor:
     def __init__(self, dwn_smpl):
         self.dwn_smpl = dwn_smpl
-        self.max_radius_m = 0.11
+        self.max_radius_m = 0.09
 
     def publish_emtpy_pc(self, pub, header):
         # publish always

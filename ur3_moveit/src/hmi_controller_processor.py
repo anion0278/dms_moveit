@@ -56,7 +56,7 @@ class DataProcessor():
             if vec_len != 0:
                 self.currect_collision_vec = v / vec_len # vector should be normalized !
                 #print("New vector: %s" % self.currect_collision_vec)
-                print("New vector length [m]: %s" % vec_len)
+                # print("New vector length [m]: %s" % vec_len)
 
     def __get_compressed_quarternion(self, data): 
         floats = np.zeros(4)

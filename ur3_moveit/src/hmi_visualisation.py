@@ -58,6 +58,5 @@ class RVizVisualiser:
         self.pub.publish(ma)
     
     def __get_component(self, value):
-        # 255 - max speed
-        return self.__k * float(value) / 255.0 * self.__max_vector_length
+        return self.__k * float(value) / config.vibr_max * self.__max_vector_length
 

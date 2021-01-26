@@ -61,7 +61,6 @@ class HmiController():
                     else:
                         self.send_speed_command(new_notification) 
                     break 
-                print("Exited loop")
             return
 
         if isinstance(notification, nt.PromptNotification):

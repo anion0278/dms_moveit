@@ -21,7 +21,7 @@ class CalibrationManager(): # TODO separate into Calibration and Transform manag
         self.frame_calib_file = config.get_frame_calibration_file_path(node_name)
 
         self.tf_pub = tf2_ros.StaticTransformBroadcaster()
-        self.tf_buf = tf2_ros.Buffer(cache_time = config.config.tf_viz_decay_duration_s) 
+        self.tf_buf = tf2_ros.Buffer(cache_time = config.tf_viz_decay_duration_s) 
         self.tf_listener = tf2_ros.TransformListener(self.tf_buf)
 
         self.__tracked_frame_id = controller.device_name

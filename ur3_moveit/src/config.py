@@ -32,6 +32,7 @@ replan_intensity = 200
 dist_intensity_max = 160
 dist_intensity_min = 120
 vibr_min = 60
+vibr_max = 255
 
 tf_viz_decay_duration_s = rospy.Duration(0.2)
 

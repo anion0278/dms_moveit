@@ -88,7 +88,6 @@ class RobotDriver: # TODO rename more appropriatelly?
 
         self.__clear_octomap_service = rospy.ServiceProxy(clear_octomap_service, Empty)
         self.clear_octomap()
-        self.objs = []
 
     def add_hmi_obj(self, pose, name, radius): #TODO into visualizer ? 
         self.scene.add_sphere(name, pose, radius)  
