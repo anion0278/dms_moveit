@@ -1,15 +1,15 @@
 Panels:
   - Class: rviz/Displays
-    Help Height: 78
+    Help Height: 81
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
-        - /Status1
-        - /Grid1
-        - /PointCloud21
-      Splitter Ratio: 0.5
-    Tree Height: 698
+        - /MoveIt1
+        - /MoveIt1/Scene Geometry1
+        - /MoveIt1/Planned Path1
+        - /TF1/Frames1
+      Splitter Ratio: 0.5870503783226013
+    Tree Height: 694
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -28,7 +28,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: Top Camera Points
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -54,39 +54,9 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 1.0514506101608276
-        Min Value: 0.6099985837936401
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: AxisColor
-      Decay Time: 0
-      Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 4096
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: PointCloud2
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 3
-      Size (m): 0.009999999776482582
-      Style: Points
-      Topic: /right_hmi_points
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: true
     - Acceleration_Scaling_Factor: 0.1
       Class: moveit_rviz_plugin/MotionPlanning
-      Enabled: false
+      Enabled: true
       Move Group Namespace: ""
       MoveIt_Allow_Approximate_IK: false
       MoveIt_Allow_External_Program: false
@@ -107,8 +77,8 @@ Visualization Manager:
         Size:
           X: 2
           Y: 2
-          Z: 2
-      Name: MotionPlanning
+          Z: -2
+      Name: MoveIt
       Planned Path:
         Color Enabled: false
         Interrupt Display: false
@@ -118,11 +88,6 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          back_wall_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
           base:
             Alpha: 1
             Show Axes: false
@@ -132,11 +97,7 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          base_link_camera:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          base_link_camera2:
+          base_link_camera_left:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -144,84 +105,43 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_bottom_screw_frame:
+          camera_left_bottom_screw_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_color_frame:
+          camera_left_color_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_color_optical_frame:
+          camera_left_color_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_depth_frame:
+          camera_left_depth_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_depth_optical_frame:
+          camera_left_depth_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_infra1_frame:
+          camera_left_infra1_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_infra1_optical_frame:
+          camera_left_infra1_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_infra2_frame:
+          camera_left_infra2_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_infra2_optical_frame:
+          camera_left_infra2_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          camera_bottom_screw_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_color_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_color_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_depth_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_depth_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_infra1_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_infra1_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_infra2_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_infra2_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_link:
+          camera_left_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -308,6 +228,21 @@ Visualization Manager:
             Show Trail: false
             Value: true
           table:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          table_back_sup:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          table_left_sup:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          table_right_sup:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -341,10 +276,10 @@ Visualization Manager:
             Show Trail: false
             Value: true
         Loop Animation: false
-        Robot Alpha: 0.5
-        Robot Color: 150; 50; 150
+        Robot Alpha: 0.30000001192092896
+        Robot Color: 238; 238; 236
         Show Robot Collision: false
-        Show Robot Visual: true
+        Show Robot Visual: false
         Show Trail: false
         State Display Time: 0.05 s
         Trail Step Size: 1
@@ -363,7 +298,7 @@ Visualization Manager:
         Interactive Marker Size: 0
         Joint Violation Color: 255; 0; 255
         Planning Group: manipulator
-        Query Goal State: true
+        Query Goal State: false
         Query Start State: false
         Show Workspace: false
         Start State Alpha: 1
@@ -375,7 +310,7 @@ Visualization Manager:
         Scene Color: 50; 230; 50
         Scene Display Time: 0.009999999776482582
         Show Scene Geometry: true
-        Voxel Coloring: Z-Axis
+        Voxel Coloring: Cell Probability
         Voxel Rendering: Occupied Voxels
       Scene Robot:
         Attached Body Color: 150; 50; 150
@@ -385,11 +320,6 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          back_wall_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
           base:
             Alpha: 1
             Show Axes: false
@@ -399,11 +329,7 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          base_link_camera:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          base_link_camera2:
+          base_link_camera_left:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -411,84 +337,43 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_bottom_screw_frame:
+          camera_left_bottom_screw_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_color_frame:
+          camera_left_color_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_color_optical_frame:
+          camera_left_color_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_depth_frame:
+          camera_left_depth_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_depth_optical_frame:
+          camera_left_depth_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_infra1_frame:
+          camera_left_infra1_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_infra1_optical_frame:
+          camera_left_infra1_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_infra2_frame:
+          camera_left_infra2_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_infra2_optical_frame:
+          camera_left_infra2_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera2_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          camera_bottom_screw_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_color_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_color_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_depth_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_depth_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_infra1_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_infra1_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_infra2_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_infra2_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          camera_link:
+          camera_left_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -575,6 +460,21 @@ Visualization Manager:
             Show Trail: false
             Value: true
           table:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          table_back_sup:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          table_left_sup:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          table_right_sup:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -610,23 +510,347 @@ Visualization Manager:
         Robot Alpha: 1
         Show Robot Collision: false
         Show Robot Visual: true
-      Value: false
+      Value: true
       Velocity_Scaling_Factor: 0.1
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /camera_top/color/image_raw
+      Image Topic: /hmi_tracker_image
       Max Value: 1
       Median window: 5
       Min Value: 0
-      Name: Image
+      Name: HMI Tracker Image
       Normalize Range: true
       Queue Size: 2
       Transport Hint: raw
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: -9999
+        Min Value: 9999
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Right HMI Points
+      Position Transformer: XYZ
+      Queue Size: 1
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /hmi_right_tracked_points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: -9999
+        Min Value: 9999
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Left HMI Points
+      Position Transformer: XYZ
+      Queue Size: 1
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /hmi_left_tracked_points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 0.9165199398994446
+        Min Value: 0.39940011501312256
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Top Camera Points
+      Position Transformer: XYZ
+      Queue Size: 1
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /camera_top/depth_registered/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Left Camera Points
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /camera_left/depth_registered/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base:
+          Value: false
+        base_link:
+          Value: false
+        base_link_camera_left:
+          Value: false
+        base_link_camera_top:
+          Value: false
+        camera_left_aligned_depth_to_color_frame:
+          Value: true
+        camera_left_bottom_screw_frame:
+          Value: false
+        camera_left_color_frame:
+          Value: false
+        camera_left_color_optical_frame:
+          Value: false
+        camera_left_depth_frame:
+          Value: false
+        camera_left_depth_optical_frame:
+          Value: false
+        camera_left_infra1_frame:
+          Value: false
+        camera_left_infra1_optical_frame:
+          Value: false
+        camera_left_infra2_frame:
+          Value: false
+        camera_left_infra2_optical_frame:
+          Value: false
+        camera_left_link:
+          Value: false
+        camera_top_aligned_depth_to_color_frame:
+          Value: true
+        camera_top_bottom_screw_frame:
+          Value: false
+        camera_top_color_frame:
+          Value: false
+        camera_top_color_optical_frame:
+          Value: false
+        camera_top_depth_frame:
+          Value: false
+        camera_top_depth_optical_frame:
+          Value: false
+        camera_top_infra1_frame:
+          Value: false
+        camera_top_infra1_optical_frame:
+          Value: false
+        camera_top_infra2_frame:
+          Value: false
+        camera_top_infra2_optical_frame:
+          Value: false
+        camera_top_link:
+          Value: false
+        ee_link:
+          Value: false
+        effector_body:
+          Value: false
+        force_sensor:
+          Value: false
+        forearm_link:
+          Value: false
+        hmi_left:
+          Value: true
+        hmi_right:
+          Value: true
+        left_jaw:
+          Value: false
+        left_wall_link:
+          Value: true
+        non_existent_frame:
+          Value: true
+        right_jaw:
+          Value: false
+        shoulder_link:
+          Value: false
+        table:
+          Value: false
+        table_back_sup:
+          Value: false
+        table_left_sup:
+          Value: false
+        table_right_sup:
+          Value: false
+        tool0:
+          Value: false
+        tool0_controller:
+          Value: true
+        upper_arm_link:
+          Value: false
+        world:
+          Value: true
+        wrist_1_link:
+          Value: false
+        wrist_2_link:
+          Value: false
+        wrist_3_link:
+          Value: false
+      Marker Scale: 0.4000000059604645
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        world:
+          left_wall_link:
+            {}
+          table:
+            base_link:
+              base:
+                tool0_controller:
+                  {}
+              shoulder_link:
+                upper_arm_link:
+                  forearm_link:
+                    wrist_1_link:
+                      wrist_2_link:
+                        wrist_3_link:
+                          ee_link:
+                            force_sensor:
+                              effector_body:
+                                left_jaw:
+                                  {}
+                                right_jaw:
+                                  {}
+                          tool0:
+                            {}
+            base_link_camera_left:
+              camera_left_bottom_screw_frame:
+                camera_left_link:
+                  camera_left_aligned_depth_to_color_frame:
+                    {}
+                  camera_left_color_frame:
+                    camera_left_color_optical_frame:
+                      {}
+                  camera_left_depth_frame:
+                    camera_left_depth_optical_frame:
+                      {}
+                  camera_left_infra1_frame:
+                    camera_left_infra1_optical_frame:
+                      {}
+                  camera_left_infra2_frame:
+                    camera_left_infra2_optical_frame:
+                      {}
+            base_link_camera_top:
+              camera_top_bottom_screw_frame:
+                camera_top_link:
+                  camera_top_aligned_depth_to_color_frame:
+                    camera_top_color_optical_frame:
+                      {}
+                  camera_top_color_frame:
+                    {}
+                  camera_top_depth_frame:
+                    camera_top_depth_optical_frame:
+                      {}
+                  camera_top_infra1_frame:
+                    camera_top_infra1_optical_frame:
+                      {}
+                  camera_top_infra2_frame:
+                    camera_top_infra2_optical_frame:
+                      {}
+            table_back_sup:
+              {}
+            table_left_sup:
+              {}
+            table_right_sup:
+              {}
+      Update Interval: 0
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /hmi_left_markers
+      Name: Left HMI Speed Component
+      Namespaces:
+        {}
+      Queue Size: 2
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /hmi_right_markers
+      Name: Right HMI Speed Components
+      Namespaces:
+        {}
+      Queue Size: 2
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /move_group/collision_vectors
+      Name: Collision Vectors
+      Namespaces:
+        {}
+      Queue Size: 2
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /occupied_cells_vis_array
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
-    Background Color: 48; 48; 48
+    Background Color: 238; 238; 236
     Default Light: true
     Fixed Frame: world
     Frame Rate: 30
@@ -652,39 +876,39 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.242612600326538
+      Distance: 2.664630889892578
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.47493162751197815
-        Y: 0.3125699758529663
-        Z: 0.6430197954177856
+        X: 0.4895331859588623
+        Y: 0.30987611413002014
+        Z: 1.0410373210906982
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9347966909408569
+      Pitch: 0.4697965085506439
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.3253941237926483
+      Yaw: 3.4885411262512207
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
+  HMI Tracker Image:
+    collapsed: false
   Height: 995
   Hide Left Dock: false
   Hide Right Dock: false
-  Image:
+  MoveIt:
     collapsed: false
-  MotionPlanning:
+  MoveIt - Trajectory Slider:
     collapsed: false
-  MotionPlanning - Trajectory Slider:
-    collapsed: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000029500000345fc020000000bfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000280020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000000000000000fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e0067000000003d0000025d0000019b00fffffffb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000001600000016fb0000000a0049006d006100670065010000003d000003450000001600ffffff000000010000015600000345fc0200000004fb000000100044006900730070006c006100790073010000003d00000345000000c900fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d00000345000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d0065010000000000000780000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000003890000034500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000029500000344fc020000000dfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000280020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000000000000000fb0000000c004d006f0076006500490074010000003d000001a60000019b00fffffffb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c0069006400650072000000003d000000410000000000000000fb000000220048004d004900200054007200610063006b0065007200200049006d00610067006501000001e9000001980000001600fffffffb00000036004d006f007600650049007400210020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000000000000000fb00000034004d006f00760065004900740020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100ffffff00000001000001de00000344fc0200000004fb000000100044006900730070006c006100790073010000003d00000344000000c900fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d00000345000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003ffc0100000002fb0000000800540069006d0065010000000000000780000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000003010000034400000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:

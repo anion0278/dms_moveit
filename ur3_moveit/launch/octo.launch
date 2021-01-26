@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
 
-  <node pkg="tf2_ros" type="static_transform_publisher" name="camera_link_broadcaster" args="0 0 0.5 0.707 0 -0.707 0 world camera_top_link" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="camera_link_broadcaster" args="0 0 1.95 0.707 0 -0.707 0 world camera_top_link" />
 
   <include file="$(find realsense2_camera)/launch/rs_camera.launch">
     <arg name="filters" value="pointcloud" />
@@ -14,9 +14,14 @@
 
 	<param name="sensor_model/hit" value="0.99"/>
 	<param name="sensor_model/miss" value="0.05"/>
-
+<!-- 
 	 <param name="sensor_model/min" value="0.2"/>
-	<param name="sensor_model/max" value="0.8"/>
+	<param name="sensor_model/max" value="0.8"/> -->
+
+	<!-- <param name="pointcloud_max_z" value="0.4"/>
+	<param name="pointcloud_min_z" value="0.0"/> -->
+	<!-- <param name="sensor_model/pointcloud_max_z" value="0.2"/> -->
+	<!-- <param name="sensor_model/pointcloud_min_z" value="0.1"/> -->
 
 
     <!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
