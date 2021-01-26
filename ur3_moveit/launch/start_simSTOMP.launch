@@ -2,6 +2,7 @@
 <launch>
   <!-- Octomap and sensors settings -->
   <param name="/move_group/octomap_resolution" type="double" value="0.035" />
+    <param name="/move_group/collision/show_distances" type="bool" value="true" />
   <rosparam ns="/move_group" command="load" file="$(find ur3_moveit)/config/sensors_3d.yaml" />
   <param name="/move_group/manipulator/longest_valid_segment_fraction" type="double" value="0.006" />
   <param name="/move_group/ompl/simplify_solutions" value="true" />

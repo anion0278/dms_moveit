@@ -5,23 +5,23 @@
   <xacro:include filename="$(find ur3_description)/urdf/ur3_robot_custom.urdf.xacro" />
   <xacro:include filename="$(find ur3_description)/urdf/depth_camera.xacro" />
 
-  <depth_camera name="camera_right" />
+  <!-- <depth_camera name="camera_right" />
   <joint name="table_to_camera_right" type="fixed">
     <parent link="table"/>
     <child link="base_link_camera_right"/>
     <origin xyz="-0.6 1.2 1.6" rpy="0 ${pi/6} -${pi/4}"/>
-  </joint>
+  </joint> -->
 
   <depth_camera name="camera_left" />
   <joint name="table_to_camera_left" type="fixed">
     <parent link="table"/>
     <child link="base_link_camera_left"/>
-    <origin xyz="-0.6 -0.2 1.6"  rpy="0 ${pi/6} ${pi/4}"/>
+    <origin xyz="-0.30 -0.26 1.71"  rpy="${-pi/2} ${pi/4} ${pi/2}"/>
   </joint>
 
   <depth_camera name="camera_top" />
   <joint name="table_to_camera_top" type="fixed">
-    <parent link="table"/>
+      <parent link="table"/>
     <child link="base_link_camera_top"/>
     <origin xyz="-0.22 0.47 2.0"  rpy="0 ${pi/2} -${pi}"/>
   </joint>
@@ -46,6 +46,32 @@
       <origin rpy="0 ${-pi/2} 0" xyz="0 0 0 "/>
     </collision>
   </link>
+  <joint name="world_to_table" type="fixed">
+    <parent link="world"/>
+    <child link="table"/>
+    <origin xyz="0 1.0 0" rpy="0 0 -${pi}"/>
+  </joint>
+
+  <link name="left_wall_link">
+    <visual>
+      <geometry>
+        <box size="0.1 0.9 2.0"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.2 0.2 0.2 0.2" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+         <box size="0.1 0.9 2.0"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_wall_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="2.0 0.0 0.0"/>
+    <parent link="world"/>
+    <child link="left_wall_link"/>
+  </joint>
 
   <link name="table_left_sup">
     <collision>
@@ -89,11 +115,6 @@
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
 
-  <joint name="world_to_table" type="fixed">
-    <parent link="world"/>
-    <child link="table"/>
-    <origin xyz="0 1.0 0" rpy="0 0 -${pi}"/>
-  </joint>
 
   <joint name="table_to_robot" type="fixed">
     <parent link="table"/>

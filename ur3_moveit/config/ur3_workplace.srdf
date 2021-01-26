@@ -37,6 +37,9 @@
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="effector" parent_link="ee_link" group="effector" parent_group="manipulator" />
+
+
+    <!-- THIS ALLOWED COLLISION MATRIX ACTUALLY WORKS IN MOVEIT IN RVIZ, HOWEVER IT IS NOT USED IN MOVEIT CODE DURING COLLISION CHECKING - WHY?? -->
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="base_link" link2="camera_right_link" reason="Never" />
     <disable_collisions link1="base_link" link2="shoulder_link" reason="Adjacent" />
@@ -147,5 +150,6 @@
 
     <disable_collisions link1="hmi_right" link2="hmi_left" reason="Never" />
     <disable_collisions link1="hmi_left" link2="hmi_right" reason="Never" />
+    <disable_collisions link1="SHIP" link2="SHIPS" reason="Never" />
 
 </robot>

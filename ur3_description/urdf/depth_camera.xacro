@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <robot name="realsense2_cameras" 
     xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:arg name="camera_range" default="1.4"/>
+
     <xacro:macro name="depth_camera" params="name">
         <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
 
@@ -21,16 +24,16 @@
                     </image>
                     <clip>
                         <near>0.05</near>
+                        
                         <!-- SHOULD BE EDITED ALONG WITH pointCloudCutoffMax !!! Otherwise Rviz wont start -->
                         <!-- SHOULD BE MORE THAN far_clipping_plane_distance in sensors_3d.yaml of Moveit -->
-                        <far>1.8</far>
+                        <far>$(arg camera_range)</far>
                     </clip>
                 </camera>
                 <plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
                     <baseline>0</baseline>
                     <alwaysOn>true</alwaysOn>
-                    <!-- Keep this zero, update_rate in the parent <sensor> tag will control the frame rate. -->
-                    <updateRate>0.0</updateRate>
+                    <updateRate>0.0</updateRate><!-- Keep this zero, update_rate in the parent <sensor> tag will control the frame rate. -->
                     <cameraName>${name}_ir</cameraName>
                     <imageTopicName>/${name}/color/image_rect_color</imageTopicName>
                     <cameraInfoTopicName>/${name}/color/camera_info</cameraInfoTopicName> 
@@ -39,8 +42,7 @@
                     <pointCloudTopicName>/${name}/depth_registered/points</pointCloudTopicName>
                     <frameName>${name}_color_optical_frame</frameName>
                     <pointCloudCutoff>0.001</pointCloudCutoff>
-                    <!-- SHOULD BE EDITED ALONG WITH clip.far !!! Otherwise Rviz wont start -->
-                    <pointCloudCutoffMax>1.8</pointCloudCutoffMax>
+                    <pointCloudCutoffMax>$(arg camera_range)</pointCloudCutoffMax>
                     <distortionK1>0</distortionK1>
                     <distortionK2>0</distortionK2>
                     <distortionK3>0</distortionK3>
