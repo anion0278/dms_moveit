@@ -25,7 +25,7 @@ class MovementFailed(Exception):
 
 class Commander():
     def __init__(self, robot_driver, wait_for_hmi, num_attempts):
-        if wait_for_hmi == "true":
+        if wait_for_hmi:
             self.__wait_for_hmi()
         self.robot_driver = robot_driver
         self.num_attempts = num_attempts
@@ -135,8 +135,12 @@ class Commander():
 
 
 if __name__ == "__main__":
-    driver = r.RobotDriver(total_speed=0.1, total_acc=0.3)
+    import time
+    time.sleep(3) # othewise Moveit does not always start
+
     args = rospy.myargv(argv=sys.argv)
-    wait_for_hmi = args[1] if len(args) > 1 else False
+    wait_for_hmi = args[1] == "true" if len(args) > 1 else False
+    robot_speed = 0.001 if len(args) > 2 and args[2] == "sim" else 0.7
+    driver = r.RobotDriver(total_speed=robot_speed, total_acc=0.3)
     commander = Commander(driver, wait_for_hmi, num_attempts=0) # 0 attempts -> infinite
     commander.demo_task()

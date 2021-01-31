@@ -6,7 +6,7 @@ import sys
 import ros_numpy
 
 import config
-import hmi_controller_notificator as nt
+import hmi_controller_notifier as nt
 import hmi_controller_processor as pr
 import hmi_controller_calibration_manager as cb
 import hmi_visualisation as vis
@@ -24,10 +24,10 @@ class HmiController():
 
         rospy.init_node(self.node_name) # should be initialized before Calibration Manager (TFBuffer)
         self.__ble = ble.BleManager(self.device_name, debug, self.__main_loop, self.__process_hmi_data)
-        self.notificator = nt.VibroNotificator(self.device_name, directed_vibration)
+        self.notifier = nt.VibroNotifier(self.device_name, directed_vibration)
         self.calibrator = cb.CalibrationManager(self, self.node_name, use_world_frame, debug)
         self.visualizer = vis.RVizVisualiser(config.get_rviz_color(self.device_name), self.node_name + "_markers", self.calibrator.calibr_frame_id, 1)
-        self.processor = pr.DataProcessor(self, self.calibrator, self.visualizer, self.notificator)
+        self.processor = pr.DataProcessor(self, self.calibrator, self.visualizer, self.notifier)
 
     def run(self):
         self.__ble.start()
@@ -41,20 +41,20 @@ class HmiController():
             print("HMI data processing error: %s " % e.message)
 
     def __main_loop(self):
-        self.notificator.init_params()
+        self.notifier.init_params()
         self.__notify_ready()
         while True:
             self.set_hmi_notification()
 
     def set_hmi_notification(self):
-        notification = self.notificator.get_notification()
+        notification = self.notifier.get_notification()
         
         if isinstance(notification, nt.ProlongedNotification):
             start_time = rospy.get_time()
             while notification.time > (rospy.get_time() - start_time):
                 self.send_speed_command(notification) 
 
-                new_notification = self.notificator.get_notification()
+                new_notification = self.notifier.get_notification()
                 if new_notification.intensity > notification.intensity:
                     if isinstance(new_notification, nt.ProlongedNotification):
                         self.send_speed_command(new_notification) 
@@ -74,8 +74,8 @@ class HmiController():
         if self.processor.current_orientation is not None and self.calibrator.is_hmi_recognized():
             ros_vec = self.processor.get_speed_vector()
             self.visualizer.publish_data_if_required(ros_vec, self.processor.current_imu_status)
-            motor_speeds = self.notificator.get_motor_speeds(notification, ros_vec)
-            #print("Motor speeds: %s" % motor_speeds)
+            motor_speeds = self.notifier.get_motor_speeds(notification, ros_vec)
+            # print("%s Motor speeds: %s" % (self.device_name, motor_speeds))
             self.send_speed_msg(motor_speeds)
         else:
             # print("Could not find TF for %s, HMI is not recognized" % self.device_name)
@@ -124,7 +124,7 @@ if __name__ == "__main__":
 
     if debug: util.print_all_args()
         
-    hmi = HmiController(sys.argv[1], True, use_world)
+    hmi = HmiController(sys.argv[1], directed_vibration = True, use_world_frame = use_world)
     hmi.run()
 
     

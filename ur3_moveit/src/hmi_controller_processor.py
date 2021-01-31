@@ -17,9 +17,9 @@ regex_imu_pattern = "Q(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})(-?\d)(\d{2})" + re
 regex_offsets_pattern = regex_calibration_pattern + "-(.{22})"
 
 class DataProcessor():
-    def __init__(self, controller, calibrator, visualizer, notificator):
+    def __init__(self, controller, calibrator, visualizer, notifier):
         self.calibrator = calibrator
-        self.notificator = notificator
+        self.notifier = notifier
         self.visualizer = visualizer
         self.controller = controller
         

@@ -40,6 +40,7 @@ class HmiTrackerImageProcessor:
         self.left_color_range = self.get_hsv_green_range() 
         
         self.contour_min_size = 150.0 # down sampling is applied in code!
+        self.contour_max_size = 1000.0
         self.dwn_smpl = dwn_smpl
         self.cam_img_pub = rospy.Publisher("hmi_tracker_image", Image, queue_size=1)
         self.__cv_bridge = CvBridge()
@@ -142,7 +143,8 @@ class HmiTrackerImageProcessor:
         _, contours, _ = cv2.findContours(color_mask.astype("uint8"), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if contours:
             contour_pts = max(contours, key=lambda cont: cont.size)
-            if contour_pts.size > self.contour_min_size / self.dwn_smpl:
+            if contour_pts.size > self.contour_min_size / self.dwn_smpl and \
+                contour_pts.size < self.contour_max_size / self.dwn_smpl:
                 rect = cv2.minAreaRect(contour_pts)
                 center = np.array(rect[0]).astype("int")
 

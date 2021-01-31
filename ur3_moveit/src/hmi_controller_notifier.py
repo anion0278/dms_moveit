@@ -15,15 +15,15 @@ class PromptNotification():
 class ProlongedNotification(): 
     def __init__(self, intensity, time_s, directed_vibration = True):
         self.time = time_s
-        # this is way better than Python's inheritance
+        # its way better than Python's inheritance
         self.intensity = intensity 
         self.directed_vibration = directed_vibration
 
 
-class VibroNotificator():
+class VibroNotifier():
     def __init__(self, device_name, directed_vibration):
         self.directed_vibration_mode = directed_vibration
-        self.reaction_dist_m = 0.15  # distance on which HMIs start to react (proportionally)
+        self.reaction_dist_m = 0.20  # distance on which HMIs start to react (proportionally)
         self.__min_vib = config.dist_intensity_min
         self.__max_vib = config.dist_intensity_max
         self.hmi_clearance_param = config.clearance_param + "_" + device_name
@@ -48,9 +48,9 @@ class VibroNotificator():
 
     def __get_clearance(self):
         hmi_clearance = self.get_hmi_clearance()
-        obstacle_clearance = self.get_obstacle_clearance()
         # obstacle is closer than HMI
         # TODO decide if react on this event. Maybe the reaction dist should be lower?
+        obstacle_clearance = self.get_obstacle_clearance()
         if obstacle_clearance < hmi_clearance:   
             hmi_clearance = obstacle_clearance
         return hmi_clearance
@@ -69,10 +69,6 @@ class VibroNotificator():
         #print("Device %s : %s" % (self.device_name, speed_comps))
         return speed_comps
 
-    # TODO
-    #     if speed_comps[i] < config.vibr_min and speed_comps[i] > config.vibr_min / 2:
-    #     val = config.vibr_min
-
     def __simulateneous_vibration(self, s):
         return [s,s,s,s,s,s]
 
@@ -84,6 +80,11 @@ class VibroNotificator():
                 speed_comps[i] = speed_vector[i]
             else: 
                 speed_comps[i + 3] = abs(speed_vector[i])
+
+        for i in range(len(speed_comps) / 2):   
+            if speed_comps[i] < config.vibr_min and speed_comps[i] >= config.vibr_min / 2:
+                speed_comps[i] = config.vibr_min
+
         return speed_comps
 
     def init_params(self):

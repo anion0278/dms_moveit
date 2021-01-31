@@ -993,3 +993,7 @@ ur3_moveit/src/hmi_tracker_transform_manager.pyc
 ur3_moveit/src/hmi_controller_disconnector.pyc
 ur3_moveit/config/d435_camera_settings1.json
 ur3_moveit/config/d435_camera_settings_home.json
+ur3_moveit/src/out
+ur3_moveit/src/out-concurency solved?
+ur3_moveit/src/out-default concurency
+ur3_moveit/src/hmi_controller_notifier.pyc
