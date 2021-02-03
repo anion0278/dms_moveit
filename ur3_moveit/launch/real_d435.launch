@@ -1,0 +1,35 @@
+<launch>
+
+    <arg name="clip_distance" default="5.0"/>
+    <arg name="serial_no" default=""/>
+    <arg name="camera_name" default="camera"/>
+
+   <arg name="width" default="424"/>
+    <arg name="height" default="240"/>
+    <arg name="fps" default="15"/>
+
+  <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+        <arg name="json_file_path" value="$(find ur3_moveit)/config/d435_camera_settings.json" />
+
+        <!-- this is currect recomended API for PointCloud -->
+        <arg name="filters" value="pointcloud" /> 
+        <!-- <arg name="enable_pointcloud" value="true" /> THIS IS A DEPRECATED API !!!--> 
+
+        <arg name="camera" value="$(arg camera_name)" />
+        <arg name="depth_width" value="$(arg width)" /> 
+        <arg name="depth_height" value="$(arg height)" />
+        <arg name="depth_fps" value="$(arg fps)" />
+        <!-- min is 256 x 144 with 90 FPS (!) but for a very small region ! -->
+        <arg name="color_width" value="$(arg width)" /> 
+        <arg name="color_height" value="$(arg height)" />
+        <arg name="color_fps" value="$(arg fps)" />
+
+        <arg name="device_type" value="d435" />
+        <arg name="serial_no" value="$(arg serial_no)" />
+        <arg name="clip_distance" value="$(arg clip_distance)" />
+        
+        <arg name="enable_gyro" value="false" />
+        <arg name="enable_accel" value="false" />
+        <arg name="enable_sync" value="true" />
+    </include>
+</launch>

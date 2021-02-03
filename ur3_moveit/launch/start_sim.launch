@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="enable_both_hmi" default="false"/>
+  <arg name="enable_both_hmi" default="true"/>
 
   
   <!-- Octomap and sensors settings -->
   <param name="/move_group/octomap_resolution" type="double" value="0.035" />
+  <param name="/move_group/max_segment_length" type="double" value="0.5" />
+  <param name="/move_group/min_waypoint_count" type="int" value="12" />
   <param name="/move_group/collision/show_distances" type="bool" value="false" />
+  <param name="/move_group/collision/show_vector_points" type="bool" value="false" />
   <rosparam ns="/move_group" command="load" file="$(find ur3_moveit)/config/sensors_3d.yaml" />
   <param name="/move_group/manipulator/longest_valid_segment_fraction" type="double" value="0.007" />
   <param name="/move_group/ompl/simplify_solutions" value="true" />
@@ -42,9 +45,9 @@
   
   <group if="$(arg enable_both_hmi)">
     <node name="hmi_starter" pkg="ur3_moveit" type="hmi_controller_starter.py" respawn="false" output="screen"/>
-    <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen"  args="moveit" />
   </group>
-  <!-- <node name="task_commander" pkg="ur3_moveit" type="task_commander.py" respawn="false" output="screen" args="$(arg enable_both_hmi)" /> -->
+    <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen"  args="moveit" />
+  <node name="task_commander" pkg="ur3_moveit" type="task_commander.py" respawn="false" output="screen" args="$(arg enable_both_hmi) sim" />
 
   <include file="$(find ur3_moveit)/launch/move_group.launch">
     <arg name="controllers_definition" value="controllers.yaml" />
@@ -55,7 +58,7 @@
     <include file="$(find ur3_moveit)/launch/sdf_spawn.launch">
       <arg name="model_name" value="left_hand" />
       <arg name="x" value="0.073" />
-      <arg name="y" value="0.9" />
+      <arg name="y" value="0.6" />
       <arg name="z" value="1.15" />
       <arg name="yaw" value="0.3" />
       <arg name="sdf_model_file" value="$(find ur3_moveit)/obstacles/hand_left/model.sdf" />
