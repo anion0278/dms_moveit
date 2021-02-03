@@ -1,33 +1,32 @@
 #!/usr/bin/env python
 
 import sys
-import copy
 import rospy
 import moveit_commander
-from math import pi
 import time
-import os
-from std_msgs.msg import String
 from std_srvs.srv import Empty
-import moveit_msgs.msg
-import geometry_msgs.msg
-from geometry_msgs.msg import Point, Quaternion, PoseStamped
-from sensor_msgs.msg import JointState
+from geometry_msgs.msg import Point, Quaternion
 from geometry_msgs.msg import Pose
+import numpy as np
+
 import rosnode
+import geometry_msgs.msg
+import moveit_msgs.msg
+from sensor_msgs.msg import JointState
 from controller_manager_msgs.srv import SwitchController, SwitchControllerRequest, SwitchControllerResponse
 
-import util_timeout as timeout
-import util_ros_process as ros_process
 
 home_position = "Home"
 group_name = "manipulator"
 clear_octomap_service = "/clear_octomap"
 state_validity_service = "/check_state_validity"
 
+def get_joint_pose_from_deg(name, joint_angles_deg):
+    return NamedJointPose(np.radians(np.array(joint_angles_deg)), name)
+
 class NamedJointPose():
-    def __init__(self, joint_angles, name):
-        self.pose = joint_angles
+    def __init__(self, joint_angles_rad, name):
+        self.pose = joint_angles_rad
         self.name = name
 
 class NamedPointPose():
@@ -85,9 +84,7 @@ class RobotDriver: # TODO rename more appropriatelly?
         # this is needed in melodic(for some reason), otherwise the robot moves superslowly
         self.move_group.set_max_velocity_scaling_factor(total_speed)
         self.move_group.set_max_acceleration_scaling_factor(total_acc)
-
         self.__clear_octomap_service = rospy.ServiceProxy(clear_octomap_service, Empty)
-        self.clear_octomap()
 
     def add_hmi_obj(self, pose, name, radius): #TODO into visualizer ? 
         self.scene.add_sphere(name, pose, radius)  
@@ -126,6 +123,22 @@ class RobotDriver: # TODO rename more appropriatelly?
 
     def perform_planning(self):
         plan = self.move_group.plan()
+
+        max_acc = 0
+        try:
+            for point, i in zip(plan[1].joint_trajectory.points, range(len(plan[1].joint_trajectory.points))):
+                point_acc_max = max(np.absolute(np.array(point.accelerations)))
+                if len(point.accelerations) == 0:
+                    point.accelerations = plan[1].joint_trajectory.points[i+1].accelerations
+                if len(point.velocities) == 0:
+                    point.velocities = plan[1].joint_trajectory.points[i+1].velocities
+                # print("solved!!!")
+                if point_acc_max > max_acc:
+                    max_acc = point_acc_max
+        except:
+            pass
+        print("Motion - MAX ACC: %s" % max_acc)       
+
         success = plan[0] # moveit python API has changed
         if (not success):
             print("Could not plan the movement!")  # Plan: " + str(plan)

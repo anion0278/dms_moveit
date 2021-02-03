@@ -2,6 +2,7 @@ import sys
 from datetime import datetime
 import rospy
 import numpy as np
+from bondpy import bondpy
 
 def print_all_args():
      for arg, i in zip(sys.argv, range(len(sys.argv))):

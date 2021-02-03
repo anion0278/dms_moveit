@@ -40,14 +40,15 @@ def start_roscore():
 def is_roscore_running():
     return rosgraph.is_master_online()
 
-
+def kill_ros_graph():
+    print("Destroying rosgraph!")
+    run_process_sync("rosnode kill -a")
+    
 def close_roscore():
     kill_process_by_name("roscore")
     kill_process_by_name("rosmaster")
     kill_process_by_name("roslaunch")
     kill_process_by_name("rosout")
-    kill_process_by_name("move_group")
-    kill_process_by_name("robot_state_pub")
     print("roscore killed !")
 
 

@@ -24,13 +24,16 @@ goal_name_param = "/goal_name"
 goal_validity_param = "/goal_validity"
 notification_val_param =  "/debug_"
 
+heartbeat_topic = "_heartbeat"
 
 collision_vec_topic = "/move_group/collision_vectors"
 
-invalid_goal_intensity = 180 # replan stronger than invalid goal, because is more frequents
-replan_intensity = 200
-dist_intensity_max = 160
-dist_intensity_min = 120
+# these two are different, because they active all motors 
+invalid_goal_intensity = 190 # replan stronger than invalid goal, because is more frequent
+replan_intensity = 220
+
+dist_intensity_max = 190
+dist_intensity_min = 140
 vibr_min = 60
 vibr_max = 255
 
