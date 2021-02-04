@@ -30,7 +30,7 @@ class VibroNotifier():
 
     def get_notification(self):
         task_status = self.get_task_status()
-        # print("Task status: %s" % task_status)
+        #print("Task status: %s" % task_status)
         if task_status == TaskStatus.INTERRUPTED:
             return ProlongedNotification(config.replan_intensity, 0.3, False)    
             
@@ -39,21 +39,20 @@ class VibroNotifier():
 
         if task_status == TaskStatus.OK:
             clearance = self.__get_clearance()
-            # print("Clearance [m]: %s" % clearance)
+            print("Clearance [m]: %s" % clearance)
             pv = self.__get_proportional_vibration(clearance)
-            # print("Vibration: %s" % pv)
+            print("Vibration: %s" % pv)
             return PromptNotification(pv)
 
         raise AttributeError("Unrecognized task status")
 
     def __get_clearance(self):
-        hmi_clearance = self.get_hmi_clearance()
-        # obstacle is closer than HMI
-        # TODO decide if react on this event. Maybe the reaction dist should be lower?
-        obstacle_clearance = self.get_obstacle_clearance()
-        if obstacle_clearance < hmi_clearance:   
-            hmi_clearance = obstacle_clearance
-        return hmi_clearance
+        return self.get_hmi_clearance()
+        # If obstacle is closer than HMI
+        # TODO decide whether we should react on this event. Maybe the reaction dist should be lower?
+        # obstacle_clearance = self.get_obstacle_clearance()
+        # if obstacle_clearance < hmi_clearance:   
+        #     hmi_clearance = obstacle_clearance
 
     def __get_proportional_vibration(self, clearance):
         if clearance < self.reaction_dist_m:

@@ -3,7 +3,7 @@
 import rospy
 import numpy as np
 import sys
-import ros_numpy
+from icecream import ic
 
 import config
 import hmi_controller_notifier as nt
@@ -74,18 +74,19 @@ class HmiController():
 
     def send_speed_command(self, notification):
         util.set_param(config.notification_val_param+self.node_name, notification.intensity) # timeline data
+        # ic(self.device_name, self.calibrator.is_hmi_recognized())
         if self.processor.current_orientation is not None and self.calibrator.is_hmi_recognized() :
             ros_vec = self.processor.get_speed_vector()
             self.visualizer.publish_data_if_required(ros_vec, self.processor.current_imu_status)
             motor_speeds = self.notifier.get_motor_speeds(notification, ros_vec)
-            # print("%s Motor speeds: %s" % (self.device_name, motor_speeds))
+            # ic("Motor speeds (%s): %s" % (self.device_name, motor_speeds))
             if not util.has_nan_values(motor_speeds): # TODO refactoring
                 self.send_speed_msg(motor_speeds)
             else: 
-                # print("Nan values!!")
+                # ic("Nan values!!")
                 self.send_speed_msg([0,0,0, 0,0,0]) 
         else:
-            # print("Could not find TF for %s, HMI is not recognized" % self.device_name)
+            # ic("Could not find TF for %s, HMI is not recognized" % self.device_name)
             self.send_speed_msg([0,0,0, 0,0,0]) # we need to sustain communication even if HMI is not recognized
 
     def __notify_ready(self):

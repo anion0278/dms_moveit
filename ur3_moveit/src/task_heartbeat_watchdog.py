@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import rospy
+import sys
 from std_msgs.msg import Empty
 
 import config
@@ -32,6 +33,7 @@ class HeartbeatMonitor():
                 time_since_prev_beat = current_time - topic_prev_msg_time
                 if time_since_prev_beat > self.timeout:
                     self.on_timeout(topic_name)
+                    sys.exit()
 
     def __on_beat(self, data, topic_name):
         current_time = rospy.Time.now()

@@ -7,7 +7,9 @@ import robot_driver as r
 import config
 from config import TaskStatus
 import util_common as utils
-from ur_msgs.srv import * #SetSpeedSliderFractionRequest
+from ur_msgs.srv import *
+import hmi_controller_starter as starter
+
 
 class MovementFailed(Exception):
     def __init__(self, *args):
@@ -121,10 +123,8 @@ class Commander():
             print("Unsucessfull retreat !")
 
     def __wait_for_hmi(self):
-        print("Task Commander: Waiting for Left HMI")
-        rospy.wait_for_service(config.hmi_left + config.calibr_service)
-        print("Task Commander: Waiting for Right HMI")
-        rospy.wait_for_service(config.hmi_right + config.calibr_service)
+        starter.wait_for_hmi(config.hmi_left)
+        starter.wait_for_hmi(config.hmi_right)
 
     def __set_debug_goal_name(self, pose):
         if isinstance(pose, str):

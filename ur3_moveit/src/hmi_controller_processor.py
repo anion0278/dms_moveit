@@ -23,7 +23,7 @@ class DataProcessor():
         self.visualizer = visualizer
         self.controller = controller
         
-        self.__collision_vec_sub = rospy.Subscriber(config.collision_vec_topic, MarkerArray, self.process_collsion_vector)
+        self.__collision_vec_sub = rospy.Subscriber(config.collision_vec_topic, MarkerArray, self.process_collsion_vector, queue_size=5)
         self.currect_collision_vec = [0,0,0]
         self.current_orientation = None
         self.current_imu_status = None
@@ -53,9 +53,9 @@ class DataProcessor():
             points = (m.points for m in marker_array_msg.markers if data_namespace == m.ns).next()
             v = ros_numpy.numpify(points[0]) - ros_numpy.numpify(points[1])
             vec_len = np.linalg.norm(v)
-            if vec_len != 0:
+            if vec_len != 0: 
                 self.currect_collision_vec = v / vec_len # vector should be normalized !
-                #print("New vector: %s" % self.currect_collision_vec)
+                # print("New vector (%s): %s" % (self.controller.device_name, self.currect_collision_vec))
                 # print("New vector length [m]: %s" % vec_len)
 
     def __get_compressed_quarternion(self, data): 
