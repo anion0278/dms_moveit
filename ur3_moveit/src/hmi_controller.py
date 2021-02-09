@@ -4,8 +4,11 @@ import rospy
 import numpy as np
 import sys
 from icecream import ic
+import setproctitle
 
 import config
+setproctitle.setproctitle(config.hmi_controller_process)
+
 import hmi_controller_notifier as nt
 import hmi_controller_processor as pr
 import hmi_controller_calibration_manager as cb
@@ -22,6 +25,7 @@ class HmiController():
     def __init__(self, device_name, directed_vibration, use_world_frame = False):
         self.node_name = device_name
         self.device_name = device_name
+        setproctitle.setproctitle(config.hmi_controller_process + ": %s" % device_name)
 
         rospy.init_node(self.node_name) # should be initialized before Calibration Manager (TFBuffer)
         self.__ble = ble.BleManager(self.device_name, debug, self.__main_loop, self.__process_hmi_data)
@@ -46,12 +50,13 @@ class HmiController():
     def __main_loop(self):
         self.notifier.init_params()
         self.__notify_ready()
-        while True:
+        while not rospy.is_shutdown():
             self.set_hmi_notification()
+        print("Node %s: ROS shutdown" % self.device_name)
+        sys.exit()
 
     def set_hmi_notification(self):
         notification = self.notifier.get_notification()
-        
         if isinstance(notification, nt.ProlongedNotification):
             start_time = rospy.get_time()
             while notification.time > (rospy.get_time() - start_time):
@@ -80,7 +85,7 @@ class HmiController():
             self.visualizer.publish_data_if_required(ros_vec, self.processor.current_imu_status)
             motor_speeds = self.notifier.get_motor_speeds(notification, ros_vec)
             # ic("Motor speeds (%s): %s" % (self.device_name, motor_speeds))
-            if not util.has_nan_values(motor_speeds): # TODO refactoring
+            if not util.has_nan_values(motor_speeds): # FIXME refactoring
                 self.send_speed_msg(motor_speeds)
             else: 
                 # ic("Nan values!!")

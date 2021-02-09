@@ -5,8 +5,9 @@ from sensor_msgs.msg import PointCloud2, Image
 import ros_numpy  #sudo apt-get install ros-melodic-ros-numpy
 import message_filters
 from scipy.spatial import distance
+import setproctitle
+setproctitle.setproctitle("DMS HMI Tracker")
 
-import task_commander as com
 import robot_driver
 import config
 import util_common as util
@@ -16,7 +17,7 @@ import hmi_tracker_transform_manager as tp
 
 debug = False
 
-class EmptyMoveitInterface():
+class EmptyMoveitInterface(): # for HMI demo purposes
     def __init__(self):
         rospy.init_node('robot_python_driver', anonymous=True)
     
@@ -118,7 +119,7 @@ class HmiTracker:
 
 if __name__ == "__main__":
     
-    sys.argv.append("moveit")
+    # sys.argv.append("moveit")
     if "moveit" in sys.argv: 
         print("Tracker: MOVEIT MODE")
         moveit_interface = robot_driver.RobotDriver(total_speed=0.2)

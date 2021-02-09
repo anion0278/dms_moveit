@@ -2,12 +2,14 @@
 
 import rospy
 import sys
+from ur_msgs.srv import *
+import setproctitle
+setproctitle.setproctitle("DMS Task Commander")
 
 import robot_driver as r
 import config
 from config import TaskStatus
 import util_common as utils
-from ur_msgs.srv import *
 import hmi_controller_starter as starter
 
 
@@ -152,14 +154,13 @@ class Commander():
 
 
 if __name__ == "__main__":
-    import time
-    time.sleep(3) # othewise Moveit does not always start
-
     args = rospy.myargv(argv=sys.argv)
     wait_for_hmi = args[1] == "true" if len(args) > 1 else False
     if len(args) > 2 and args[2] == "sim":
         print("Simulation mode")
         robot_speed = 0.9  # less
+        # rospy.wait_for_service("/gazebo/set_physics_properties")
+        # rospy.sleep(2)
     else: 
         print("Real robot mode")
         # set_real_robot_speed_slider(0.5)

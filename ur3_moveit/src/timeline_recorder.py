@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-import roslaunch
 import rospy
 import os
 import csv
 import numpy as np
+import setproctitle
+setproctitle.setproctitle("Timeline Recorder")
 
 import config
 import util_ros_process as ros_process

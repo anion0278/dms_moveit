@@ -26,11 +26,17 @@ def run_process_sync(command):
     os.system(command)
 
 
-def kill_process_by_name(process_name):
+def kill_processes_by_name(process_name):
     for proc in psutil.process_iter():
         if proc.name() == process_name:
             proc.kill()
+            print("Killed process: %s" % proc.name())
 
+def kill_processes_by_contained_name(process_name_part):
+    for proc in psutil.process_iter():
+        if process_name_part in proc.name():
+            proc.kill()
+            print("Killed process: %s" % proc.name())
 
 def start_roscore():
     process = run_process_async("roscore")

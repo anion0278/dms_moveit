@@ -12,6 +12,10 @@ class TaskStatus(Enum):
 hmi_right = "hmi_right"
 hmi_left = "hmi_left"
 
+hmi_controller_process = "DMS HMI Controller"
+hmi_disconnector_process = "DMS HMI Disconnector"
+hmi_watchdog_process = "DMS HMI Watchdog"
+
 # Param Server Names
 task_status_param = "task_status"
 clearance_param = "/move_group/collision/min_clearance"

@@ -8,6 +8,7 @@ import atexit
 import os
 import time
 import threading
+import util_timeout
 
 import util_common as util
 
@@ -36,7 +37,8 @@ class BleManager():
         if newline:
             text += "\r\n" 
         self.__semaphore.acquire()
-        self.__uart.write(text)
+        # solved by killing HMI Controllers' processes in watchdog
+        self.__uart.write(text) # has at least 30s timeout, blocks the thread, causes problems when HMI is improperly disconnected
         self.__semaphore.release()
         if self.debug:
             print("Device: %s Time: %s Sent: %s" % (self.device_name, util.get_time_str(), text))
@@ -66,7 +68,6 @@ class BleManager():
                 success = True
             except Exception as ex:
                 print("Failed to connect to %s, reason: %s" % (self.device_name, ex))
-                UART.disconnect_devices()
             finally:
                 adapter.stop_scan()
 

@@ -30,8 +30,8 @@ def __raise_timeout(signum, frame):
     raise RuntimeError
 
 
-def action_with_timeout(action, time, timeout_handler=None):
+def action_with_timeout(action, time_s, timeout_handler=None):
     # Add a timeout block.
-    with __timeout(time, timeout_handler):
-        print('Starting action with timeout...')
+    with __timeout(time_s, timeout_handler):
+        #print('Starting action with timeout...')
         action()

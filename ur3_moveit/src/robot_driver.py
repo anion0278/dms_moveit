@@ -68,10 +68,8 @@ joint_pose_B = NamedJointPose([2.582419230110138,
 class RobotDriver: # TODO rename more appropriatelly?
     def __init__(self, total_speed = 1.0, total_acc = 1.0):
         rospy.wait_for_service(clear_octomap_service)
-        time.sleep(1)
-
         moveit_commander.roscpp_initialize(sys.argv)
-        rospy.init_node('robot_python_driver', anonymous=True)
+        rospy.init_node('python_moveit_commander', anonymous=True)
 
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface()

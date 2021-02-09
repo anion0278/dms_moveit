@@ -4,17 +4,14 @@ from visualization_msgs.msg import *
 from geometry_msgs.msg import *
 from std_msgs.msg import ColorRGBA
 import tf2_ros
-tf_pub = tf2_ros.StaticTransformBroadcaster()
 from geometry_msgs.msg import TransformStamped, Transform
+import setproctitle
+setproctitle.setproctitle("DMS HMI Tester")
 
 import config
 from config import TaskStatus
 import util_common as utils
-import util_ros_process as rp
 import util_ros_msgs
-
-import setproctitle
-setproctitle.setproctitle('HMI Tester')
 
 utils.set_param(config.task_status_param, TaskStatus.OK.value)
 
@@ -39,7 +36,7 @@ def set_hmi_tf(hmi_name):
     t.child_frame_id = hmi_name
     tf_pub.sendTransform(t)
 
-
+tf_pub = tf2_ros.StaticTransformBroadcaster()
 hmi_collision_vector_pub = rospy.Publisher(config.collision_vec_topic, MarkerArray, queue_size=2)
 
 rate = rospy.Rate(10)

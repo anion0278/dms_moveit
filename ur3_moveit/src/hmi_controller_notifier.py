@@ -39,9 +39,9 @@ class VibroNotifier():
 
         if task_status == TaskStatus.OK:
             clearance = self.__get_clearance()
-            print("Clearance [m]: %s" % clearance)
+            # print("Clearance [m]: %s" % clearance)
             pv = self.__get_proportional_vibration(clearance)
-            print("Vibration: %s" % pv)
+            # print("Vibration: %s" % pv)
             return PromptNotification(pv)
 
         raise AttributeError("Unrecognized task status")
