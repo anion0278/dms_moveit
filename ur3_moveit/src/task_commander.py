@@ -3,15 +3,18 @@
 import rospy
 import sys
 from ur_msgs.srv import *
+from icecream import ic
+import curses, time
 import setproctitle
 setproctitle.setproctitle("DMS Task Commander")
 
 import robot_driver as r
+import util_keyboard as keyboard
 import config
 from config import TaskStatus
 import util_common as utils
 import hmi_controller_starter as starter
-
+from moveit_msgs.msg import MoveGroupActionFeedback
 
 class MovementFailed(Exception):
     def __init__(self, *args):
@@ -43,8 +46,12 @@ class Commander():
         self.robot_driver.clear_octomap()
         self.num_attempts = num_attempts
         self.plan_attempts_before_octo_clearing = 8
-        
+        self.current_movement_status = None
+        self.async_movement_execution_monitor = rospy.Subscriber("/move_group/feedback", MoveGroupActionFeedback, callback=self.on_movement_executed)
         self.__init_status()
+
+    def on_movement_executed(self, feedback_msg): # TODO should be in RobotDriver
+        self.current_movement_status = feedback_msg
 
     def __init_status(self):
         self.__set_status(TaskStatus.OK)
@@ -53,22 +60,7 @@ class Commander():
         self.__set_debug_goal_name("None")
 
 
-    def demo_task_sequence(self, task_poses, repetitions = 1000):
-        while True:
-            try:
-                commander.move_to(r.home_position)
-                for i in range(0, repetitions):
-                    for pose in task_poses:
-                        if not commander.move_to(pose):
-                            print("The movement could not been executed!")
-                            raise MovementFailed
-                commander.move_to(r.home_position)
-
-            except Exception as ex:
-                print("TASK COMMANDER STOPPED: %s" % ex.message)
-                pass
-
-    def move_to(self, pose, retreat_on_fail=True):
+    def move_to(self, pose, retreat_on_fail=True, enable_preempting = False):
         retreat_pose = self.__get_retreat_pose()
         self.__set_debug_goal_name(pose)
         plan_attempts = 0
@@ -91,17 +83,41 @@ class Commander():
                 continue
             plan_attempts = 0 # counting only sequential unsuccesfull attempts
 
-            self.__set_debug_goal_validity(True) # TODO refactoring
+            self.__set_debug_goal_validity(True) # TODO refactoring, DRY
             self.__set_status(TaskStatus.OK)
             move_attempts += 1
-            if not self.robot_driver.execute_planned_sync():
-                self.__set_status_interrupted()
+
+            if not enable_preempting:
+                if not self.robot_driver.execute_planned_sync():
+                    self.__set_status_interrupted()
+                else:
+                    success = True
             else:
-                success = True
+                success = self.execute_planned_async()
 
         if not success and retreat_on_fail:
             self.retreat_to_previous_pose(retreat_pose)
 
+        return success
+
+    def execute_planned_async(self):
+        ''' Enables preemption '''
+        success = False
+        self.current_movement_status = None
+        move_status = None
+        self.robot_driver.execute_planned_async()
+        print("< Press ESC to stop movement execution >") 
+        while move_status is None: # TODO Into util_keyboard
+            pressed_key_code = curses.wrapper(keyboard.key_hook)
+            if pressed_key_code == 27:
+                success = True
+                print("ESC - Motion stopped - Keyboard interrupt!")
+                self.robot_driver.stop_async_movement()
+                break
+            time.sleep(0.05)
+            move_status = self.robot_driver.get_motion_status(self.current_movement_status)
+        if not success:
+            success = move_status
         return success
 
     def __get_retreat_pose(self):
@@ -122,7 +138,7 @@ class Commander():
         if self.robot_driver.execute_planned_sync():
             print("Sucessfull retreat")
         else:
-            print("Unsucessfull retreat !")
+            print("Unsucessfull retreat!")
 
     def __wait_for_hmi(self):
         starter.wait_for_hmi(config.hmi_left)
@@ -152,36 +168,55 @@ class Commander():
         self.__set_status(TaskStatus.INTERRUPTED)
         self.__set_debug_plan_interrupted(False)
 
+    def demo_task_sequence(self, task_poses, repetitions = 1000, move_to_home = True, enable_preemtping = False):
+        try:
+            if move_to_home:
+                self.move_to(r.home_position, enable_preemtping)
+            for i in range(0, repetitions):
+                for pose in task_poses:
+                    if rospy.is_shutdown(): sys.exit() # it will take time to exit
+                    if not self.move_to(pose, enable_preemtping):
+                        print("The movement could not been executed!")
+                        raise MovementFailed
+            if move_to_home:
+                self.move_to(r.home_position, enable_preemtping)
+        except Exception as ex:
+            print("TASK COMMANDER STOPPED: %s" % ex.message)
 
-if __name__ == "__main__":
+
+def get_task_commander():
     args = rospy.myargv(argv=sys.argv)
     wait_for_hmi = args[1] == "true" if len(args) > 1 else False
+
     if len(args) > 2 and args[2] == "sim":
-        print("Simulation mode")
-        robot_speed = 0.9  # less
-        # rospy.wait_for_service("/gazebo/set_physics_properties")
-        # rospy.sleep(2)
+        print("Task Commander: Simulation mode")
     else: 
-        print("Real robot mode")
+        print("Task Commander: Real robot mode")
         # set_real_robot_speed_slider(0.5)
-        robot_speed = 0.9
+
+    robot_speed = 0.9
     driver = r.RobotDriver(total_speed=robot_speed, total_acc=robot_speed)
-    commander = Commander(driver, wait_for_hmi, num_attempts=0) # 0 attempts -> infinite
-    # commander.demo_task_sequence([r.joint_pose_A, r.joint_pose_B, r.joint_pose_A])
-    task_poses_l = [
-        r.get_joint_pose_from_deg("Left-1",[-28,-79,97,-109,-89,0]),
-        r.get_joint_pose_from_deg("Left-2",[10,-58,36,25,11,0]),
-        r.get_joint_pose_from_deg("Left-3",[21,-19,23,-5,23,0]),
-        r.get_joint_pose_from_deg("Left-1",[-28,-79,97,-109,-89,0]),
+    return Commander(driver, wait_for_hmi, num_attempts=0) # 0 attempts -> infinite
 
-        r.get_joint_pose_from_deg("Right-1",[165,-79,97,-109,-89,0]),
-        # r.get_joint_pose_from_deg("Right-2",[123,-53,24,28,126,0]),
-        r.get_joint_pose_from_deg("Right-3",[130,-35,24,-81,-89,0]),
-        r.get_joint_pose_from_deg("Right-1",[165,-79,97,-109,-89,0]),
-    ]
-    task_poses_s = [
-        r.get_joint_pose_from_deg("Left-1",[-28,-79,97,-109,-89,0]),
 
-        r.get_joint_pose_from_deg("Right-1",[165,-79,97,-109,-89,0]),
-    ]
-    commander.demo_task_sequence(task_poses_l)
+if __name__ == "__main__":
+    commander = get_task_commander()
+    commander.demo_task_sequence([r.joint_pose_A, r.joint_pose_B, r.joint_pose_A])
+
+    # task_poses_l = [
+    #     r.get_joint_pose_from_deg("Left-1",[-28,-79,97,-109,-89,0]),
+    #     r.get_joint_pose_from_deg("Left-2",[10,-58,36,25,11,0]),
+    #     r.get_joint_pose_from_deg("Left-3",[21,-19,23,-5,23,0]),
+    #     r.get_joint_pose_from_deg("Left-1",[-28,-79,97,-109,-89,0]),
+    #     r.get_joint_pose_from_deg("Right-1",[165,-79,97,-109,-89,0]),
+    #     # r.get_joint_pose_from_deg("Right-2",[123,-53,24,28,126,0]),
+    #     r.get_joint_pose_from_deg("Right-3",[130,-35,24,-81,-89,0]),
+    #     r.get_joint_pose_from_deg("Right-1",[165,-79,97,-109,-89,0]),
+    # ]
+
+
+    # task_poses_s = [
+    #     r.get_joint_pose_from_deg("Left-1",[-28,-79,97,-109,-89,0]),
+    #     r.get_joint_pose_from_deg("Right-1",[165,-79,97,-109,-89,0]),
+    # ]
+

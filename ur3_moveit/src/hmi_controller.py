@@ -125,9 +125,10 @@ class HmiController():
         return "X{0}Y{1}Z{2}-X{3}-Y{4}-Z{5}".format(*speed_comps_strs) 
 
 if __name__ == "__main__":
+    util.print_all_args()
 
     use_world = False
-    if not "node" in sys.argv:
+    if not "mode:=node" in sys.argv:
         print("STANDALONE MODE !")
         use_world = True
         hmi_controller_disconnector.restart_adapter()
@@ -135,9 +136,14 @@ if __name__ == "__main__":
         # sys.argv.append(config.hmi_left)
         debug = True
 
-    if debug: util.print_all_args()
-        
-    hmi = HmiController(sys.argv[1], directed_vibration = True, use_world_frame = use_world)
+    device_name = sys.argv[1].replace("device_name:=","")
+    
+    directed_vibration = False
+    if ("directed_vibration:=true" in sys.argv):
+        print("(%s) Directed vibration enabled" % device_name)
+        directed_vibration = True
+    
+    hmi = HmiController(device_name = device_name, directed_vibration = directed_vibration, use_world_frame = use_world)
     hmi.run()
 
     

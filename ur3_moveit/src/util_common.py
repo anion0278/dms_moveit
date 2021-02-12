@@ -2,9 +2,11 @@ import sys
 from datetime import datetime
 import rospy
 import numpy as np
-from bondpy import bondpy
+import setproctitle
+
 
 def print_all_args():
+     print("Proc %s - args:" % setproctitle.getproctitle())
      for arg, i in zip(sys.argv, range(len(sys.argv))):
             print("Arg [%s]: %s" % (i, arg))
 

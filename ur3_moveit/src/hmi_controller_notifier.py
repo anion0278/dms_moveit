@@ -23,9 +23,12 @@ class ProlongedNotification():
 class VibroNotifier():
     def __init__(self, device_name, directed_vibration):
         self.directed_vibration_mode = directed_vibration
-        self.reaction_dist_m = 0.20  # distance on which HMIs start to react (proportionally)
+        self.reaction_dist_m = config.reaction_dist_m 
         self.__min_vib = config.dist_intensity_min
         self.__max_vib = config.dist_intensity_max
+        if not directed_vibration: # reducing vibration for simulataneous vibration mode
+            self.__min_vib *= config.simultaneous_vibration_intensity_factor
+            self.__max_vib *= config.simultaneous_vibration_intensity_factor
         self.hmi_clearance_param = config.clearance_param + "_" + device_name
 
     def get_notification(self):

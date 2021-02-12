@@ -35,7 +35,7 @@ center_suf = "_center"
 class HmiTracker:
     def __init__(self, camera_name, moveit_interface):
         self.__driver = moveit_interface
-        self.epsilon_min_dist_change_m = 0.02
+        self.epsilon_min_dist_change_m = 0.01
         self.__hmi_cache = {config.hmi_left:0, config.hmi_right:0, config.hmi_left+center_suf:0, config.hmi_right+center_suf:0}
 
         dwn_smpl = 4
@@ -90,7 +90,7 @@ class HmiTracker:
         self.__driver.remove_hmi_obj(hmi_name)
         self.pc_proc.publish_emtpy_pc(pc_pub, header)
         zero_pose = self.tf_proc.get_hand_pose(header.frame_id, [0,0,0])  
-        self.tf_proc.publish_hmi_tf(zero_pose, "non_existent_frame", hmi_name)
+        self.tf_proc.publish_hmi_tf(zero_pose, header.frame_id, hmi_name)
         self.__hmi_cache[hmi_name] = 0
         self.__hmi_cache[hmi_name+center_suf] = 0
 
@@ -118,8 +118,6 @@ class HmiTracker:
 
 
 if __name__ == "__main__":
-    
-    # sys.argv.append("moveit")
     if "moveit" in sys.argv: 
         print("Tracker: MOVEIT MODE")
         moveit_interface = robot_driver.RobotDriver(total_speed=0.2)
@@ -127,7 +125,7 @@ if __name__ == "__main__":
         print("Tracker: HMI DEMO MODE!")
         moveit_interface = EmptyMoveitInterface()
 
-    if debug: util.print_all_args()
+    util.print_all_args()
 
     t = HmiTracker("camera_top", moveit_interface)
     t.run()

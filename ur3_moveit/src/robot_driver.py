@@ -80,9 +80,12 @@ class RobotDriver: # TODO rename more appropriatelly?
         self.move_group.set_planner_id("RRTConnect")
 
         # this is needed in melodic(for some reason), otherwise the robot moves superslowly
-        self.move_group.set_max_velocity_scaling_factor(total_speed)
-        self.move_group.set_max_acceleration_scaling_factor(total_acc)
+        self.set_speed_params(total_speed, total_acc)
         self.__clear_octomap_service = rospy.ServiceProxy(clear_octomap_service, Empty)
+
+    def set_speed_params(self, speed, acceleration):
+        self.move_group.set_max_velocity_scaling_factor(speed)
+        self.move_group.set_max_acceleration_scaling_factor(acceleration)
 
     def add_hmi_obj(self, pose, name, radius): #TODO into visualizer ? 
         self.scene.add_sphere(name, pose, radius)  
@@ -101,12 +104,16 @@ class RobotDriver: # TODO rename more appropriatelly?
         print("Octomap clearing...")
         self.__clear_octomap_service()
 
-    # returns measured time - for planning and for execution
     def move_to_pose(self, target):
+        '''Returns measured time - for planning and for execution'''
         self.set_target_pose(target)
         if not self.perform_planning(): return False
         success = self.execute_planned_sync()
         return success
+
+    def stop_async_movement(self): 
+        # '''Async movements only!''' 
+        self.move_group.stop() 
 
     def get_pose(self):
         return self.move_group.get_current_joint_values()
@@ -118,6 +125,14 @@ class RobotDriver: # TODO rename more appropriatelly?
             self.move_group.set_joint_value_target(target.pose)
         if (isinstance(target, NamedPointPose)):
             self.move_group.set_pose_target(target.pose)
+
+    def get_motion_status(self, motion_feedback_msg):
+        if motion_feedback_msg is None: return None
+        # Feedback codes can be found at: http://docs.ros.org/en/fuerte/api/control_msgs/html/__FollowJointTrajectoryActionResult_8py_source.html
+        move_status = motion_feedback_msg.status.status
+        if move_status in [0, 1]: return None
+        if move_status in [2, 3, 6]: return True
+        if move_status in [4, 5, 7, 8, 9]: return False
 
     def perform_planning(self):
         plan = self.move_group.plan()
@@ -135,8 +150,7 @@ class RobotDriver: # TODO rename more appropriatelly?
                     max_acc = point_acc_max
         except:
             pass
-        print("Motion - MAX ACC: %s" % max_acc)       
-
+        # print("Motion - MAX ACC: %s" % max_acc)       
         success = plan[0] # moveit python API has changed
         if (not success):
             print("Could not plan the movement!")  # Plan: " + str(plan)
@@ -147,6 +161,10 @@ class RobotDriver: # TODO rename more appropriatelly?
         #print("New position: " + str(self.move_group.get_current_pose()))
         if (not success):
             print("Could not execute the movement!")
+        return success
+
+    def execute_planned_async(self):
+        success = self.move_group.go(wait=False)
         return success
 
     def move_home(self):

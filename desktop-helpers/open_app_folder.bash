@@ -1,0 +1,1 @@
+nautilus ~/.local/share/applications

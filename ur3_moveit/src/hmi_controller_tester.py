@@ -12,10 +12,11 @@ import config
 from config import TaskStatus
 import util_common as utils
 import util_ros_msgs
+import hmi_controller_starter
 
 utils.set_param(config.task_status_param, TaskStatus.OK.value)
 
-import hmi_controller_starter
+hmi_controller_starter.connect_both_hmi()
 
 def get_arrow(ns, id, end_point):
     m = Marker(type = Marker.ARROW, 

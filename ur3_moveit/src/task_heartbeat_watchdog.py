@@ -20,7 +20,7 @@ class HeartbeatSender():
 class HeartbeatMonitor():
     def __init__(self, monitored_topics_arr, callback = None):
         rospy.init_node('watchdog', anonymous=True)
-        self.timeout = rospy.Duration(0.25)
+        self.timeout = rospy.Duration(0.6)
         self.callback = callback
         self.check_rate = rospy.Rate(5)
         self.previous_beat_monitors = dict()

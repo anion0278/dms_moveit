@@ -5,7 +5,7 @@
 
   <include file="$(find ur_robot_driver)/launch/ur3e_bringup.launch">
     <arg name="robot_ip" value="$(arg robot_ip)" />
-    <arg name="limited" value="true" />
+    <!-- <arg name="limited" value="true" /> -->
     <arg name="headless_mode" value="true" />
     <arg name="kinematics_config" value="$(find ur3_moveit)/config/ucr_ur3e_calibration.yaml" />
     
@@ -27,8 +27,8 @@
   <arg name="xacro_path" default="$(find ur3_description)/urdf/$(arg xacro_file_name)"/>
   <param name="robot_description" command="xacro --inorder '$(arg xacro_path)'" />
 
-  <node name="task_commander" pkg="ur3_moveit" type="task_commander.py" respawn="false" output="screen" args="$(arg enable_both_hmi)" />
-  <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen" />
+  <!-- <node name="task_commander" pkg="ur3_moveit" type="task_commander.py" respawn="false" output="screen" args="$(arg enable_both_hmi)" /> -->
+  <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen" args="moveit" />
 
   <group if="$(arg enable_both_hmi)">
     <node name="hmi_starter" pkg="ur3_moveit" type="hmi_controller_starter.py" respawn="false" output="screen"/>

@@ -30,13 +30,16 @@ heartbeat_topic = "_heartbeat"
 collision_vec_topic = "/move_group/collision_vectors"
 
 # these two are different, because they active all motors 
-invalid_goal_intensity = 190 # replan stronger than invalid goal, because is more frequent
-replan_intensity = 220
+invalid_goal_intensity = 140 # replan stronger than invalid goal, because is more frequent
+replan_intensity = 180
+simultaneous_vibration_intensity_factor = 0.7
 
-dist_intensity_max = 190
-dist_intensity_min = 140
-vibr_min = 60
+dist_intensity_max = 240
+dist_intensity_min = 150
+vibr_min = 70
 vibr_max = 255
+
+reaction_dist_m = 0.20  # distance on which HMIs start to react (proportionally)
 
 tf_viz_decay_duration_s = rospy.Duration(0.2)
 
