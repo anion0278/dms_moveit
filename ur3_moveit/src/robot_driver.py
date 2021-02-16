@@ -136,24 +136,9 @@ class RobotDriver: # TODO rename more appropriatelly?
 
     def perform_planning(self):
         plan = self.move_group.plan()
-
-        max_acc = 0
-        try:
-            for point, i in zip(plan[1].joint_trajectory.points, range(len(plan[1].joint_trajectory.points))):
-                point_acc_max = max(np.absolute(np.array(point.accelerations)))
-                if len(point.accelerations) == 0:
-                    point.accelerations = plan[1].joint_trajectory.points[i+1].accelerations
-                if len(point.velocities) == 0:
-                    point.velocities = plan[1].joint_trajectory.points[i+1].velocities
-                # print("solved!!!")
-                if point_acc_max > max_acc:
-                    max_acc = point_acc_max
-        except:
-            pass
-        # print("Motion - MAX ACC: %s" % max_acc)       
-        success = plan[0] # moveit python API has changed
+        success = plan[0]
         if (not success):
-            print("Could not plan the movement!")  # Plan: " + str(plan)
+            print("Could not plan the movement!") 
         return success
 
     def execute_planned_sync(self):
