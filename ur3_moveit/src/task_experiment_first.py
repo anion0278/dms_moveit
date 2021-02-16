@@ -37,18 +37,11 @@ if __name__ == "__main__":
 
     init_pose = r.get_joint_pose_from_deg("Initial Pose",[90,-90,0,-90,-90,0])
     goals = [
-        # r.get_joint_pose_from_deg("Goal 1 - Top Left",[4, -49, 96, -137, -90, -89]),
-        r.get_joint_pose_from_deg("Goal 1 - Top Left",[10, -49, 96, -137, -90, -89]), # lower
-        # r.get_joint_pose_from_deg("Goal 2 - Bottom Left",[35, -14, 22, -98, -90, -58]), # first
+        r.get_joint_pose_from_deg("Goal 1 - Top Left",[10, -49, 96, -137, -90, -89]), 
         r.get_joint_pose_from_deg("Goal 2 - Bottom Left",[55, -35, 61, -118, -90, -58]), 
-        # r.get_joint_pose_from_deg("Goal 2 - Bottom Left",[29, -30, 17, -151, -90, -6]), # tyce
-        r.get_joint_pose_from_deg("Goal 3 - Center",[67, -50, 133, -173, -90, -23]),
-        # r.get_joint_pose_from_deg("Goal 4 - Top Right",[143, -39, 96, -147, -90, 53]),
-        r.get_joint_pose_from_deg("Goal 4 - Top Right",[136, -39, 96, -147, -90, 53]), # lower
-        # r.get_joint_pose_from_deg("Goal 5 - Bottom Right",[121, -1, 10, -98, -90, 31]),
-        r.get_joint_pose_from_deg("Goal 5 - Bottom Right",[100, -23, 57, -123, -90, 31]),
-        # r.get_joint_pose_from_deg("Goal 5 - Bottom Right",[122, -33, 8, -110, -62, -3]), #tyce
-    ]
+        r.get_joint_pose_from_deg("Goal 3 - Center",[67, -60, 133, -164, -90, -23]),
+        r.get_joint_pose_from_deg("Goal 4 - Top Right",[134, -44, 95, -144, -90, 53]),
+        r.get_joint_pose_from_deg("Goal 5 - Bottom Right",[100, -29, 57, -116, -91, 31])]
 
     phase_msg_format = "{}) ############################# {} #############################" # todo limit to 77 symbols
 
