@@ -2,6 +2,7 @@
 
 import rospy
 import numpy as np
+import ros_numpy
 import sys
 from icecream import ic
 import setproctitle
@@ -81,9 +82,9 @@ class HmiController():
         util.set_param(config.notification_val_param+self.node_name, notification.intensity) # timeline data
         # ic(self.device_name, self.calibrator.is_hmi_recognized())
         if self.processor.current_orientation is not None and self.calibrator.is_hmi_recognized() :
-            ros_vec = self.processor.get_speed_vector()
-            self.visualizer.publish_data_if_required(ros_vec, self.processor.current_imu_status)
-            motor_speeds = self.notifier.get_motor_speeds(notification, ros_vec)
+            norm_vec = self.processor.get_speed_vector() # normalized vector
+            self.visualizer.publish_data_if_required(norm_vec * notification.intensity, self.processor.current_imu_status)  # TODO visualization for SMAM
+            motor_speeds = self.notifier.get_motor_speeds(notification, norm_vec)
             # ic("Motor speeds (%s): %s" % (self.device_name, motor_speeds))
             if not util.has_nan_values(motor_speeds): # FIXME refactoring
                 self.send_speed_msg(motor_speeds)

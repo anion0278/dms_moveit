@@ -20,7 +20,7 @@ def start_and_wait_for_hmi(hmi_name, args):
     wait_for_hmi(hmi_name)
 
 def connect_both_hmi(args):
-    rospy.init_node("hmi_starter")
+    rospy.init_node("hmi_starter") 
     # there is no other way to start it correctly!
     os.system("rosrun ur3_moveit hmi_controller_disconnector.py")
     # by starting via rosrun the amout of unrelated info is rediced
@@ -30,4 +30,5 @@ def connect_both_hmi(args):
 
 if __name__ == "__main__":
     util.print_all_args()
-    connect_both_hmi(sys.argv[1])
+    # custom_args = filter(lambda arg: not arg.startswith("__"),sys.argv)
+    connect_both_hmi("directed_vibration:=true") 

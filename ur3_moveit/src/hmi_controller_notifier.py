@@ -62,8 +62,8 @@ class VibroNotifier():
             return  (self.__max_vib - self.__min_vib) * (self.reaction_dist_m - clearance) / self.reaction_dist_m + self.__min_vib
         return 0
 
-    def get_motor_speeds(self, notification, ros_vec): 
-        speed_vector = notification.intensity * ros_numpy.numpify(ros_vec)
+    def get_motor_speeds(self, notification, norm_vec): 
+        speed_vector = notification.intensity * norm_vec
         if self.directed_vibration_mode and notification.directed_vibration:
             speed_comps = self.__directed_vibration(speed_vector)
         else:

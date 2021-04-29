@@ -33,7 +33,7 @@ class DataProcessor():
         qa = quaternion_inverse(self.current_orientation)
         trs = TransformStamped(transform = Transform(rotation = Quaternion(*qa)))
         ros_vec = tf2_tr.do_transform_vector3(vs, trs).vector
-        return ros_vec
+        return ros_numpy.numpify(ros_vec) # normalized vector
 
     def process_hmi_data(self, data):
         match = re.search(regex_imu_pattern, data, re.IGNORECASE)
