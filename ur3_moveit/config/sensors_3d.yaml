@@ -1,26 +1,30 @@
-# DepthImageOctomapUpdater is much faster! (~ 12-50-200 ms vs 20-180-500 ms) min-avr-max
+# DepthImageOctomapUpdater is much faster! (~ 12-50-200 ms vs 20-180-500 ms: min-avr-max) 
 # especially when point_subsample is set to 1 !!! 
 
 sensors:
-  # - sensor_plugin: occupancy_map_monitor/DepthImageOctomapUpdater
-  #   image_topic: /camera_right/depth/image_rect_raw
-  #   queue_size: 1
-  #   near_clipping_plane_distance: 0.1
-  #   far_clipping_plane_distance: 1.3
-  #   shadow_threshold: 0.2
-  #   padding_scale: 1.0
-  #   padding_offset: 0.06
-  #   max_update_rate: 0
-  #   hmi_padding_reduction: 0.07
-
   - sensor_plugin: occupancy_map_monitor/DepthImageOctomapUpdater
     image_topic: /camera_left/depth/image_rect_raw
     queue_size: 1
     near_clipping_plane_distance: 0.1
     far_clipping_plane_distance: 1.3
     shadow_threshold: 0.2
-    padding_scale: 4.0
-    padding_offset: 0.04
+    padding_scale: 1.0
+    padding_offset: 0.03
+    max_update_rate: 0
+    hmi_padding_reduction: 0.00
+    prob_hit: 0.8
+    prob_miss: 0.3
+    show_info: 0
+    free_space_updater_batch: 1
+
+  - sensor_plugin: occupancy_map_monitor/DepthImageOctomapUpdater
+    image_topic: /camera_right/depth/image_rect_raw
+    queue_size: 1
+    near_clipping_plane_distance: 0.1
+    far_clipping_plane_distance: 1.4
+    shadow_threshold: 0.2
+    padding_scale: 1.0
+    padding_offset: 0.03
     max_update_rate: 0
     hmi_padding_reduction: 0.00
     prob_hit: 0.8
@@ -34,8 +38,8 @@ sensors:
     near_clipping_plane_distance: 0.1
     far_clipping_plane_distance: 1.2 # should be less then the camera clip distance !!
     shadow_threshold: 0.2
-    padding_scale: 4.0
-    padding_offset: 0.06 # should be in [cm] (tutorial), but actually its [m] 
+    padding_scale: 1.0
+    padding_offset: 0.03 # should be in [cm] (tutorial), but actually its [m] 
     skip_vertical_pixels: 0 # skipping the edge of the image which can contain artifacts (from code)
     skip_horizontal_pixels: 0 
     max_update_rate: 0 # 0 -> unlimited
@@ -44,6 +48,7 @@ sensors:
     prob_miss: 0.25 # only last values are effective!
     show_info: 0
     free_space_updater_batch: 1
+    
 
 
   

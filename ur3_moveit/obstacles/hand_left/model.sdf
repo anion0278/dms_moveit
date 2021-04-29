@@ -18,7 +18,6 @@
       </inertial>
       <collision name="collision">
         <geometry>
-            <!-- <mesh filename="package://ur3_moveit/obstacles/hand_right/hand_right_low.stl"> -->
             <mesh>
               <uri>/home/stefan/catkin_ws/src/dms_moveit/ur3_moveit/obstacles/hand_left/hand_left_low.stl</uri>
               <scale>0.001 0.001 0.001</scale>
@@ -42,10 +41,10 @@
           </mesh>
         </geometry>
         <material>
-          <ambient>56 170 136</ambient>
-          <diffuse>56 170 136</diffuse>
-          <specular>56 170 136</specular>
-          <emissive>56 170 136</emissive>
+          <ambient>56 170 100</ambient>
+          <diffuse>56 170 100</diffuse>
+          <specular>56 170 100</specular>
+          <emissive>56 170 160</emissive>
         </material>
       </visual>
       <visual name="visual_forearm">

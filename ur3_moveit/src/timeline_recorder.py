@@ -11,12 +11,12 @@ import config
 import util_ros_process as ros_process
 import util_common as utils
 
-rospy.init_node('timeline_recorder', anonymous=True)
+rospy.init_node("timeline_recorder")
 
 utils.set_param(config.replan_impulse_param, False)
 end = False
 
-max_dist = 0.2 # max distance to be displayed in graph
+max_dist = config.reaction_dist_m # max distance to be displayed in graph
  
 current_script_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -27,19 +27,18 @@ def get_bool(param):
 
 def get_rel_intensivity(param):
     val = rospy.get_param(param)
-    return round(float(val) / config.invalid_goal_intensity * 100.0)
+    return round(float(val) / config.vibr_max * 100.0)
 
 def get_rel_distance(param):
     dist = np.clip(rospy.get_param(param), 0, max_dist)
-    return round(dist / max_dist * 100, 2)
+    return round(float(dist) / max_dist * 100, 2)
 
-with open(os.path.join(current_script_path,'timeline.csv'), mode='w') as tl_file:
+with open(os.path.join(current_script_path,'timeline_16.csv'), mode='w') as tl_file:
     writer = csv.writer(tl_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     writer.writerow(['time', 'dist_right', 'dist_left', 'dist_obj', 'hmi_val_right', 'hmi_val_left', 'validity', 'replan', "goal_name"])
     try:
         time = 0
         while not end:
-            # TODO param names from config
             dist_right = get_rel_distance(config.clearance_param + "_" + config.hmi_right) 
             dist_left = get_rel_distance(config.clearance_param + "_" +  config.hmi_left)
             dist_obj = get_rel_distance(config.clearance_param)
@@ -59,7 +58,13 @@ with open(os.path.join(current_script_path,'timeline.csv'), mode='w') as tl_file
             print("Recorded step: %s" % rospy.get_time())
 
             #time = rospy.get_time()
-            time = round(time + time_step, 2) # should not be like that, but...
+            time = round(time + time_step, 2) 
+
+            if time > 30:
+                writer.writerow([time, 0, 0, 0, 0, 0, 0, 0])
+                tl_file.close()
+                print("Finished recording!")
+                break
 
     except KeyboardInterrupt:
         writer.writerow([time, 0, 0, 0, 0, 0, 0, 0])

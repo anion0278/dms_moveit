@@ -3,17 +3,10 @@
 import sys
 import rospy
 import moveit_commander
-import time
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Point, Quaternion
 from geometry_msgs.msg import Pose
 import numpy as np
-
-import rosnode
-import geometry_msgs.msg
-import moveit_msgs.msg
-from sensor_msgs.msg import JointState
-from controller_manager_msgs.srv import SwitchController, SwitchControllerRequest, SwitchControllerResponse
 
 
 home_position = "Home"
@@ -69,7 +62,7 @@ class RobotDriver: # TODO rename more appropriatelly?
     def __init__(self, total_speed = 1.0, total_acc = 1.0):
         rospy.wait_for_service(clear_octomap_service)
         moveit_commander.roscpp_initialize(sys.argv)
-        rospy.init_node('python_moveit_commander', anonymous=True)
+        rospy.init_node('python_moveit_commander', anonymous=True) # multiple nodes with the same name may exist
 
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface()
@@ -136,7 +129,8 @@ class RobotDriver: # TODO rename more appropriatelly?
 
     def perform_planning(self):
         plan = self.move_group.plan()
-        success = plan[0]
+        success = plan[0] 
+
         if (not success):
             print("Could not plan the movement!") 
         return success

@@ -201,7 +201,10 @@ def get_task_commander():
 
 if __name__ == "__main__":
     commander = get_task_commander()
-    commander.demo_task_sequence([r.joint_pose_A, r.joint_pose_B, r.joint_pose_A])
+    # commander.demo_task_sequence([r.joint_pose_A, r.joint_pose_B, r.joint_pose_A])
+
+    normal_speed = 0.99
+    commander.robot_driver.set_speed_params(normal_speed, normal_speed)
 
     # task_poses_l = [
     #     r.get_joint_pose_from_deg("Left-1",[-28,-79,97,-109,-89,0]),
@@ -213,7 +216,17 @@ if __name__ == "__main__":
     #     r.get_joint_pose_from_deg("Right-3",[130,-35,24,-81,-89,0]),
     #     r.get_joint_pose_from_deg("Right-1",[165,-79,97,-109,-89,0]),
     # ]
-
+    task_poses_l = [
+        # r.get_joint_pose_from_deg("Left-1",[-28,-79,97,-109,-89,0]),
+        # r.get_joint_pose_from_deg("Left-2",[10,-58,36,25,11,0]),
+        # r.get_joint_pose_from_deg("Left-3",[21,-19,23,-5,23,0]),
+        r.get_joint_pose_from_deg("Left-1",[-28,-79,97,-109,-89,0]),
+        r.get_joint_pose_from_deg("Right-1",[165,-79,97,-109,-89,0]),
+        # r.get_joint_pose_from_deg("Right-2",[123,-53,24,28,126,0]),
+        # r.get_joint_pose_from_deg("Right-3",[130,-35,24,-81,-89,0]),
+        # r.get_joint_pose_from_deg("Right-1",[165,-79,97,-109,-89,0]),
+    ]
+    commander.demo_task_sequence(task_poses_l)
 
     # task_poses_s = [
     #     r.get_joint_pose_from_deg("Left-1",[-28,-79,97,-109,-89,0]),
