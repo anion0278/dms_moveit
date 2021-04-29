@@ -24,9 +24,7 @@ void setup()
   SetupMotors();
   SetupImu();
   SetupBle();
-
-  Print("Connect using Python app");
-
+  
   StartAdvertisingBle();
 }
 
