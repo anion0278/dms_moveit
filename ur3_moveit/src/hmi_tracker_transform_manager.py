@@ -2,18 +2,21 @@
 import rospy
 from geometry_msgs.msg import Quaternion, PoseStamped, TransformStamped, Transform
 import tf2_ros
-from sensor_msgs.msg import PointCloud2, PointField, Image
+from sensor_msgs.msg import PointCloud2
+import PyKDL
+from tf2_sensor_msgs.tf2_sensor_msgs import transform_to_kdl
 
 class HmiTrackerTransformManager:
     def __init__(self):
         self.cam_trf = None
         self.tf_pub = tf2_ros.StaticTransformBroadcaster() 
+        self.tf_buf = None
 
     def init_hmi_orientation(self, cam_pc_topic):
-        tf_buf = tf2_ros.Buffer()
-        listener = tf2_ros.TransformListener(tf_buf) # required
+        self.tf_buf = tf2_ros.Buffer()
+        listener = tf2_ros.TransformListener(self.tf_buf) # required
         cam_frame_id = rospy.wait_for_message(cam_pc_topic, PointCloud2).header.frame_id
-        self.cam_trf = tf_buf.lookup_transform(cam_frame_id, "world", rospy.Time(), timeout=rospy.Duration(0.1)).transform
+        self.cam_trf = self.tf_buf.lookup_transform(cam_frame_id, "world", rospy.Time(), timeout=rospy.Duration(0.1)).transform
         pass
 
     def publish_hmi_tf(self, stamped_pose, parent_frame_id, hmi_name):
@@ -31,3 +34,12 @@ class HmiTrackerTransformManager:
         p.pose.position.z = center_pos[2]
         p.pose.orientation = Quaternion(0, 0, 0, 1)
         return p
+
+    def transform_pc(self, points, initial_frame_id, target_frame_id):
+        trsf = self.tf_buf.lookup_transform(initial_frame_id, target_frame_id, rospy.Time(), timeout=rospy.Duration(0.1))
+        t_kdl = transform_to_kdl(trsf)
+        points_out = []
+        for p_in in points:
+            p_out = t_kdl * PyKDL.Vector(p_in[0], p_in[1], p_in[2])
+            points_out.append((p_out[0], p_out[1], p_out[2]))
+        return points_out

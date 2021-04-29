@@ -101,8 +101,7 @@ class HmiTrackerImageProcessor:
                 img = self.stack_mask(img, left_hand.full_color_mask, "Left mask", self.left_border_color)
             if right_hand is not None:
                 img = self.stack_mask(img, right_hand.full_color_mask, "Right mask", self.right_border_color)
-        self.publish_img_if_required(img)
-        return left_hand, right_hand
+        return left_hand, right_hand, img
 
     def stack_mask(self, img, mask, text, color):
         pos_x = 10 + img.shape[1]
