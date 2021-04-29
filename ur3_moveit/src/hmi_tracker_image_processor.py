@@ -97,7 +97,6 @@ class HmiTrackerImageProcessor:
 
         if (self.debug):
             if left_hand is not None:
-                # img * np.dstack((im_red_ball_mask, im_red_ball_mask, im_red_ball_mask))
                 # http://hanzratech.in/2015/02/07/caveat-thresholding-hue-component.html#:~:text=The%20HSV%20values%20for%20true,we%20will%20use%20the%20cv2.
                 img = self.stack_mask(img, left_hand.full_color_mask, "Left mask", self.left_border_color)
             if right_hand is not None:
@@ -150,11 +149,6 @@ class HmiTrackerImageProcessor:
 
                 single_hand_mask = np.zeros(color_mask.shape)
                 self.__fill_contours(single_hand_mask, contour_pts)
-
-                if not self.is_center_within_contour(center, contour_pts): # ZERO meaning the point is on the contour!!!
-                    # the closest point INSIDE contour, otherwise the center's height can be incorreclty calculated
-                    # TODO takes point from contour, which sometimes out of shape (especially when on the edge of image)
-                    center = np.squeeze(min(contour_pts, key=lambda p: distance.euclidean(p, center))) 
 
                 result = HmiImageData(center, rect, contour_pts, color_mask, single_hand_mask)
         return result
