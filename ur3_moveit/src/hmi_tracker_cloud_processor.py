@@ -32,20 +32,25 @@ class HmiTrackerCloudProcessor:
             pc_pub.publish(ros_pc)
 
     def get_hmi_point_cloud(self, hand_data, pc_msg):
-        blob_pts = np.where(hand_data.single_hand_mask > 0)
+        blob_pts = hand_data.blob_pts
+        if len(blob_pts[1]) == 0:
+            raise ValueError("Hand blob did not contain any points, this would lead to full copy of point cloud!")
         pc_gen = pc2.read_points(pc_msg, field_names = ["x","y","z"], uvs = zip(blob_pts[1]*self.dwn_smpl, blob_pts[0]*self.dwn_smpl), skip_nans=True)
         pc_hand = np.array([x for x in pc_gen])
         return pc_hand
 
-    def __filter_point_cloud(self, pc_hand):
+    def filter_point_cloud(self, pc_hand):
         o3dpc = open3d.geometry.PointCloud()
         o3dpc.points = open3d.utility.Vector3dVector(pc_hand[:, :3])
-        filtered_cloud, _ = statistical_outlier_removal(o3dpc, nb_neighbors=len(o3dpc.points) / self.dwn_smpl, std_ratio=0.00001)
+        neighbors = int(len(o3dpc.points) / self.dwn_smpl)
+        filtered_cloud, _ = statistical_outlier_removal(o3dpc, nb_neighbors=neighbors, std_ratio=0.00001)
         return filtered_cloud
 
-    def get_pc_bounding_sphere(self, pc_hand, frame_id):
-        filtered_cloud_o3d = self.__filter_point_cloud(pc_hand)
+    def get_pc_bounding_sphere(self, filtered_cloud_o3d, frame_id):
         centroid = np.median(filtered_cloud_o3d.points, axis=0)
+        if utils.has_nan_values(centroid):
+            return None
+
         ros_cl = orh.o3dpc_to_rospc(filtered_cloud_o3d)
         ros_cl.header.frame_id = frame_id
 

@@ -100,21 +100,24 @@ class HmiTracker:
 
             if right_hand is not None:
                 pc_right_hand = self.__process_hand_data(right_hand, pc_msg, pc_right_hand)
-
+        
         self.__publish_data(config.hmi_left, self.left_pc_pub, pc_left_hand, self.main_camera_frame_id)
         self.__publish_data(config.hmi_right, self.right_pc_pub, pc_right_hand, self.main_camera_frame_id)
+        pass
 
-    def __process_hand_data(self, right_hand, pc_msg, pc_right_hand):
-        pc_r = self.pc_proc.get_hmi_point_cloud(right_hand, pc_msg)
+    def __process_hand_data(self, hand, pc_msg, pc_hand):
+        pc_r = self.pc_proc.get_hmi_point_cloud(hand, pc_msg)
         pc_r_tr = self.tf_proc.transform_pc(pc_r, self.main_camera_frame_id, pc_msg.header.frame_id)
-        pc_right_hand = np.append(pc_right_hand, pc_r_tr, axis=0)
-        return pc_right_hand
+        if len(pc_r_tr) > 0:
+            pc_hand = np.append(pc_hand, pc_r_tr, axis=0)
+        return pc_hand
 
     def __publish_data(self, hmi_name, pc_pub, pc_hand, frame_id):
-        if len(pc_hand) == 0:
+        filtered_cloud_o3d = self.pc_proc.filter_point_cloud(pc_hand)
+        if len(filtered_cloud_o3d.points) == 0:
             self.publish_empty_data(hmi_name, pc_pub, frame_id)
         else:
-            self.publish_hand(pc_hand, hmi_name, pc_pub, frame_id)
+            self.publish_hand(filtered_cloud_o3d, hmi_name, pc_pub, frame_id)
 
     def publish_empty_data(self, hmi_name, pc_pub, frame_id):
         self.__driver.remove_hmi_obj(hmi_name)
@@ -124,8 +127,8 @@ class HmiTracker:
         self.__hmi_cache[hmi_name] = 0
         self.__hmi_cache[hmi_name+center_suf] = 0
 
-    def publish_hand(self, pc_hand, hmi_name, pc_pub, frame_id):
-        sphere_center, sphere_radius, ros_pc = self.pc_proc.get_pc_bounding_sphere(pc_hand, frame_id)
+    def publish_hand(self, filtered_cloud_o3d, hmi_name, pc_pub, frame_id):
+        sphere_center, sphere_radius, ros_pc = self.pc_proc.get_pc_bounding_sphere(filtered_cloud_o3d, frame_id)
         self.pc_proc.publish_if_required(pc_pub, ros_pc)
 
         # TF should be published anyway, because it decays fast !!!

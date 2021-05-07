@@ -8,12 +8,11 @@ from cv_bridge import CvBridge, CvBridgeError
 import config
 
 class HmiImageData:
-    def __init__(self, center, bounding_box, contour_pts, full_color_mask, single_hand_mask):
+    def __init__(self, center, bounding_box, blob_pts, full_color_mask):
         self.center = center
         self.bounding_box = bounding_box
-        self.contour_pts = contour_pts
+        self.blob_pts = blob_pts
         self.full_color_mask = full_color_mask
-        self.single_hand_mask = single_hand_mask
 
 class ColorRange:
     def __init__(self, lower, upper):
@@ -26,11 +25,8 @@ class ColorRange:
         return self.lower[0] < 0 or self.upper[0] > self.h_lim
 
     def get_split_ranges(self): 
-        # if self.lower[0] < 0:
         return [ColorRange((0, self.lower[1], self.lower[2]), self.upper), 
             ColorRange((self.h_lim+self.lower[0], self.lower[1], self.lower[2]), (self.h_lim, self.upper[1], self.upper[2]))]
-        # if self.upper[0] > self.h_lim:
-        #     return []
 
 class HmiTrackerImageProcessor:
     def __init__(self, dwn_smpl, debug):
@@ -131,7 +127,6 @@ class HmiTrackerImageProcessor:
         cv2.drawContours(img, [np.int0(box)], 0, color, 2)
     
     def __find_hand(self, hsv_img, color_range):
-        result = None
         color_mask = self.get_color_mask(hsv_img, color_range)
 
         # joins the regions - shows better results
@@ -149,8 +144,13 @@ class HmiTrackerImageProcessor:
                 single_hand_mask = np.zeros(color_mask.shape)
                 self.__fill_contours(single_hand_mask, contour_pts)
 
-                result = HmiImageData(center, rect, contour_pts, color_mask, single_hand_mask)
-        return result
+                blob_pts = np.where(single_hand_mask > 0)
+                if len(blob_pts[1]) == 0:
+                    return None # can occur due to removal of the contour
+                # after contour is removed, blob can be empty, leading to copying of all points from PC MSG
+
+                return HmiImageData(center, rect, blob_pts, color_mask)
+        return None
 
     def get_color_mask(self, hsv_img, color_range):
         mask = None
