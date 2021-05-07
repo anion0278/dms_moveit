@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="robot_ip" default="192.168.1.111"/>
-  <arg name="enable_both_hmi" default="false"/>
+  <arg name="enable_both_hmi" default="true"/>
+  <arg name="directed_vibration" default="true"/>
 
   <include file="$(find ur_robot_driver)/launch/ur3e_bringup.launch">
     <arg name="robot_ip" value="$(arg robot_ip)" />
@@ -31,7 +32,7 @@
   <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen" args="moveit" />
 
   <group if="$(arg enable_both_hmi)">
-    <node name="hmi_starter" pkg="ur3_moveit" type="hmi_controller_starter.py" respawn="false" output="screen"/>
+    <node name="hmi_starter" pkg="ur3_moveit" type="hmi_controller_starter.py" args="$(arg directed_vibration)" respawn="false" output="screen"/>
   </group>
 
   <include file="$(find ur3_moveit)/launch/real_d435.launch">
@@ -44,6 +45,12 @@
     <arg name="serial_no" value="902512070206" />
     <arg name="camera_name" value="camera_left" />
     <arg name="clip_distance" value="1.4" />
+  </include>
+
+  <include file="$(find ur3_moveit)/launch/real_d435.launch">
+    <arg name="serial_no" value="902512070480" />
+    <arg name="camera_name" value="camera_right" />
+    <arg name="clip_distance" value="1.5" />
   </include>
 
   <include file="$(find ur3_moveit)/launch/move_group.launch">

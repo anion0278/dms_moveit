@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="enable_both_hmi" default="false"/>
+  <arg name="enable_both_hmi" default="true"/>
   <arg name="enable_directed_vibration" default="true"/>
 
   <!-- Octomap and sensors settings -->
@@ -43,8 +43,8 @@
   <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
   <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load joint_group_position_controller" />
   
-  <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen"  args="moveit" />
-  <!-- <node name="task_commander" pkg="ur3_moveit" type="task_commander.py" respawn="false" output="screen" args="$(arg enable_both_hmi) sim" /> -->
+  <node name="hmi_tracker" pkg="ur3_moveit" type="hmi_tracker.py" respawn="false" output="screen"  args="moveit" required="true" />
+  <node name="task_commander" pkg="ur3_moveit" type="task_commander.py" respawn="false" output="screen" args="$(arg enable_both_hmi) sim" />
 
   <group if="$(arg enable_both_hmi)">
     <node name="hmi_starter" pkg="ur3_moveit" type="hmi_controller_starter.py" respawn="false" args="directed_vibration:=$(arg enable_directed_vibration)" output="screen"/>

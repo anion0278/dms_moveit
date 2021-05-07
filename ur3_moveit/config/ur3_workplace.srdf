@@ -12,12 +12,12 @@
     <group name="manipulator">
         <chain base_link="base_link" tip_link="ee_link" />
     </group>
-    <group name="effector">
+    <!-- <group name="effector">
         <link name="force_sensor" />
         <link name="effector_body" />
         <link name="left_jaw" />
         <link name="right_jaw" />
-    </group>
+    </group> -->
     <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
     <group_state name="AllZeros" group="manipulator">
         <joint name="elbow_joint" value="0" />
@@ -31,125 +31,93 @@
         <joint name="elbow_joint" value="1.57" />
         <joint name="shoulder_lift_joint" value="-1.57" />
         <joint name="shoulder_pan_joint" value="1.57" />
-        <joint name="wrist_1_joint" value="0" />
-        <joint name="wrist_2_joint" value="0" />
+        <joint name="wrist_1_joint" value="-1.57" />
+        <joint name="wrist_2_joint" value="-1.57" />
         <joint name="wrist_3_joint" value="0" />
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="effector" parent_link="ee_link" group="effector" parent_group="manipulator" />
+    <!-- <end_effector name="effector" parent_link="ee_link" group="effector" parent_group="manipulator" /> -->
 
 
     <!-- THIS ALLOWED COLLISION MATRIX ACTUALLY WORKS IN MOVEIT IN RVIZ, HOWEVER IT IS NOT USED IN MOVEIT CODE DURING COLLISION CHECKING - WHY?? -->
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+
+    <!-- wrist link 3 is closer to end effector (ee_link) -->
+    <disable_collisions link1="base_link" link2="camera_left_link" reason="Never" />
     <disable_collisions link1="base_link" link2="camera_right_link" reason="Never" />
+    <disable_collisions link1="base_link" link2="camera_top_link" reason="Never" />
     <disable_collisions link1="base_link" link2="shoulder_link" reason="Adjacent" />
     <disable_collisions link1="base_link" link2="table" reason="Adjacent" />
-    <disable_collisions link1="ee_link" link2="effector_body" reason="Never" />
-    <disable_collisions link1="ee_link" link2="force_sensor" reason="Never" />
-    <disable_collisions link1="ee_link" link2="left_jaw" reason="Never" />
-    <disable_collisions link1="ee_link" link2="right_jaw" reason="Never" />
-    <disable_collisions link1="ee_link" link2="wrist_1_link" reason="Never" />
-    <disable_collisions link1="ee_link" link2="wrist_2_link" reason="Never" />
-    <disable_collisions link1="ee_link" link2="wrist_3_link" reason="Adjacent" />
-    <disable_collisions link1="effector_body" link2="force_sensor" reason="Never" />
-    <disable_collisions link1="effector_body" link2="left_jaw" reason="Never" />
-    <disable_collisions link1="effector_body" link2="right_jaw" reason="Never" />
-    <disable_collisions link1="effector_body" link2="wrist_1_link" reason="Never" />
-    <disable_collisions link1="effector_body" link2="wrist_2_link" reason="Never" />
-    <disable_collisions link1="effector_body" link2="wrist_3_link" reason="Never" />
-    <disable_collisions link1="force_sensor" link2="left_jaw" reason="Never" />
-    <disable_collisions link1="force_sensor" link2="right_jaw" reason="Never" />
-    <disable_collisions link1="force_sensor" link2="wrist_1_link" reason="Never" />
-    <disable_collisions link1="force_sensor" link2="wrist_2_link" reason="Never" />
-    <disable_collisions link1="force_sensor" link2="wrist_3_link" reason="Never" />
-    <disable_collisions link1="forearm_link" link2="upper_arm_link" reason="Adjacent" />
-    <disable_collisions link1="forearm_link" link2="wrist_1_link" reason="Adjacent" />
-    <disable_collisions link1="forearm_link" link2="wrist_2_link" reason="Never" />
-    <disable_collisions link1="left_jaw" link2="right_jaw" reason="Never" />
-    <disable_collisions link1="left_jaw" link2="wrist_1_link" reason="Never" />
-    <disable_collisions link1="left_jaw" link2="wrist_2_link" reason="Never" />
-    <disable_collisions link1="left_jaw" link2="wrist_3_link" reason="Never" />
-    <disable_collisions link1="right_jaw" link2="wrist_1_link" reason="Never" />
-    <disable_collisions link1="right_jaw" link2="wrist_2_link" reason="Never" />
-    <disable_collisions link1="right_jaw" link2="wrist_3_link" reason="Never" />
-    <disable_collisions link1="shoulder_link" link2="table" reason="Never" />
-    <disable_collisions link1="shoulder_link" link2="upper_arm_link" reason="Adjacent" />
-    <disable_collisions link1="shoulder_link" link2="wrist_1_link" reason="Never" />
-    <disable_collisions link1="shoulder_link" link2="wrist_2_link" reason="Never" />
-    <disable_collisions link1="wrist_1_link" link2="wrist_2_link" reason="Adjacent" />
-    <disable_collisions link1="wrist_1_link" link2="wrist_3_link" reason="Never" />
-    <disable_collisions link1="wrist_2_link" link2="wrist_3_link" reason="Adjacent" />
-
-    <disable_collisions link1="camera_right_link" link2="ee_link" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="effector_body" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="force_sensor" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="forearm_link" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="left_jaw" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="right_jaw" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="shoulder_link" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="table" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="upper_arm_link" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="wrist_1_link" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="wrist_2_link" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="wrist_3_link" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="top_wall_link" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="back_wall_link" reason="Never" />
-    <disable_collisions link1="camera_right_link" link2="left_wall_link" reason="Never" />
- 
-    <disable_collisions link1="base_link_camera" link2="ee_link" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="effector_body" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="force_sensor" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="forearm_link" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="left_jaw" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="right_jaw" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="shoulder_link" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="table" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="upper_arm_link" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="wrist_1_link" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="wrist_2_link" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="wrist_3_link" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="top_wall_link" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="back_wall_link" reason="Never" />
-    <disable_collisions link1="base_link_camera" link2="left_wall_link" reason="Never" />
-
-    <disable_collisions link1="base_link_camera_left" link2="ee_link" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="effector_body" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="force_sensor" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="forearm_link" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="left_jaw" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="right_jaw" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="shoulder_link" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="table" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="upper_arm_link" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="wrist_1_link" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="wrist_2_link" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="wrist_3_link" reason="Never" />
-
-    <disable_collisions link1="base_link_camera_left" link2="top_wall_link" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="back_wall_link" reason="Never" />
-    <disable_collisions link1="base_link_camera_left" link2="left_wall_link" reason="Never" />
-
-    <disable_collisions link1="base_link" link2="camera_left_link" reason="Never" />
+    <disable_collisions link1="base_link" link2="table_back_sup" reason="Never" />
+    <disable_collisions link1="base_link" link2="table_left_sup" reason="Never" />
+    <disable_collisions link1="base_link" link2="table_right_sup" reason="Never" />
+    <disable_collisions link1="camera_left_link" link2="camera_right_link" reason="Never" />
+    <disable_collisions link1="camera_left_link" link2="camera_top_link" reason="Never" />
     <disable_collisions link1="camera_left_link" link2="ee_link" reason="Never" />
-    <disable_collisions link1="camera_left_link" link2="effector_body" reason="Never" />
-    <disable_collisions link1="camera_left_link" link2="force_sensor" reason="Never" />
     <disable_collisions link1="camera_left_link" link2="forearm_link" reason="Never" />
-    <disable_collisions link1="camera_left_link" link2="left_jaw" reason="Never" />
-    <disable_collisions link1="camera_left_link" link2="right_jaw" reason="Never" />
     <disable_collisions link1="camera_left_link" link2="shoulder_link" reason="Never" />
-    <disable_collisions link1="camera_left_link" link2="table" reason="Never" />
+    <disable_collisions link1="camera_left_link" link2="table" reason="Adjacent" />
+    <disable_collisions link1="camera_left_link" link2="table_back_sup" reason="Never" />
+    <disable_collisions link1="camera_left_link" link2="table_left_sup" reason="Never" />
+    <disable_collisions link1="camera_left_link" link2="table_right_sup" reason="Never" />
     <disable_collisions link1="camera_left_link" link2="upper_arm_link" reason="Never" />
     <disable_collisions link1="camera_left_link" link2="wrist_1_link" reason="Never" />
     <disable_collisions link1="camera_left_link" link2="wrist_2_link" reason="Never" />
     <disable_collisions link1="camera_left_link" link2="wrist_3_link" reason="Never" />
+    <disable_collisions link1="camera_right_link" link2="camera_top_link" reason="Never" />
+    <disable_collisions link1="camera_right_link" link2="ee_link" reason="Never" />
+    <disable_collisions link1="camera_right_link" link2="forearm_link" reason="Never" />
+    <disable_collisions link1="camera_right_link" link2="shoulder_link" reason="Never" />
+    <disable_collisions link1="camera_right_link" link2="table" reason="Adjacent" />
+    <disable_collisions link1="camera_right_link" link2="table_back_sup" reason="Never" />
+    <disable_collisions link1="camera_right_link" link2="table_left_sup" reason="Never" />
+    <disable_collisions link1="camera_right_link" link2="table_right_sup" reason="Never" />
+    <disable_collisions link1="camera_right_link" link2="upper_arm_link" reason="Never" />
+    <disable_collisions link1="camera_right_link" link2="wrist_1_link" reason="Never" />
+    <disable_collisions link1="camera_right_link" link2="wrist_2_link" reason="Never" />
+    <disable_collisions link1="camera_right_link" link2="wrist_3_link" reason="Never" />
+    <disable_collisions link1="camera_top_link" link2="ee_link" reason="Never" />
+    <disable_collisions link1="camera_top_link" link2="forearm_link" reason="Never" />
+    <disable_collisions link1="camera_top_link" link2="shoulder_link" reason="Never" />
+    <disable_collisions link1="camera_top_link" link2="table" reason="Adjacent" />
+    <disable_collisions link1="camera_top_link" link2="table_back_sup" reason="Never" />
+    <disable_collisions link1="camera_top_link" link2="table_left_sup" reason="Never" />
+    <disable_collisions link1="camera_top_link" link2="table_right_sup" reason="Never" />
+    <disable_collisions link1="camera_top_link" link2="upper_arm_link" reason="Never" />
+    <disable_collisions link1="camera_top_link" link2="wrist_1_link" reason="Never" />
+    <disable_collisions link1="camera_top_link" link2="wrist_2_link" reason="Never" />
+    <disable_collisions link1="camera_top_link" link2="wrist_3_link" reason="Never" />
+    <disable_collisions link1="ee_link" link2="table_left_sup" reason="Never" />
+    <disable_collisions link1="ee_link" link2="table_right_sup" reason="Never" />
+    <disable_collisions link1="ee_link" link2="wrist_1_link" reason="Never" />
+    <disable_collisions link1="ee_link" link2="wrist_2_link" reason="Never" />
+    <disable_collisions link1="ee_link" link2="wrist_3_link" reason="Adjacent" />
 
-    <disable_collisions link1="camera_left_link" link2="top_wall_link" reason="Never" />
-    <disable_collisions link1="camera_left_link" link2="back_wall_link" reason="Never" />
-    <disable_collisions link1="camera_left_link" link2="left_wall_link" reason="Never" />
-
-
-    <disable_collisions link1="hmi_right" link2="hmi_left" reason="Never" />
-    <disable_collisions link1="hmi_left" link2="hmi_right" reason="Never" />
-    <disable_collisions link1="SHIP" link2="SHIPS" reason="Never" />
+    <disable_collisions link1="forearm_link" link2="table_left_sup" reason="Never" />
+    <disable_collisions link1="forearm_link" link2="table_right_sup" reason="Never" />
+    <disable_collisions link1="forearm_link" link2="upper_arm_link" reason="Adjacent" />
+    <disable_collisions link1="forearm_link" link2="wrist_1_link" reason="Adjacent" />
+    <disable_collisions link1="shoulder_link" link2="table" reason="Never" />
+    <disable_collisions link1="shoulder_link" link2="table_back_sup" reason="Never" />
+    <disable_collisions link1="shoulder_link" link2="table_left_sup" reason="Never" />
+    <disable_collisions link1="shoulder_link" link2="table_right_sup" reason="Never" />
+    <disable_collisions link1="shoulder_link" link2="upper_arm_link" reason="Adjacent" />
+    <disable_collisions link1="shoulder_link" link2="wrist_1_link" reason="Never" />
+    <disable_collisions link1="shoulder_link" link2="wrist_2_link" reason="Never" />
+    <disable_collisions link1="table" link2="table_back_sup" reason="Adjacent" />
+    <disable_collisions link1="table" link2="table_left_sup" reason="Adjacent" />
+    <disable_collisions link1="table" link2="table_right_sup" reason="Adjacent" />
+    <disable_collisions link1="table_back_sup" link2="table_left_sup" reason="Default" />
+    <disable_collisions link1="table_left_sup" link2="table_right_sup" reason="Never" />
+    <disable_collisions link1="table_left_sup" link2="upper_arm_link" reason="Never" />
+    <disable_collisions link1="table_left_sup" link2="wrist_1_link" reason="Never" />
+    <disable_collisions link1="table_left_sup" link2="wrist_2_link" reason="Never" />
+    <disable_collisions link1="table_left_sup" link2="wrist_3_link" reason="Never" />
+    <disable_collisions link1="table_right_sup" link2="upper_arm_link" reason="Never" />
+    <disable_collisions link1="table_right_sup" link2="wrist_1_link" reason="Never" />
+    <disable_collisions link1="table_right_sup" link2="wrist_2_link" reason="Never" />
+    <disable_collisions link1="table_right_sup" link2="wrist_3_link" reason="Never" />
+    <disable_collisions link1="wrist_1_link" link2="wrist_2_link" reason="Adjacent" />
+    <disable_collisions link1="wrist_2_link" link2="wrist_3_link" reason="Adjacent" />
 
 </robot>

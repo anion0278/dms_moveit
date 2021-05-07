@@ -11,7 +11,7 @@ sensors:
     padding_scale: 1.0
     padding_offset: 0.03
     max_update_rate: 0
-    hmi_padding_reduction: 0.00
+    hmi_padding_reduction: 0.0
     prob_hit: 0.8
     prob_miss: 0.3
     show_info: 0
@@ -26,7 +26,7 @@ sensors:
     padding_scale: 1.0
     padding_offset: 0.03
     max_update_rate: 0
-    hmi_padding_reduction: 0.00
+    hmi_padding_reduction: 0.0
     prob_hit: 0.8
     prob_miss: 0.3
     show_info: 0
