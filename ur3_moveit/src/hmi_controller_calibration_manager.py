@@ -53,7 +53,7 @@ class CalibrationManager(): # TODO separate into Calibration and Transform manag
         self.controller.send_offsets_request_msg()
         self.__store_frame_calibration()
         return TriggerResponse(success=True,
-            message= self.controller.device_name + "was succesfully calibrated.")
+            message= self.controller.device_name + " was succesfully calibrated.")
 
     def restore_imu_offsets(self):
         try:
@@ -86,8 +86,8 @@ class CalibrationManager(): # TODO separate into Calibration and Transform manag
     def __get_frame_calibration(self):
         # TODO here we need the "pure" orientation
         original_real_orientation = quaternion_multiply(
-            self.controller.processor.current_orientation, 
-            quaternion_inverse(self.frame_calibration))
+            quaternion_inverse(self.frame_calibration),
+            self.controller.processor.current_orientation)
         return quaternion_inverse(original_real_orientation)
 
 
