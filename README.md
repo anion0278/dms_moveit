@@ -3,7 +3,7 @@ We propose a novel approach to communicating the robot’s intentions to a human
 
 ## Related publications
 
-*   [Improved Mutual Understanding for Human-Robot Collaboration: Combining Human-Aware Motion Planning with Haptic Feedback Devices for Communicating Planned Trajectory](httpshttps://www.mdpi.com/1424-8220/21/11/3673)
+*   [Improved Mutual Understanding for Human-Robot Collaboration: Combining Human-Aware Motion Planning with Haptic Feedback Devices for Communicating Planned Trajectory](https://www.mdpi.com/1424-8220/21/11/3673)
 *   [Intuitive Spatial Tactile Feedback for Better Awareness about Robot Trajectory during Human–Robot Collaboration](https://doi.org/10.3390/s21175748)
 
 ![Abstract](illustrations/graphical_abstract.png) 
