@@ -1,6 +1,8 @@
 ## Improved Mutual Understanding for Human-Robot Collaboration 
 We propose a novel approach to communicating the robot’s intentions to a human worker. The improvement to the collaboration is presented by introducing haptic feedback devices, whose task is to notify the human worker about the currently planned robot’s trajectory and changes in its status.
 
+{% include youtube.html id="pzwWaD9q2bo" %}
+
 ## Related publications
 
 *   [Improved Mutual Understanding for Human-Robot Collaboration: Combining Human-Aware Motion Planning with Haptic Feedback Devices for Communicating Planned Trajectory](https://www.mdpi.com/1424-8220/21/11/3673)
