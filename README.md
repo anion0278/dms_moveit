@@ -9,6 +9,20 @@ We propose a novel approach to communicating the robot’s intentions to a human
 *   [Improved Mutual Understanding for Human-Robot Collaboration: Combining Human-Aware Motion Planning with Haptic Feedback Devices for Communicating Planned Trajectory](https://www.mdpi.com/1424-8220/21/11/3673)
 *   [Intuitive Spatial Tactile Feedback for Better Awareness about Robot Trajectory during Human–Robot Collaboration](https://doi.org/10.3390/s21175748)
 
+```
+@Article{s21175748,
+AUTHOR = {Grushko, Stefan and Vysocký, Aleš and Heczko, Dominik and Bobovský, Zdenko},
+TITLE = {Intuitive Spatial Tactile Feedback for Better Awareness about Robot Trajectory during Human–Robot Collaboration},
+JOURNAL = {Sensors},
+VOLUME = {21},
+YEAR = {2021},
+NUMBER = {17},
+ARTICLE-NUMBER = {5748},
+URL = {https://www.mdpi.com/1424-8220/21/17/5748},
+PubMedID = {34502639},
+}
+```
+
 ![Abstract](illustrations/graphical_abstract.png) 
 
 The proposed system is based on the concept of a shared collaborative workspace where the robot may adapt its movement to avoid collision with human workers. The workspace is monitored by multiple RGB-D sensors, and data provided by these sensors allow to construct a map of robot’s surroundings and obstacles. At each step of the task execution, the robot creates a collision-free motion plan according to the currently available free space. If during the execution of the planned movement there is a change in the environment (for example, existing obstacles change their location) and the movement can no longer be completed due to possible collisions with obstacles, the robot can create a new motion plan. <br/>
