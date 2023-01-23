@@ -10,18 +10,6 @@ We propose a novel approach to communicating the robot’s intentions to a human
 *   [Intuitive Spatial Tactile Feedback for Better Awareness about Robot Trajectory during Human–Robot Collaboration](https://doi.org/10.3390/s21175748)
 
 ```
-@article{s21175748,
-author = {Grushko, Stefan and Vysocky, Ales and Heczko, Dominik and Bobovský, Zdenko},
-year = {2021},
-month = {08},
-pages = {},
-title = {Intuitive Spatial Tactile Feedback for Better Awareness about Robot Trajectory during Human-Robot Collaboration},
-volume = {21},
-journal = {Sensors (Basel, Switzerland)},
-doi = {10.3390/s21175748}
-}
-```
-```
 @article{s21113673,
 author = {Grushko, Stefan and Vysocky, Ales and Oščádal, Petr and Vocetka, Michal and Novak, Petr and Bobovský, Zdenko},
 year = {2021},
@@ -31,6 +19,18 @@ title = {Improved Mutual Understanding for Human-Robot Collaboration: Combining 
 volume = {21},
 journal = {Sensors},
 doi = {10.3390/s21113673}
+}
+```
+```
+@article{s21175748,
+author = {Grushko, Stefan and Vysocky, Ales and Heczko, Dominik and Bobovský, Zdenko},
+year = {2021},
+month = {08},
+pages = {},
+title = {Intuitive Spatial Tactile Feedback for Better Awareness about Robot Trajectory during Human-Robot Collaboration},
+volume = {21},
+journal = {Sensors (Basel, Switzerland)},
+doi = {10.3390/s21175748}
 }
 ```
 
